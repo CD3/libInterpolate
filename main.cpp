@@ -1,5 +1,5 @@
 #include <iostream>
-#include "interpLib.h"
+#include "splineInterp/interpLib.h"
 #include "boost/numeric/ublas/vector.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/lexical_cast.hpp"

@@ -1,13 +1,7 @@
-#include <iostream>
-#include <string>
-#include <fstream>
-
 #include "interpLib.h"
 #include "fileReader/ReadFunction.h"
-#include "boost/filesystem.hpp"
 #include "matrixBuild.h"
 
-namespace fs = boost::filesystem;
 
 void SplineInterp::initialSetup()
 {

@@ -1,16 +1,16 @@
 #ifndef INTERPLIB_H
 #define INTERPLIB_H value
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include "boost/filesystem.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/numeric/ublas/vector.hpp"
 #include "boost/numeric/ublas/lu.hpp"
+#include "boost/filesystem.hpp"
 
-
-namespace fs=boost::filesystem;
 namespace ublas=boost::numeric::ublas;
+namespace fs=boost::filesystem;
 
 //right now this just takes the path to a filename in the constructor and sets up an instance
 //of the interpolator class where all of the necessary matrices/vectors are built.

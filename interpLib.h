@@ -20,7 +20,6 @@ namespace ublas=boost::numeric::ublas;
 //
 //ToDo:
 //-overload the constructor so that it can take *x, *y, and n (double pointer arrays as straight form the output of Dr.Clark's file reader
-//-overload the constructor so that it can take std::arrays or vectors
 
 class SplineInterp
 {

@@ -2,6 +2,7 @@
 #define INTERPLIB_H value
 
 #include <string>
+#include <vector>
 #include "boost/filesystem.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/numeric/ublas/vector.hpp"
@@ -25,9 +26,6 @@ class SplineInterp
 {
 
     private:
-
-        fs::path filename;
-
         //this is the length of the input file
         int n;
 
@@ -44,10 +42,13 @@ class SplineInterp
         ublas::vector<double> a;
         ublas::vector<double> b;
 
+        void initialSetup();
+
     protected:
 
     public:
         SplineInterp(std::string dataFile);
+        SplineInterp(std::vector<double> x, std::vector<double> y);
         ~SplineInterp();
 
         //int getN();

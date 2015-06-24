@@ -3,3 +3,6 @@ all: interpLib.o
 
 interpLib.o: interpLib.cpp
 	g++ -c -std=c++11 -g -Wall interpLib.cpp
+	
+clean:
+	rm int *.o

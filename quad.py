@@ -3,7 +3,7 @@
 
 xmin = -10.
 xmax = 10.
-N = 200
+N = 10
 dx = (xmax - xmin)/(N-1)
 
 f = open("test.txt", "w")

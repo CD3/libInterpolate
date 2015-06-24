@@ -9,17 +9,8 @@
 #include "boost/numeric/ublas/lu.hpp"
 #include "boost/filesystem.hpp"
 
-namespace ublas=boost::numeric::ublas;
 namespace fs=boost::filesystem;
-
-//right now this just takes the path to a filename in the constructor and sets up an instance
-//of the interpolator class where all of the necessary matrices/vectors are built.
-//
-//After the object is built, its interpAt member function can be run any number of times without having to redo all the time-intensive math.
-//
-//
-//ToDo:
-//-overload the constructor so that it can take *x, *y, and n (double pointer arrays as straight form the output of Dr.Clark's file reader
+namespace ublas=boost::numeric::ublas;
 
 class SplineInterp
 {

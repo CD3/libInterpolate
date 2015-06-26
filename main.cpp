@@ -16,12 +16,10 @@ int main(int argc, char *argv[])
     SplineInterp testInterp;
     testInterp.setData(path);
 
-    std::cout << testInterp(9.2) << std::endl;
-
-    //if( argc > 1 )
-    //{
-        //std::cout << std::setprecision(12) <<  testInterp(boost::lexical_cast<double>(argv[1]) ) << std::endl;;
-    //}
+    if( argc > 1 )
+    {
+        std::cout << std::setprecision(12) <<  testInterp(boost::lexical_cast<double>(argv[1]) ) << std::endl;;
+    }
 
     return 0;
 }

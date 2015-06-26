@@ -4,7 +4,7 @@ This is a spline interpolator based on the method outlined on the [Wikipedia Pag
 
 ## Code Example
 
-The class can be constructed using a filename as follows:
+The class can read data from a file name:
 
 	#include "splineInterp/interpLib.h"
 	
@@ -12,9 +12,11 @@ The class can be constructed using a filename as follows:
 	std::string path = "nameOfTwoColumnDataFile.txt"
 
 	//construct the class
-	SplineInterp testInterp(path);
+	SplineInterp testInterp;
+	
+	testInterp.setData(path);
 
-	double interpolatedValue = testInterp.interpAt( targetInterpValue );
+	double interpolatedValue = testInterp(pointToInterpolate);
 
 or with two std::vector<double> types:
 
@@ -24,16 +26,17 @@ or with two std::vector<double> types:
 	std::vector<double> x;
 	std::vector<double> y;
 
-	SplineInterp testInterp(x, y);
-
-	double interpValue = testInterp.interpAt( targetInterpValue );
-At the time of construction, the class builds all of the matrices and calculates coefficients relevant to the data set needed by the interpolation method. The expensive part happens once, and then getting interpolated values afterwards is quick.
+	SplineInterp testInterp;
+	testInterp.setData(x,y);
+	
+	double interpolatedValue = testInterp(pointToInterpolate);
+The class supports calling the setData member function multiple times in order to change out the data set used by the interpolator.
 
 ## Installation
 
 This library depends on boost being installed. Compilation will require linking boost_system and boost_filesystem because boost::filesystem is used to validate the existance of the file to be read in. Also, the main data types of the calculation are boost::matrix and boost::vector.
 
-The main.cpp and test.txt included with this project are just meant to show an example of basic usage for the library. The text file contains a coarsely defined quadratic from -10 to 10. The program reads this file in and interpolates a value passed by the command line.
+The main.cpp and test.txt included with this project are just meant to show an example of basic usage for the library. The text file contains a coarsely defined quadratic from 0 to 10. The program reads this file in and interpolates a value passed by the command line.
 
 	$ make
 	$ ./int 3.32
@@ -41,4 +44,4 @@ The main.cpp and test.txt included with this project are just meant to show an e
 
 ## Tests
 
-To be populated...
+A unit test using the Boost test suite is included with the library.

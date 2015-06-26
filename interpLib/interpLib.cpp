@@ -3,20 +3,27 @@
 #include "matrixBuild.h"
 
 
-void SplineInterp::initialSetup()
+void SplineInterp::initCoefficients()
 {
+
+    //init the matrices that get solved by the lu factorization
+    ublas::matrix<double> A(this->n, this->n);
+    ublas::vector<double> B(this->n);
+
+    //intermediate values for the solver
     ublas::vector<double> rhs(this->n);
     ublas::permutation_matrix<int> P(this->n);
 
-    this->A = matrixABuild(this->X, this->Y);
-    this->B = matrixBBuild(this->X, this->Y);
+    //build the matrices that get solved
+    A = matrixABuild(this->X, this->Y);
+    B = matrixBBuild(this->X, this->Y);
 
     for (int i = 0; i < this->n; ++i)
     {
        rhs(i) = B(i); 
     }
     
-    ublas::lu_factorize(this->A,P);
+    ublas::lu_factorize(A,P);
     B = rhs;
     ublas::lu_substitute(A,P,rhs);
 
@@ -31,7 +38,7 @@ void SplineInterp::initialSetup()
 
 }
 
-SplineInterp::SplineInterp(std::string dataFile)
+void SplineInterp::setData(std::string dataFile)
 {
     if( fs::exists( dataFile ) )
     {
@@ -54,7 +61,7 @@ SplineInterp::SplineInterp(std::string dataFile)
                 this->Y(i) = y[i];
             }
 
-            this->initialSetup();
+            this->initCoefficients();
 
             delete[] x;
             delete[] y;
@@ -62,7 +69,7 @@ SplineInterp::SplineInterp(std::string dataFile)
     }
 }
 
-SplineInterp::SplineInterp(std::vector<double> x, std::vector<double> y)
+void SplineInterp::setData(std::vector<double> x, std::vector<double> y)
 {
     this->n = x.size();
 
@@ -75,14 +82,18 @@ SplineInterp::SplineInterp(std::vector<double> x, std::vector<double> y)
        this->Y(i) = y[i]; 
     }
 
-    this->initialSetup();
+    this->initCoefficients();
+}
+
+SplineInterp::SplineInterp()
+{
 }
 
 SplineInterp::~SplineInterp()
 {
 }
 
-double SplineInterp::interpAt(double targetValue)
+double SplineInterp::operator() (double targetValue)
 {
     double outVal;
     for (int i = 0; i < this->n; ++i)
@@ -93,6 +104,7 @@ double SplineInterp::interpAt(double targetValue)
         {
             outVal = Y(i);
         } 
+
         else if(targetValue < X(i) && targetValue > X(i-1))
         {
            double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
@@ -101,6 +113,30 @@ double SplineInterp::interpAt(double targetValue)
            outVal = q;
        } 
     }
+ 
+    return outVal;
+}
 
+double SplineInterp::operator[] (double targetValue)
+{
+    double outVal;
+    for (int i = 0; i < this->n; ++i)
+    {
+        //this is a not very good check to see if you're passing in a value that's already in the data set.
+        //this equality should be checked with a better function for comparing doubles
+        if( X(i) == targetValue )
+        {
+            outVal = Y(i);
+        } 
+
+        else if(targetValue < X(i) && targetValue > X(i-1))
+        {
+           double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
+           double q = ( 1 - tmp ) * Y(i-1) + tmp * Y(i) + tmp*(1-tmp)*(a(i-1)*(1-tmp)+b(i-1)*tmp);
+
+           outVal = q;
+       } 
+    }
+ 
     return outVal;
 }

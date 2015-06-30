@@ -69,20 +69,25 @@ void SplineInterp::setData(std::string dataFile)
     }
 }
 
-void SplineInterp::setData(std::vector<double> x, std::vector<double> y)
+void SplineInterp::setData(size_t _n, double* _x, double* _y)
 {
-    this->n = x.size();
+    this->n = _n;
 
-    this->X.resize(n);
-    this->Y.resize(n);
+    this->X.resize(this->n);
+    this->Y.resize(this->n);
 
     for (int i = 0; i < this->n; ++i)
     {
-       this->X(i) = x[i]; 
-       this->Y(i) = y[i]; 
+       this->X(i) = _x[i]; 
+       this->Y(i) = _y[i]; 
     }
 
     this->initCoefficients();
+}
+  
+void SplineInterp::setData(std::vector<double> x, std::vector<double> y)
+{
+  this->setData( x.size(), x.data(), y.data() );
 }
 
 SplineInterp::SplineInterp()

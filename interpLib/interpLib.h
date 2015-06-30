@@ -49,8 +49,8 @@ class SplineInterp
         double interpAt( double targetValue );
         double operator()( double interpValue );
         double operator[]( double interpValue );
+
         void setData( size_t n, double *x, double *y );
-        void setData( std::string dataFile );
         void setData( std::vector<double> x, std::vector<double> y );
 
 };

@@ -1,5 +1,4 @@
 #include "interpLib.h"
-#include "fileReader/ReadFunction.h"
 #include "matrixBuild.h"
 
 
@@ -36,37 +35,6 @@ void SplineInterp::initCoefficients()
         this->b(i) = -rhs(i+1) * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
     }
 
-}
-
-void SplineInterp::setData(std::string dataFile)
-{
-    if( fs::exists( dataFile ) )
-    {
-        if( fs::is_regular_file( dataFile ) )
-        {
-            std::ifstream inputFile(dataFile.c_str());
-
-            double *x, *y;
-
-            RUC::ReadFunction( inputFile, x, y, this->n );
-
-            inputFile.close();
-
-            this->X.resize(this->n);
-            this->Y.resize(this->n);
-
-            for ( int i = 0; i < this->n; ++i)
-            {
-                this->X(i) = x[i];
-                this->Y(i) = y[i];
-            }
-
-            this->initCoefficients();
-
-            delete[] x;
-            delete[] y;
-        }
-    }
 }
 
 void SplineInterp::setData(size_t _n, double* _x, double* _y)

@@ -99,27 +99,16 @@ double SplineInterp::operator() (double targetValue)
   if( targetValue < X(0) )
     return 0;
 
-  if( targetValue > X(this->n-1) )
+  if( targetValue >= X(this->n-1) )
     return 0;
 
-  double outVal;
-  for (int i = 0; i < this->n; ++i)
-  {
-      //this is a not very good check to see if you're passing in a value that's already in the data set.
-      //this equality should be checked with a better function for comparing doubles
-      if( X(i) == targetValue )
-      {
-          outVal = Y(i);
-      } 
+  // find the index that is just to the right of the targetValue
+  int i = 1;
+  while( i < this->n-1 && X(i) < targetValue )
+    i++;
 
-      else if(targetValue < X(i) && targetValue > X(i-1))
-      {
-         double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
-         double q = ( 1 - tmp ) * Y(i-1) + tmp * Y(i) + tmp*(1-tmp)*(a(i-1)*(1-tmp)+b(i-1)*tmp);
-
-         outVal = q;
-     } 
-  }
+  double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
+  double outVal = ( 1 - tmp ) * Y(i-1) + tmp * Y(i) + tmp*(1-tmp)*(a(i-1)*(1-tmp)+b(i-1)*tmp);
 
   return outVal;
 }

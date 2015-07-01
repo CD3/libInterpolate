@@ -31,7 +31,6 @@ BOOST_AUTO_TEST_CASE(testInterpVecs)
     BOOST_CHECK_CLOSE(testInterp(2.5), 6.2566, 1e-3);
 }
 
-
 BOOST_AUTO_TEST_CASE(testSinInterp)
 {
     int n = 30;
@@ -59,6 +58,36 @@ BOOST_AUTO_TEST_CASE(testSinInterp)
       double xx = xmin -.1 + i*dx/res;
       if( sin(xx) > 0.01 ) // only check values much greater than zero
         BOOST_CHECK_CLOSE( (xx > 0 && xx < 10) ? sin(xx) : 0, testInterp(xx), 1);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(testSinDerivative)
+{
+    int n = 30;
+    double xmin,xmax,dx;
+    std::vector<double> x(n), y(n);
+    xmin = 0;
+    xmax = 10;
+    dx = (xmax - xmin) / (n - 1);
+
+    //set up test data
+    for (int i = 0; i < n; ++i)
+    {
+        x[i] = xmin+i*dx;
+        y[i] = sin(x[i]);
+    }
+
+    // get an interpolator
+    SplineInterp testInterp;
+    testInterp.setData(x,y);
+
+    ////test case
+    int res = 10;
+    for(int i = 0; i < res*n; i++)
+    {
+      double xx = xmin -.1 + i*dx/res;
+      if( sin(xx) > 0.01 ) // only check values much greater than zero
+        BOOST_CHECK_CLOSE( (xx > 0 && xx < 10) ? cos(xx) : 0, testInterp.derivative(xx), 2.9);
     }
 }
 

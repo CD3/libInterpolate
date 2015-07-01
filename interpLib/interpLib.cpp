@@ -58,12 +58,27 @@ void SplineInterp::setData(std::vector<double> x, std::vector<double> y)
   this->setData( x.size(), x.data(), y.data() );
 }
 
-SplineInterp::SplineInterp()
+double SplineInterp::derivative(double targetValue)
 {
-}
+    //No extrapolation
+    if( targetValue < X(0) )
+        return 0;
 
-SplineInterp::~SplineInterp()
-{
+    if( targetValue >= X(this->n-1) )
+        return 0;
+
+    // find the index that is just to the right of the targetValue
+    int i = 1;
+    while( i < this->n-1 && X(i) < targetValue )
+        i++;
+
+    //this should be the same t as in the regular interpolation case
+    double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
+
+    double outVal = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*tmp )*( a(i-1)*(1-tmp) + b(i-1)*tmp )/( X(i) - X(i-1))
+       + tmp*(1-tmp)*(b(i-1)-a(i-1))/(X(i)-X(i-1)) ;
+
+    return outVal;
 }
 
 double SplineInterp::operator() (double targetValue)
@@ -89,4 +104,12 @@ double SplineInterp::operator() (double targetValue)
 double SplineInterp::operator[] (double targetValue)
 {
     return this->operator()(targetValue);
+}
+
+SplineInterp::SplineInterp()
+{
+}
+
+SplineInterp::~SplineInterp()
+{
 }

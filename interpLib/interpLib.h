@@ -42,13 +42,15 @@ class SplineInterp
     protected:
 
     public:
-        SplineInterp(double targetValue);
         SplineInterp();
         ~SplineInterp();
 
+        //these functions all just get the interpolated value at a target value
         double interpAt( double targetValue );
-        double operator()( double interpValue );
-        double operator[]( double interpValue );
+        double operator()( double targetValue );
+        double operator[]( double targetValue );
+
+        double derivative( double targetvalue );
 
         void setData( size_t n, double *x, double *y );
         void setData( std::vector<double> x, std::vector<double> y );

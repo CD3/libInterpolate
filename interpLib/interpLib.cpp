@@ -58,52 +58,54 @@ void SplineInterp::setData(std::vector<double> x, std::vector<double> y)
   this->setData( x.size(), x.data(), y.data() );
 }
 
-double SplineInterp::derivative(double targetValue)
+double SplineInterp::derivative(double x)
 {
     //No extrapolation
-    if( targetValue < X(0) )
+    if( x < X(0) )
         return 0;
 
-    if( targetValue >= X(this->n-1) )
+    if( x >= X(this->n-1) )
         return 0;
 
-    // find the index that is just to the right of the targetValue
+    // find the index that is just to the right of x
     int i = 1;
-    while( i < this->n-1 && X(i) < targetValue )
+    while( i < this->n-1 && X(i) < x )
         i++;
 
     //this should be the same t as in the regular interpolation case
-    double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
+    double t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
 
-    double outVal = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*tmp )*( a(i-1)*(1-tmp) + b(i-1)*tmp )/( X(i) - X(i-1))
-       + tmp*(1-tmp)*(b(i-1)-a(i-1))/(X(i)-X(i-1)) ;
+    double qprime = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*t )*( a(i-1)*(1-t) + b(i-1)*t )/( X(i) - X(i-1))
+                    + t*(1-t)*(b(i-1)-a(i-1))/(X(i)-X(i-1)) ;
 
-    return outVal;
+    return qprime;
 }
 
-double SplineInterp::operator() (double targetValue)
+double SplineInterp::operator() (double x)
 {
   // don't extrapolate at all
-  if( targetValue < X(0) )
+  if( x < X(0) )
     return 0;
 
-  if( targetValue >= X(this->n-1) )
+  if( x >= X(this->n-1) )
     return 0;
 
-  // find the index that is just to the right of the targetValue
+  // find the index that is just to the right of the x
   int i = 1;
-  while( i < this->n-1 && X(i) < targetValue )
+  while( i < this->n-1 && X(i) < x )
     i++;
 
-  double tmp = ( targetValue - X(i-1) ) / ( X(i) - X(i-1) );
-  double outVal = ( 1 - tmp ) * Y(i-1) + tmp * Y(i) + tmp*(1-tmp)*(a(i-1)*(1-tmp)+b(i-1)*tmp);
+  // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
+  // for a derivation this interpolation.
+  double t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
+  double q = ( 1 - t ) * Y(i-1) + t * Y(i) + t*(1-t)*(a(i-1)*(1-t)+b(i-1)*t);
 
-  return outVal;
+  return q;
 }
 
-double SplineInterp::operator[] (double targetValue)
+double SplineInterp::operator[] (double x)
 {
-    return this->operator()(targetValue);
+    return this->operator()(x);
 }
 
 SplineInterp::SplineInterp()

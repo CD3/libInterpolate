@@ -51,6 +51,8 @@ class SplineInterp
         double operator[]( double targetValue );
 
         double derivative( double targetvalue );
+        double integral( double _a, double _b);
+        double integral( );
 
         void setData( size_t n, double *x, double *y );
         void setData( std::vector<double> x, std::vector<double> y );

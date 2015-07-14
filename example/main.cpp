@@ -3,7 +3,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-#include "interpLib.h"
+#include "interpLib.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     } 
 
     //create the interpolation object
-    SplineInterp exampleInterp;
+    SplineInterp <double>exampleInterp;
 
     //give data to the interpolation object
     exampleInterp.setData( X, Y);

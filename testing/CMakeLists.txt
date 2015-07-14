@@ -10,7 +10,6 @@ if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
   set( HAVE_UNITTESTPP 1 )  # compatible with autoconf
 
   include_directories( "${PROJECT_SOURCE_DIR}/interpLib" )
-  include_directories( "${PROJECT_SOURCE_DIR}/interpLib/fileReader" )
      link_directories( "${PROJECT_SOURCE_DIR}/src/build" )
 
   file( GLOB_RECURSE unitTest_SOURCES
@@ -30,7 +29,7 @@ if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
     add_executable(${testName} ${testSrc})
 
     #Link to Boost libraries AND your targets and dependencies
-    target_link_libraries(${testName} ${EXTRA_LIBS} ${LIBS} interpLib boost_system boost_filesystem)
+    target_link_libraries(${testName} ${EXTRA_LIBS} ${LIBS} boost_system boost_filesystem)
 
     #Move testing binaries into a testDIr directory
     set_target_properties(${testName} PROPERTIES 

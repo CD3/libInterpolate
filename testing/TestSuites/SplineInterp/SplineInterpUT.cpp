@@ -5,7 +5,7 @@
 #define BOOST_TEST_MODULE LinearInterpUT
 #include <boost/test/included/unit_test.hpp>
 
-#include "interpLib.h"
+#include "interpLib.hpp"
 
 BOOST_AUTO_TEST_SUITE(CubicSplineInterpUT)
 
@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(testInterpVecs)
 {
     
     //set up the class
-    SplineInterp testInterp;
+    SplineInterp <double>testInterp;
     int n = 10;
     std::vector<double> x, y;
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(testSinInterp)
     }
 
     // get an interpolator
-    SplineInterp testInterp;
+    SplineInterp <double>testInterp;
     testInterp.setData(x,y);
 
     ////test case
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(testSinDerivative)
     }
 
     // get an interpolator
-    SplineInterp testInterp;
+    SplineInterp <double>testInterp;
     testInterp.setData(x,y);
 
     ////test case
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(testSinIntegral)
     }
 
     // get an interpolator
-    SplineInterp testInterp;
+    SplineInterp <double>testInterp;
     testInterp.setData(x,y);
 
     ////test case
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(testDefinateIntegrals)
     }
 
     // get an interpolator
-    SplineInterp testInterp;
+    SplineInterp <double>testInterp;
     testInterp.setData(x,y);
 
 

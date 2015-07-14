@@ -9,11 +9,12 @@
 
 namespace ublas = boost::numeric::ublas;
 
-ublas::matrix<double> matrixABuild(ublas::vector<double> x, ublas::vector<double> y)
+template<typename Real>
+ublas::matrix<Real> matrixABuild(ublas::vector<Real> x)
 {
     const int N = x.size();
 
-    ublas::matrix<double> A(N,N);
+    ublas::matrix<Real> A(N,N);
 
     for(int i = 0; i < N; ++i)
     {
@@ -51,10 +52,11 @@ ublas::matrix<double> matrixABuild(ublas::vector<double> x, ublas::vector<double
     return A;
 }
 
-ublas::vector<double> matrixBBuild(ublas::vector<double> x, ublas::vector<double> y)
+template< typename Real>
+ublas::vector<Real> matrixBBuild(ublas::vector<Real> x, ublas::vector<Real> y)
 {
     const int n = x.size();
-    ublas::vector<double> _B(n);
+    ublas::vector<Real> _B(n);
 
     for(int i = 0; i < n; ++i)
     {   

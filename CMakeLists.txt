@@ -6,16 +6,11 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ")
 
 
 include_directories("${PROJECT_SOURCE_DIR}/interpLib")
-include_directories("${PROJECT_SOURCE_DIR}/interpLib/fileReader")
 
 
 set( EXTERNAL_LIBS boost_system boost_filesystem )
 set( SOURCES
-            example/main.cpp
-            interpLib/interpLib.cpp)
-
-
-add_library(interpLib interpLib/interpLib.cpp)
+            example/main.cpp )
 
 
 add_executable(interpolateExample ${SOURCES})

@@ -8,7 +8,7 @@ Real SplineInterp<Real>::operator()(Real x)
   if( x < X(0) )
     return 0;
      
-  if( x >= X(this->n-1) )
+  if( x > X(this->n-1) )
     return 0;
   
   // find the index that is just to the right of the x
@@ -31,7 +31,7 @@ Real SplineInterp<Real>::operator[](Real x)
   if( x < X(0) )
     return 0;
      
-  if( x >= X(this->n-1) )
+  if( x > X(this->n-1) )
     return 0;
   
   // find the index that is just to the right of the x
@@ -54,7 +54,7 @@ Real SplineInterp<Real>::derivative(Real x)
     if( x < X(0) )
         return 0;
 
-    if( x >= X(this->n-1) )
+    if( x > X(this->n-1) )
         return 0;
 
     // find the index that is just to the right of x

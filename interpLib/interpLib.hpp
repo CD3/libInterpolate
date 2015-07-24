@@ -10,10 +10,8 @@
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/numeric/ublas/vector.hpp"
 #include "boost/numeric/ublas/lu.hpp"
-#include "boost/filesystem.hpp"
 
 namespace ublas=boost::numeric::ublas;
-namespace fs=boost::filesystem;
 
 template<class Real>
 class SplineInterp

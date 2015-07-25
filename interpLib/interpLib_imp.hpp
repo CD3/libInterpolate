@@ -212,7 +212,11 @@ void SplineInterp<Real>::setData( std::vector<Real> x, std::vector<Real> y )
 
 template<typename Real>
 void SplineInterp<Real>::initCoefficients()
-{/*{{{*/
+{
+
+    /*
+     * This now solves the problem Ax=B using the Thomas algorithm, because the matrix A will be tridiagonal.
+     */
 
     //init the matrices that get solved by the lu factorization
     ublas::matrix<Real> A(this->n, this->n);
@@ -226,24 +230,83 @@ void SplineInterp<Real>::initCoefficients()
     A = matrixABuild<Real>(this->X);
     B = matrixBBuild(this->X, this->Y);
 
+    /********************************** everything above this point is fine. ******************************************/
+
     for (int i = 0; i < this->n; ++i)
     {
        rhs(i) = B(i);
     }
 
-    ublas::lu_factorize(A,P);
-    B = rhs;
-    ublas::lu_substitute(A,P,rhs);
+    //c is a vector of the upper diagonals of matrix A
+    std::vector<Real> c;
+    for (size_t i = 0; i < A.size1()-1; ++i)
+    {/*{{{*/
+        c.push_back( A(i,i+1) );
+     
+    }/*}}}*/
 
+    //b is a vector of the diagnoals of matrix A
+    std::vector<Real> b;
+    for (size_t i = 0; i < A.size1(); ++i)
+    {
+        b.push_back(A(i,i));
+    }
+
+    //a is a vector of the lower diagonals of matrix A
+    std::vector<Real> a;
+    a.resize( this->n - 1 );
+    for (size_t i = 1; i < A.size1() - 1; ++i)
+    {
+        a.push_back(A(i,i-1));
+    }
+
+    //this is one of the vectors used in the Thomas algorithm
+    std::vector<Real> cprime;
+    cprime.resize(this->n);
+    cprime[0] = c[0] / b[0];
+
+    for (size_t i = 1; i < cprime.size(); ++i)
+    {
+       cprime[i] = c[i] / ( b[i] - a[i]*cprime[i-1] ); 
+    }
+
+    //dprime is another of the vectors used in this algorithm
+    std::vector<Real> dprime;
+    dprime.resize(this->n);
+    dprime[0] = B(0)/b[0];
+    for (size_t i = 1; i < dprime.size(); ++i)
+    {
+       dprime[i] = ( B(i) - a[i]*dprime[i-1] ) / (b[i] - a[i]*cprime[i-1]);
+    }
+
+    std::vector<Real> result;
+    result.resize(this->n);
+
+    result[ result.size() - 1 ] = dprime[ dprime.size() - 1 ];
+
+    for (size_t i = result.size() - 1; i > 0; i--)
+    {
+       result[i] = dprime[i] - cprime[i]*result[i+1]; 
+    }
+
+
+    //for (size_t i = 0; i < result.size(); ++i)
+    //{
+        //rhs(i) = result[i];
+    //}
+
+
+    /********************************** everything below this point is fine. ******************************************/
     this->a.resize(this->n - 1);
     this->b.resize(this->n - 1);
 
     for (int i = 0; i < this->n - 1; ++i)
     {
-        this->a(i) = rhs(i) * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
-        this->b(i) = -rhs(i+1) * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
+        this->a(i) = result[i] * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
+        this->b(i) = -result[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
     }
 
-}/*}}}*/
+
+}
 
 #endif

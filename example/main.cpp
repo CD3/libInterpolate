@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     //set up some example data:
     double xmin = 0;
     double xmax = 10;
-    const int N = 8;
+    const int N = 500;
     double dx = (xmax - xmin)/(N-1);
 
     std::vector<double> X, Y;
@@ -32,11 +32,11 @@ int main(int argc, char *argv[])
     exampleInterp.setData( X, Y);
 
     //interpolate an example value from user input
-    if( argc > 1 )
-    {
-        std::cout <<  exampleInterp(boost::lexical_cast<double>(argv[1])) << std::endl;
-        std::cout << "Derivative: " << exampleInterp.derivative(boost::lexical_cast<double>(argv[1])) << std::endl;
-    }
+    //if( argc > 1 )
+    //{
+        //std::cout <<  exampleInterp(boost::lexical_cast<double>(argv[1])) << std::endl;
+        //std::cout << "Derivative: " << exampleInterp.derivative(boost::lexical_cast<double>(argv[1])) << std::endl;
+    //}
 
     return 0;
 }

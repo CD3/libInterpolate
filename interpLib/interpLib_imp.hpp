@@ -215,49 +215,30 @@ void SplineInterp<Real>::initCoefficients()
 {
 
     /*
-     * This now solves the problem Ax=B using the Thomas algorithm, because the matrix A will be tridiagonal.
+     * This now solves the problem Ax=B using the Thomas algorithm, because the matrix A will be tridiagonal and diagonally dominant.
+     *
+     * The method is outlined on the Wikipedia page for Tridiagonal Matrix Algorithm
      */
 
-    //init the matrices that get solved by the lu factorization
+    //init the matrices that get solved
     ublas::matrix<Real> A(this->n, this->n);
     ublas::vector<Real> B(this->n);
-
-    //intermediate values for the solver
-    ublas::vector<Real> rhs(this->n);
-    ublas::permutation_matrix<int> P(this->n);
 
     //build the matrices that get solved
     A = matrixABuild<Real>(this->X);
     B = matrixBBuild(this->X, this->Y);
 
-    /********************************** everything above this point is fine. ******************************************/
-
-    std::vector<Real> f;
-    f.resize( this->n );
-
-    for (int i = 0; i < this->n; ++i)
-    {
-       f[i] = B(i);
-    }
-
-    for (size_t i = 0; i < A.size1(); ++i)
-    {
-        for (size_t j = 0; j < A.size2(); ++j)
-        {
-            std::cout << A(i,j) << "    ";
-        }
-        std::cout << std::endl;
-    }
-
     //c is a vector of the upper diagonals of matrix A
+    //
+    //Since there is no upper diagonal on the last row, the last value must be zero.
     std::vector<Real> c;
     for (size_t i = 0; i < this->n-1; ++i)
     {/*{{{*/
         c.push_back( A(i,i+1) );
      
     }/*}}}*/
+    c.push_back(0.0);
 
-    std::cout << std::endl;
     //b is a vector of the diagnoals of matrix A
     std::vector<Real> b;
     for (size_t i = 0; i < this->n; ++i)
@@ -267,46 +248,51 @@ void SplineInterp<Real>::initCoefficients()
 
 
     //a is a vector of the lower diagonals of matrix A
+    //
+    //Since there is no upper diagonal on the first row, the first value must be zero.
     std::vector<Real> a;
+    a.push_back(0.0);
     for (size_t i = 1; i < this->n; ++i)
     {
         a.push_back(A(i,i-1));
     }
 
-    c[0] /= b[0];
-    f[0] /= b[0];
 
-    for (size_t i = 0; i < this->n; ++i)
+    std::vector<double> c_star;
+    c_star.resize( c.size() );
+    c_star[0] = c[0]/b[0];
+    for (size_t i = 1; i < c_star.size(); ++i)
     {
-        c[i] /= b[i] - a[i]*c[i-1];
-        f[i] = (f[i] - a[i]*f[i-1]) / (b[i] - a[i]*c[i-1]);
+       c_star[i] = c[i] / (b[i]-a[i]*c_star[i-1]); 
     }
 
-    int N = this->n - 1;
-    f[N] = (f[N] - a[N]*f[N-1]) / (b[N] - a[N]*c[N-1]);
+    std::vector<double> d_star;
+    d_star.resize(this->n);
+    d_star[0] = B(0)/b[0];
 
-    for( int i = n; i-- > 0;)
+    for (size_t i = 1; i < d_star.size(); ++i)
     {
-        f[i] -= c[i]*f[i+1];
+        d_star[i] = (B(i) - a[i]*d_star[i-1])/(b[i]-a[i]*c_star[i-1]);
     }
 
+    std::vector<double> x;
+    x.resize( this->n );
+    x[ x.size() - 1 ] = d_star[ d_star.size() - 1 ];
 
+    for (size_t i = x.size() - 1; i-- > 0;)
+    {
+        x[i] = d_star[i] - c_star[i]*x[i+1];
+    }
 
-    /********************************** everything below this point is fine. ******************************************/
     this->a.resize(this->n - 1);
     this->b.resize(this->n - 1);
 
     for (int i = 0; i < this->n - 1; ++i)
     {
-        this->a(i) = f[i] * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
-        this->b(i) = -f[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
+        this->a(i) = x[i] * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
+        this->b(i) = -x[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
     }
 
-
-    for (int i = 0; i < this->a.size(); ++i)
-    {
-        std::cout << this->a(i) << std::endl;
-    }
 }
 
 #endif

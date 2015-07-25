@@ -232,14 +232,17 @@ void SplineInterp<Real>::initCoefficients()
 
     /********************************** everything above this point is fine. ******************************************/
 
+    std::vector<Real> f;
+    f.resize( this->n );
+
     for (int i = 0; i < this->n; ++i)
     {
-       rhs(i) = B(i);
+       f[i] = B(i);
     }
 
     //c is a vector of the upper diagonals of matrix A
     std::vector<Real> c;
-    for (size_t i = 0; i < A.size1()-1; ++i)
+    for (size_t i = 0; i < this->n-1; ++i)
     {/*{{{*/
         c.push_back( A(i,i+1) );
      
@@ -247,7 +250,7 @@ void SplineInterp<Real>::initCoefficients()
 
     //b is a vector of the diagnoals of matrix A
     std::vector<Real> b;
-    for (size_t i = 0; i < A.size1(); ++i)
+    for (size_t i = 0; i < this->n; ++i)
     {
         b.push_back(A(i,i));
     }
@@ -255,7 +258,7 @@ void SplineInterp<Real>::initCoefficients()
     //a is a vector of the lower diagonals of matrix A
     std::vector<Real> a;
     a.resize( this->n - 1 );
-    for (size_t i = 1; i < A.size1() - 1; ++i)
+    for (size_t i = 1; i < this->n; ++i)
     {
         a.push_back(A(i,i-1));
     }
@@ -273,7 +276,7 @@ void SplineInterp<Real>::initCoefficients()
     //dprime is another of the vectors used in this algorithm
     std::vector<Real> dprime;
     dprime.resize(this->n);
-    dprime[0] = B(0)/b[0];
+    dprime[0] = f[0]/b[0];
     for (size_t i = 1; i < dprime.size(); ++i)
     {
        dprime[i] = ( B(i) - a[i]*dprime[i-1] ) / (b[i] - a[i]*cprime[i-1]);
@@ -282,18 +285,16 @@ void SplineInterp<Real>::initCoefficients()
     std::vector<Real> result;
     result.resize(this->n);
 
-    result[ result.size() - 1 ] = dprime[ dprime.size() - 1 ];
+    result[ result.size() - 1 ] = f[ f.size() - 1 ];
 
-    for (size_t i = result.size() - 1; i > 0; i--)
+
+    //FIXME: The broken thing is happening in this loop. Probably. Go through the whole method again
+    //because huge error is happening somewhere.
+    for (int i = result.size() - 2; i >= 0; i--)
     {
-       result[i] = dprime[i] - cprime[i]*result[i+1]; 
+       result[i] = dprime[i] - cprime[i]*f[i+1]; 
+       //result[i] = 0.0;
     }
-
-
-    //for (size_t i = 0; i < result.size(); ++i)
-    //{
-        //rhs(i) = result[i];
-    //}
 
 
     /********************************** everything below this point is fine. ******************************************/

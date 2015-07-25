@@ -240,6 +240,15 @@ void SplineInterp<Real>::initCoefficients()
        f[i] = B(i);
     }
 
+    for (size_t i = 0; i < A.size1(); ++i)
+    {
+        for (size_t j = 0; j < A.size2(); ++j)
+        {
+            std::cout << A(i,j) << "    ";
+        }
+        std::cout << std::endl;
+    }
+
     //c is a vector of the upper diagonals of matrix A
     std::vector<Real> c;
     for (size_t i = 0; i < this->n-1; ++i)
@@ -248,6 +257,7 @@ void SplineInterp<Real>::initCoefficients()
      
     }/*}}}*/
 
+    std::cout << std::endl;
     //b is a vector of the diagnoals of matrix A
     std::vector<Real> b;
     for (size_t i = 0; i < this->n; ++i)
@@ -255,46 +265,31 @@ void SplineInterp<Real>::initCoefficients()
         b.push_back(A(i,i));
     }
 
+
     //a is a vector of the lower diagonals of matrix A
     std::vector<Real> a;
-    a.resize( this->n - 1 );
     for (size_t i = 1; i < this->n; ++i)
     {
         a.push_back(A(i,i-1));
     }
 
-    //this is one of the vectors used in the Thomas algorithm
-    std::vector<Real> cprime;
-    cprime.resize(this->n);
-    cprime[0] = c[0] / b[0];
+    c[0] /= b[0];
+    f[0] /= b[0];
 
-    for (size_t i = 1; i < cprime.size(); ++i)
+    for (size_t i = 0; i < this->n; ++i)
     {
-       cprime[i] = c[i] / ( b[i] - a[i]*cprime[i-1] ); 
+        c[i] /= b[i] - a[i]*c[i-1];
+        f[i] = (f[i] - a[i]*f[i-1]) / (b[i] - a[i]*c[i-1]);
     }
 
-    //dprime is another of the vectors used in this algorithm
-    std::vector<Real> dprime;
-    dprime.resize(this->n);
-    dprime[0] = f[0]/b[0];
-    for (size_t i = 1; i < dprime.size(); ++i)
+    int N = this->n - 1;
+    f[N] = (f[N] - a[N]*f[N-1]) / (b[N] - a[N]*c[N-1]);
+
+    for( int i = n; i-- > 0;)
     {
-       dprime[i] = ( B(i) - a[i]*dprime[i-1] ) / (b[i] - a[i]*cprime[i-1]);
+        f[i] -= c[i]*f[i+1];
     }
 
-    std::vector<Real> result;
-    result.resize(this->n);
-
-    result[ result.size() - 1 ] = f[ f.size() - 1 ];
-
-
-    //FIXME: The broken thing is happening in this loop. Probably. Go through the whole method again
-    //because huge error is happening somewhere.
-    for (int i = result.size() - 2; i >= 0; i--)
-    {
-       result[i] = dprime[i] - cprime[i]*f[i+1]; 
-       //result[i] = 0.0;
-    }
 
 
     /********************************** everything below this point is fine. ******************************************/
@@ -303,11 +298,15 @@ void SplineInterp<Real>::initCoefficients()
 
     for (int i = 0; i < this->n - 1; ++i)
     {
-        this->a(i) = result[i] * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
-        this->b(i) = -result[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
+        this->a(i) = f[i] * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
+        this->b(i) = -f[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
     }
 
 
+    for (int i = 0; i < this->a.size(); ++i)
+    {
+        std::cout << this->a(i) << std::endl;
+    }
 }
 
 #endif

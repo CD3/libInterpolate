@@ -63,9 +63,9 @@ Real SplineInterp<Real>::derivative(Real x)
         i++;
 
     //this should be the same t as in the regular interpolation case
-    double t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
+    Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
 
-    double qprime = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*t )*( a(i-1)*(1-t) + b(i-1)*t )/( X(i) - X(i-1))
+    Real qprime = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*t )*( a(i-1)*(1-t) + b(i-1)*t )/( X(i) - X(i-1))
                     + t*(1-t)*(b(i-1)-a(i-1))/(X(i)-X(i-1)) ;
 
     return qprime;
@@ -212,7 +212,7 @@ void SplineInterp<Real>::setData( std::vector<Real> x, std::vector<Real> y )
 
 template<typename Real>
 void SplineInterp<Real>::initCoefficients()
-{
+{/*{{{*/
 
     /*
      * This now solves the problem Ax=B using the Thomas algorithm, because the matrix A will be tridiagonal and diagonally dominant.
@@ -258,7 +258,7 @@ void SplineInterp<Real>::initCoefficients()
     }
 
 
-    std::vector<double> c_star;
+    std::vector<Real> c_star;
     c_star.resize( c.size() );
     c_star[0] = c[0]/b[0];
     for (size_t i = 1; i < c_star.size(); ++i)
@@ -266,7 +266,7 @@ void SplineInterp<Real>::initCoefficients()
        c_star[i] = c[i] / (b[i]-a[i]*c_star[i-1]); 
     }
 
-    std::vector<double> d_star;
+    std::vector<Real> d_star;
     d_star.resize(this->n);
     d_star[0] = B(0)/b[0];
 
@@ -275,7 +275,7 @@ void SplineInterp<Real>::initCoefficients()
         d_star[i] = (B(i) - a[i]*d_star[i-1])/(b[i]-a[i]*c_star[i-1]);
     }
 
-    std::vector<double> x;
+    std::vector<Real> x;
     x.resize( this->n );
     x[ x.size() - 1 ] = d_star[ d_star.size() - 1 ];
 
@@ -293,6 +293,6 @@ void SplineInterp<Real>::initCoefficients()
         this->b(i) = -x[i+1] * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
     }
 
-}
+}/*}}}*/
 
 #endif

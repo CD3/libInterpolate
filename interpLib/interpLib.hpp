@@ -7,12 +7,6 @@
 
 #include "matrixBuild.hpp"
 
-#include "boost/numeric/ublas/matrix.hpp"
-#include "boost/numeric/ublas/vector.hpp"
-#include "boost/numeric/ublas/lu.hpp"
-
-namespace ublas=boost::numeric::ublas;
-
 template<class Real>
 class SplineInterp
 {
@@ -22,13 +16,13 @@ class SplineInterp
         int n;
 
         //These are the vectors that the data will be stored in
-        ublas::vector<Real> X;
-        ublas::vector<Real> Y;
+        std::vector<Real> X;
+        std::vector<Real> Y;
 
         //When these coefficients are determined,
         //they can be used to generate the splines that are evaluated for the interpolation
-        ublas::vector<Real> a;
-        ublas::vector<Real> b;
+        std::vector<Real> a;
+        std::vector<Real> b;
 
         void initCoefficients();
 
@@ -40,9 +34,6 @@ class SplineInterp
 
         //overload the () operator to return an interpolated value
         Real operator()( Real x );
-
-        //the square bracket one is probably unnecessary
-        Real operator[]( Real x );
 
         Real derivative( Real x );
   

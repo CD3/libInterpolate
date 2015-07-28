@@ -32,16 +32,17 @@ or with two std::vector<double> types:
 	double interpolatedValue = testInterp(pointToInterpolate);
 The class supports calling the setData member function multiple times in order to change out the data set used by the interpolator.
 
-## Installation
+There is a short program in the example folder meant to show usage of setting data and getting interpolated values. It generates its own dataset, and then uses that as the data to interpolate against.
 
-This library depends on boost being installed. Compilation will require linking boost_system and boost_filesystem because boost::filesystem is used to validate the existance of the file to be read in. Also, the main data types of the calculation are boost::matrix and boost::vector.
-
-The main.cpp and test.txt included with this project are just meant to show an example of basic usage for the library. The text file contains a coarsely defined quadratic from 0 to 10. The program reads this file in and interpolates a value passed by the command line.
-
-	$ make
-	$ ./int 3.32
-	11.0221
-
+## Member functions
+| **Function** | **Description** |
+|----------|-------------|
+| operator() | return interpolated value |
+| integral(Real _a, Real _b) | Return the integral of the given range |
+| integral() | Return the integral of the entire range |
+| derivative(Real x) | Return the derivative at point x |
+| setData(size_t n, Real *_x, Real *_y) | Set data using pointer arrays |
+| setData(std::vector<Real> x, std::vector<Real> y) | Set data using std::vectors |
 ## Tests
 
 A unit test using the Boost test suite is included with the library.

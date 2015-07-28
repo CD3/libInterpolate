@@ -52,7 +52,7 @@ template<typename Real>
 Real SplineInterp<Real>::integral(Real _a, Real _b)
 {/*{{{*/
     // allow b to be less than a
-    double sign = 1;
+    Real sign = 1;
     if( _a > _b )
     {
       std::swap( a, b );
@@ -99,9 +99,9 @@ Real SplineInterp<Real>::integral(Real _a, Real _b)
      *
      */
 
-    double x_1, x_2, t;
-    double y_1, y_2;
-    double sum = 0;
+    Real x_1, x_2, t;
+    Real y_1, y_2;
+    Real sum = 0;
     for( int i = ai; i < bi-1; i++)
     {
       // x_1 -> X(i)

@@ -199,14 +199,7 @@ void SplineInterp<Real>::initCoefficients()
 
     //init the matrices that get solved
     std::vector< std::vector<Real> > A;
-    A.resize(this->n);
-    for (size_t i = 0; i < A.size(); ++i)
-    {
-        A[i].resize(this->n);
-    }
-
     std::vector<Real> B;
-    B.resize(this->n);
 
     //build the matrices that get solved
     A = matrixABuild<Real>(this->X);

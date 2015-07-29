@@ -182,7 +182,7 @@ void SplineInterp<Real>::setData( size_t _n, Real *_x, Real *_y )
 }/*}}}*/
 
 template<typename Real>
-void SplineInterp<Real>::setData( std::vector<Real> x, std::vector<Real> y )
+void SplineInterp<Real>::setData( std::vector<Real> &x, std::vector<Real> &y )
 {/*{{{*/
     this->setData( x.size(), x.data(), y.data() );
 }/*}}}*/

@@ -44,7 +44,7 @@ class SplineInterp
 
         void setData( size_t _n, Real *_x, Real *_y );
 
-        void setData( std::vector<Real> x, std::vector<Real> y );
+        void setData( std::vector<Real> &x, std::vector<Real> &y );
 };
 
 #include "interpLib_imp.hpp"

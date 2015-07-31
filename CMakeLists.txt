@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ")
 include_directories("${PROJECT_SOURCE_DIR}/interpLib")
 
 
-set( EXTERNAL_LIBS boost_system boost_filesystem )
+set( EXTERNAL_LIBS )
 set( SOURCES
             example/main.cpp )
 

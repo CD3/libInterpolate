@@ -5,14 +5,17 @@
 #include <string>
 #include <vector>
 
-#include "matrixBuild.hpp"
+#ifdef USE_EIGEN
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/Dense>
+#endif
 
 template<class Real>
 class SplineInterp
 {
 
     private:
-        //this is the length of the input file
+        //this is the length of the data vector
         int n;
 
         //These are the vectors that the data will be stored in
@@ -25,6 +28,7 @@ class SplineInterp
         std::vector<Real> b;
 
         void initCoefficients();
+        void solveForCoefficients();
 
     protected:
 

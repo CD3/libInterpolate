@@ -5,6 +5,7 @@
 #define BOOST_TEST_MODULE LinearInterpUT
 #include <boost/test/included/unit_test.hpp>
 
+#define USE_EIGEN
 #include "interpLib.hpp"
 
 BOOST_AUTO_TEST_SUITE(CubicSplineInterpUT)

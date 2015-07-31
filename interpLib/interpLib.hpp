@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "matrixBuild.hpp"
 #ifdef USE_EIGEN
 #include <eigen3/Eigen/Sparse>
 #include <eigen3/Eigen/Dense>

@@ -278,58 +278,79 @@ void SplineInterp<Real>::initCoefficients()
    */
 
   //init the matrices that get solved
-  std::vector< std::vector<Real> > A;
-  std::vector<Real> B;
+  std::vector<Real> Aa(this->n), Ab(this->n), Ac(this->n);  // three three diagonals of the tridiagonal matrix A
+  std::vector<Real> b(this->n); // RHS vector
 
-  //build the matrices that get solved
-  A = matrixABuild<Real>(this->X);
-  B = matrixBBuild(this->X, this->Y);
 
-  //c is a vector of the upper diagonals of matrix A
+  //Ac is a vector of the upper diagonals of matrix A
   //
   //Since there is no upper diagonal on the last row, the last value must be zero.
-  std::vector<Real> c;
   for (size_t i = 0; i < this->n-1; ++i)
-  {/*{{{*/
-      c.push_back( A[i][i+1] );
-   
-  }/*}}}*/
-  c.push_back(0.0);
-
-  //b is a vector of the diagnoals of matrix A
-  std::vector<Real> b;
-  for (size_t i = 0; i < this->n; ++i)
   {
-      b.push_back(A[i][i]);
+      Ac[i] = 1/(X[i+1] - X[i]);
   }
+  Ac[this->n] = 0.0;
+
+  //Ab is a vector of the diagnoals of matrix A
+  Ab[0] = 2/(X[1] - X[0]);
+  for (size_t i = 1; i < this->n-1; ++i)
+  {
+      Ab[i] = 2 / (X[i]-X[i-1]) + 2 / (X[i+1] - X[i]);
+  }
+  Ab[this->n-1] = 2/(X[this->n-1] - X[this->n-1-1]);
 
 
-  //a is a vector of the lower diagonals of matrix A
+  //Aa is a vector of the lower diagonals of matrix A
   //
   //Since there is no upper diagonal on the first row, the first value must be zero.
-  std::vector<Real> a;
-  a.push_back(0.0);
+  Aa[0] = 0.0;
   for (size_t i = 1; i < this->n; ++i)
   {
-      a.push_back(A[i][i-1]);
+      Aa[i] = 1 / (X[i] - X[i-1]);
   }
+
+
+
+  // setup RHS vector
+  for(int i = 0; i < n; ++i)
+  {   
+      if(i == 0)
+      {   
+        b[i] = 3 * ( Y[i+1] - Y[i] )/pow(X[i+1]-X[i],2);
+      }
+      else if( i == n-1 )
+      {   
+        b[i] = 3 * (Y[i] - Y[i-1])/pow(X[i] - X[i-1],2);
+      }
+      else
+      { 
+        b[i] = 3 * ( (Y[i] - Y[i-1])/(pow(X[i]-X[i-1],2)) + (Y[i+1] - Y[i])/pow(X[i+1] - X[i],2));     
+      }
+  }
+
+
+
+
+
+
+
 
 
   std::vector<Real> c_star;
-  c_star.resize( c.size() );
-  c_star[0] = c[0]/b[0];
+  c_star.resize( Ac.size() );
+  c_star[0] = Ac[0]/Ab[0];
   for (size_t i = 1; i < c_star.size(); ++i)
   {
-     c_star[i] = c[i] / (b[i]-a[i]*c_star[i-1]); 
+     c_star[i] = Ac[i] / (Ab[i]-Aa[i]*c_star[i-1]); 
   }
 
   std::vector<Real> d_star;
   d_star.resize(this->n);
-  d_star[0] = B[0]/b[0];
+  d_star[0] = b[0]/Ab[0];
 
   for (size_t i = 1; i < d_star.size(); ++i)
   {
-      d_star[i] = (B[i] - a[i]*d_star[i-1])/(b[i]-a[i]*c_star[i-1]);
+      d_star[i] = (b[i] - Aa[i]*d_star[i-1])/(Ab[i]-Aa[i]*c_star[i-1]);
   }
 
   std::vector<Real> x;

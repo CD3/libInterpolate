@@ -42,17 +42,7 @@ The 2D interpolator accepts 2D gnuplot formatted data similar to:
 
 The data should be input as three STL vectors or double pointers. The code is only tested for data in which every block is the same lengths (each x point has the same number of y points).
 
-The method separates the data into blocks as follows:
-
-	std::vector<Real> x;
-	std::vector< std::vector<Real> > y, z;
-
-So x[0] is the x point for the first block, and y[0] and z[0] are the second two vectors of the first block.
-
-The data then reorders the data so that the second column becomes the first column:
-
-	std::vector<Real> y;
-	std::vector< std::vector<Real> > x,z;
+Although the method expects input data ordered by x, it reorders the input data directly to be ordered by y.
 
 Each x,z vector pair is interpolated at the target x point. These interpolated  values are put into a vector, which would correspond to the 3rd column in the original data ordering. Because of the assumption mentioned earlier, the y vector in the second ordering is assumed to be the proper second column for the new block. The y vector from the second ordering and the newly interpolated z vector are interpolated for the targeted y value, returning the final value.
 

@@ -68,12 +68,9 @@ class SplineInterp2D
      */
 
     private:
-        std::vector<Real> x;
-        std::vector< std::vector<Real> > y,z;
-
-
         std::vector<Real> d2y;
         std::vector< std::vector<Real> > d2x, d2z;
+
     public:
         void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z );
         void setData( size_t n, Real *_x, Real *_y, Real *_z );

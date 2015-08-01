@@ -29,7 +29,7 @@ if(Boost_UNIT_TEST_FRAMEWORK_FOUND)
     add_executable(${testName} ${testSrc})
 
     #Link to Boost libraries AND your targets and dependencies
-    target_link_libraries(${testName} ${EXTRA_LIBS} ${LIBS} boost_system boost_filesystem)
+    target_link_libraries(${testName} ${EXTRA_LIBS} ${LIBS} )
 
     #Move testing binaries into a testDIr directory
     set_target_properties(${testName} PROPERTIES 

@@ -51,6 +51,37 @@ class SplineInterp
         void setData( std::vector<Real> &x, std::vector<Real> &y );
 };
 
+template<class Real>
+class SplineInterp2D
+{
+    /*
+     * INARTDI is Not A Real Two Dimensional Interpolator
+     *
+     * I really would like to work on implementing a better 2D interpolation method that works on scattered data.
+     * As this works by rearranging blocks of the input data and calling the 1D Spline interpolator multiple times,
+     * it is probably not going to be nearly as fast as a real 2D interpolation method would be.
+     *
+     *
+     * Usage:
+     *  The setData function expects that the x, y, and z vectors are straight from a gnuplot style 2D data file.
+     *
+     */
+
+    private:
+        std::vector<Real> x;
+        std::vector< std::vector<Real> > y,z;
+
+
+        std::vector<Real> d2y;
+        std::vector< std::vector<Real> > d2x, d2z;
+    public:
+        void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z );
+        void setData( size_t n, Real *_x, Real *_y, Real *_z );
+
+        Real operator() (Real _x, Real _y);
+};
+
 #include "interpLib_imp.hpp"
+#include "interpLib2D_imp.hpp"
 
 #endif

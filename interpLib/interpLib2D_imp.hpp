@@ -1,3 +1,7 @@
+/**
+ * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.
+ * Basically, x[i], y[i], and z[i] should correspond to the first, second, and third columns of a gnuplot file.
+ */
 template<typename Real>
 void SplineInterp2D<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z )
 {/*{{{*/
@@ -99,7 +103,6 @@ void SplineInterp2D<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, 
 template<typename Real>
 Real SplineInterp2D<Real>::operator()( Real _x, Real _y )
 {/*{{{*/
-
     SplineInterp<Real> interp1D;
 
     //interpolate in x for each of the y blocks
@@ -113,6 +116,108 @@ Real SplineInterp2D<Real>::operator()( Real _x, Real _y )
     //interpolate the new block at the y point
     interp1D.setData( this->d2y, newz );
     return interp1D(_y);
+
+
+}/*}}}*/
+
+
+
+
+/**
+ * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.
+ * Basically, x[i], y[i], and z[i] should correspond to the first, second, and third columns of a gnuplot file.
+ *
+ * WARNING: we a
+ */
+template<typename Real>
+void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &_y, std::vector<Real> &_z )
+{/*{{{*/
+
+  // we need to unpack the points in _x, _y, and _z
+  // if all three vectors are the same length, then it means that together the specify (x,y,z) for a set of n points.
+  // we need to split out the x and y coordinates and then map the z values onto a 2D array
+  
+  // figure out what the dimensions of the grid are first
+  if( _x.size() == _y.size() && _x.size() == _z.size() )
+  {
+    // first we will determine the number of y coordinates by finding the index at
+    // which the x value changes
+    Ny = 0;
+    while( std::abs( _x[Ny] - _x[0] ) < std::numeric_limits<Real>::min() )
+      Ny++;
+
+    // Nz should be the size of _x, _y, and _z
+    Nz = _z.size();
+    
+    // Now we should have Nx * Ny == Nz
+    // so Nx = Nz / Ny
+    Nx = Nz / Ny;
+
+    this->rawX.reset( new Real[Nx] );
+    this->rawY.reset( new Real[Ny] );
+    this->rawZ.reset( new Real[Nz] );
+
+    // grab x-coordinates. we are ASSUMING grid is regular
+    for(int i = 0; i < Nx; i++)
+      this->rawX[i] = _x[i*Ny];
+
+    // grab y-coordinates. we are ASSUMING grid is regular
+    for(int i = 0; i < Ny; i++)
+      this->rawY[i] = _y[i];
+
+    // grab z values
+    for(int i = 0; i < Nz; i++)
+      this->rawZ[i] = _z[i];
+  }
+
+  VectorMap X(this->rawX.get(), Nx, 1);
+  VectorMap Y(this->rawY.get(), Ny, 1);
+  MatrixMap Z(this->rawZ.get(), Nx, Ny);
+
+  this->C = ArrayArray22( Nx-1, Ny-1 );
+
+  // we are going to precompute the interpolation coefficients so
+  // that we can interpolate quickly
+  for(int i = 0; i < Nx - 1; i++)
+  {
+    for( int j = 0; j < Ny - 1; j++)
+    {
+      Real tmp = ( (X(i+1) - X(i) )*( Y(j+1) - Y(j) ) );
+      this->C(i,j) = Z.block(i,j,2,2)/tmp;
+    }
+  }
+
+
+}/*}}}*/
+
+template<typename Real>
+Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
+{/*{{{*/
+
+  // we want to interpolate to a point inside of a rectangle.
+  // first, determine what element the point (_x,_y) is in.
+  // the indices of the of bottom-left corner are the indecies of the element,
+  // so we want to find the grid point to the left and below (_x,_y)
+
+
+  // find the x index that is just to the LEFT of _x
+  VectorMap X(this->rawX.get(), Nx, 1);
+  int i = 0;
+  while( i < this->Nx-2 && X(i+1) < _x )
+      i++;
+
+  // find the y index that is just BELOW _y
+  VectorMap Y(this->rawY.get(), Ny, 1);
+  int j = 0;
+  while( j < this->Ny-2 && Y(j+1) < _y )
+      j++;
+  
+
+  Array22 Q;  // coordinate matrix (see Wikipedia)
+  Q << (X(i+1) - _x  ) * (Y(j+1) - _y  ) ,  (X(i+1) - _x  ) * (    _y - Y(j))
+    ,  (    _x - X(i)) * (Y(j+1) - _y  ) ,  (    _x - X(i)) * (    _y - Y(j));
+
+  return (Q*this->C(i,j)).sum();
 
 
 }/*}}}*/

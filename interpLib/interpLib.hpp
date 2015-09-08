@@ -89,30 +89,33 @@ class BilinearInterp2D
 {
 
     private:
-      //arrays used to store data
-      size_t Nx, Ny, Nz;
-      boost::shared_array<Real> rawX;
-      boost::shared_array<Real> rawY;
-      boost::shared_array<Real> rawZ;
-
       //some typedefs for using Eigen vectors and matrixes
-      typedef Matrix<Real,Dynamic,1      > VectorType;
+      typedef Matrix<Real,Dynamic,1               > VectorType;
       typedef Matrix<Real,Dynamic,Dynamic,RowMajor> MatrixType;
-      typedef Map< VectorType > VectorMap;
-      typedef Map< MatrixType > MatrixMap;
+      typedef InnerStride<> InnerStrideType;
+      typedef Stride<Dynamic,Dynamic> StrideType;
+      typedef Map< VectorType,0,InnerStride<> > VectorMap;
+      typedef Map< MatrixType,0,StrideType > MatrixMap;
 
       typedef Array<Real,2,2> Array22;
       typedef Array<Array22, Dynamic, Dynamic> ArrayArray22;
+
+      // data we are interpolating from
+      VectorType X;
+      VectorType Y;
+      MatrixType Z;
+
 
       // coeficient matrixes
       ArrayArray22 C;
 
 
     public:
-      BilinearInterp2D()
-      {};
       void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z );
       Real operator() (Real _x, Real _y);
+      Real integral( );
+      Real integral( Real xa, Real xb, Real ya, Real yb );
+
 };
 
 #include "interpLib_imp.hpp"

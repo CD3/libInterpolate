@@ -131,7 +131,7 @@ Real SplineInterp2D<Real>::operator()( Real _x, Real _y )
  */
 template<typename Real>
 void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &_y, std::vector<Real> &_z )
-{/*{{{*/
+{
 
   // we need to unpack the points in _x, _y, and _z
   // if all three vectors are the same length, then it means that together the specify (x,y,z) for a set of n points.
@@ -142,45 +142,39 @@ void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &
   {
     // first we will determine the number of y coordinates by finding the index at
     // which the x value changes
-    Ny = 0;
+    int Ny = 0;
     while( std::abs( _x[Ny] - _x[0] ) < std::numeric_limits<Real>::min() )
       Ny++;
 
     // Nz should be the size of _x, _y, and _z
-    Nz = _z.size();
+    int Nz = _z.size();
     
     // Now we should have Nx * Ny == Nz
     // so Nx = Nz / Ny
-    Nx = Nz / Ny;
+    int Nx = Nz / Ny;
 
-    this->rawX.reset( new Real[Nx] );
-    this->rawY.reset( new Real[Ny] );
-    this->rawZ.reset( new Real[Nz] );
+    this->X.resize( Nx );
+    this->Y.resize( Ny );
+    this->Z.resize( Nx, Ny );
 
     // grab x-coordinates. we are ASSUMING grid is regular
-    for(int i = 0; i < Nx; i++)
-      this->rawX[i] = _x[i*Ny];
+    this->X = VectorMap( _x.data(), Nx, InnerStrideType(Ny) );
 
     // grab y-coordinates. we are ASSUMING grid is regular
-    for(int i = 0; i < Ny; i++)
-      this->rawY[i] = _y[i];
+    this->Y = VectorMap( _y.data(), Ny, InnerStrideType(1) );
 
-    // grab z values
-    for(int i = 0; i < Nz; i++)
-      this->rawZ[i] = _z[i];
+    // grab z values. we are ASSUMING grid is regular
+    this->Z = MatrixMap(_z.data(), Nx, Ny, StrideType(Ny,1));
+
   }
 
-  VectorMap X(this->rawX.get(), Nx, 1);
-  VectorMap Y(this->rawY.get(), Ny, 1);
-  MatrixMap Z(this->rawZ.get(), Nx, Ny);
-
-  this->C = ArrayArray22( Nx-1, Ny-1 );
+  this->C = ArrayArray22( X.size()-1, Y.size()-1 );
 
   // we are going to precompute the interpolation coefficients so
   // that we can interpolate quickly
-  for(int i = 0; i < Nx - 1; i++)
+  for(int i = 0; i < X.size() - 1; i++)
   {
-    for( int j = 0; j < Ny - 1; j++)
+    for( int j = 0; j < Y.size() - 1; j++)
     {
       Real tmp = ( (X(i+1) - X(i) )*( Y(j+1) - Y(j) ) );
       this->C(i,j) = Z.block(i,j,2,2)/tmp;
@@ -188,11 +182,11 @@ void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &
   }
 
 
-}/*}}}*/
+}
 
 template<typename Real>
 Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
-{/*{{{*/
+{
 
   // we want to interpolate to a point inside of a rectangle.
   // first, determine what element the point (_x,_y) is in.
@@ -201,23 +195,20 @@ Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
 
 
   // find the x index that is just to the LEFT of _x
-  VectorMap X(this->rawX.get(), Nx, 1);
   int i = 0;
-  while( i < this->Nx-2 && X(i+1) < _x )
+  while( i < this->X.size()-2 && this->X(i+1) < _x )
       i++;
 
   // find the y index that is just BELOW _y
-  VectorMap Y(this->rawY.get(), Ny, 1);
   int j = 0;
-  while( j < this->Ny-2 && Y(j+1) < _y )
+  while( j < this->Y.size()-2 && this->Y(j+1) < _y )
       j++;
   
 
   Array22 Q;  // coordinate matrix (see Wikipedia)
-  Q << (X(i+1) - _x  ) * (Y(j+1) - _y  ) ,  (X(i+1) - _x  ) * (    _y - Y(j))
-    ,  (    _x - X(i)) * (Y(j+1) - _y  ) ,  (    _x - X(i)) * (    _y - Y(j));
+  Q << (this->X(i+1) -       _x  ) * (this->Y(j+1) - _y  ) ,  (this->X(i+1) -       _x  ) * (    _y - this->Y(j))
+    ,  (          _x - this->X(i)) * (this->Y(j+1) - _y  ) ,  (          _x - this->X(i)) * (    _y - this->Y(j));
 
   return (Q*this->C(i,j)).sum();
 
-
-}/*}}}*/
+}

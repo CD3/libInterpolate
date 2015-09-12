@@ -212,3 +212,55 @@ Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
   return (Q*this->C(i,j)).sum();
 
 }
+
+template<typename Real>
+Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
+{
+  // No extrapolation
+  _xa = std::max( _xa, X(0) );
+  _xb = std::min( _xb, X(this->n-1) );
+  _ya = std::max( _ya, Y(0) );
+  _yb = std::min( _yb, Y(this->n-1) );
+
+  // find bottom-left and top-right corners
+
+  // bottom-left corner
+  int ia = 0;
+  while( ia < this->X.size()-2 && this->X(ia+1) < _xa )
+      ia++;
+  int ja = 0;
+  while( ja < this->Y.size()-2 && this->Y(ja+1) < _ya )
+      ja++;
+
+  // top-right corner
+  int ib = 0;
+  while( ib < this->X.size()-2 && this->X(ib+1) < _xb )
+      ib++;
+  int jb = 0;
+  while( jb < this->Y.size()-2 && this->Y(jb+1) < _yb )
+      jb++;
+
+  /*
+   * We can integrate the function directly from the interpolation polynomial.
+   *
+   * See wikipedia:
+   * z = C_11 (x_2 - x  )*(y_2 - y  )
+   *   + C_12 (x_2 - x  )*(y   - y_1)
+   *   + C_21 (x   - x_1)*(y_2 - y  )
+   *   + C_22 (x_2 - x_1)*(y   - y_1)
+   *
+   * I = \int \int z(x,y) dx dy
+   *   = \int
+   *     C_11 (x_2 x   - 0.5 x^2 )*(y_2 - y  )
+   *   + C_12 (x_2 x   - 0.5 x^2 )*(y   - y_1)
+   *   + C_21 (0.5 x^2 - x_1 x   )*(y_2 - y  )
+   *   + C_22 (0.5 x^2 - x_1 x   )*(y   - y_1)
+   *   dx |_xa^xb
+   *
+   *   = C_11 (x_2 x   - 0.5 x^2)*(y_2 y   - 0.5 y^2)
+   *   + C_12 (x_2 x   - 0.5 x^2)*(0.5 y^2 - y_1 y  )
+   *   + C_21 (0.5 x^2 - x_1 x  )*(y_2 y   - 0.5 y^2)
+   *   + C_22 (0.5 x^2 - x_1 x  )*(0.5 y^2 - y_1 y  )
+   *   |_xa^xb |_ya^yb
+   */
+}

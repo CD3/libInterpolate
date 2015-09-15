@@ -6,16 +6,7 @@
 #define BOOST_TEST_MODULE SolverComparisonsUT
 #include <boost/test/included/unit_test.hpp>
 
-namespace custom {
 #include "interpLib.hpp"
-}
-
-namespace eigen {
-#undef interplib_hpp
-#define USE_EIGEN
-#include "interpLib.hpp"
-#undef USE_EIGEN
-}
 
 BOOST_AUTO_TEST_SUITE(SolverComparisonsUT)
 
@@ -37,18 +28,8 @@ BOOST_AUTO_TEST_CASE(UnifromGrid)
 
 
 
-    eigen::SplineInterp<double> eigenInterp;
-    eigenInterp.setData(x,y);
-
-    custom::SplineInterp<double> customInterp;
+    SplineInterp<double> customInterp;
     customInterp.setData(x,y);
-
-    n = 10;
-    dx = (xmax - xmin) / (n - 1);
-    for(int i = 0; i < n; i++)
-    {
-      BOOST_CHECK_CLOSE( eigenInterp(xmin * dx*i), customInterp(xmin * dx*i), 0.01 );
-    }
 
 }
 

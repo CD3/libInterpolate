@@ -6,16 +6,7 @@
 #define BOOST_TEST_MODULE PerformanceUT
 #include <boost/test/included/unit_test.hpp>
 
-namespace custom {
 #include "interpLib.hpp"
-}
-
-namespace eigen {
-#undef interplib_hpp
-#define USE_EIGEN
-#include "interpLib.hpp"
-#undef USE_EIGEN
-}
 
 BOOST_AUTO_TEST_SUITE(Performance2DUT)
 
@@ -44,20 +35,11 @@ BOOST_AUTO_TEST_CASE(InitData)
 
     boost::progress_timer* timer;
 
-    //std::cout<<"Eigen solver"<<std::endl;
-    //timer = new boost::progress_timer();
-    //eigen::SplineInterp<double> eigenInterp;
-    //eigenInterp.setData(x,y);
-    //delete timer;
-
     timer = new boost::progress_timer();
     std::cout<<"2D Data Init:"<<std::endl;
-    eigen::SplineInterp2D<double> customInterp;
+    SplineInterp2D<double> customInterp;
     customInterp.setData(x,y,z);
     delete timer;
-
-    //timer = new boost::progress_timer();
-    //delete timer;
 
 }
 

@@ -7,9 +7,7 @@
 
 #include <boost/shared_array.hpp>
 #include <eigen3/Eigen/Dense>
-#ifdef USE_EIGEN
 #include <eigen3/Eigen/Sparse>
-#endif
 
 using namespace Eigen;
 

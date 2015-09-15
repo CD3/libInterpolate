@@ -195,82 +195,6 @@ void SplineInterp<Real>::initCoefficients()
   // we need to solve A x = b, where A is a matrix and b is a vector...
   // isn't that what we are always doing?
   
-#ifdef USE_EIGEN
-  typedef Eigen::SparseMatrix<Real>              MatrixType;
-  typedef Eigen::Matrix< Real,Eigen::Dynamic,1 > VectorType;
-  MatrixType A(this->n,this->n);
-  VectorType b(this->n);
-  Eigen::SparseLU<MatrixType> solver;
-
-  std::vector< Eigen::Triplet<Real> > initA;
-  
-  for(int i = 0; i < this->n; ++i)
-  {
-    Real coeff;
-
-    // first row
-    if( i == 0 )
-    {
-      coeff = 1/(X[i+1] - X[i]);
-      initA.push_back( Eigen::Triplet<Real>( i, i+1, coeff ) );
-      coeff *= 2;
-      initA.push_back( Eigen::Triplet<Real>( i, i, coeff ) );
-    }
-    // last row
-    else if (i == n-1)
-    {
-      coeff = 1 / (X[i] - X[i-1]);
-      initA.push_back( Eigen::Triplet<Real>( i, i-1, coeff ) );
-      coeff *= 2;
-      initA.push_back( Eigen::Triplet<Real>( i, i, coeff ) );
-    }
-    // middle rows
-    else
-    {
-      // sub-diag
-      coeff = 1 / (X[i] - X[i-1]);
-      initA.push_back( Eigen::Triplet<Real>( i, i-1, coeff ) );
-      // sup-diag
-      coeff = 1/(X[i+1] - X[i]);
-      initA.push_back( Eigen::Triplet<Real>( i, i+1, coeff ) );
-      //diag
-      coeff = 2 / (X[i]-X[i-1]) + 2 / (X[i+1] - X[i]);
-      initA.push_back( Eigen::Triplet<Real>( i, i, coeff ) );
-    }
-
-  }
-
-  A.setFromTriplets( initA.begin(), initA.end() );
-  A.makeCompressed();
-
-  for(int i = 0; i < n; ++i)
-  {   
-      if(i == 0)
-      {   
-        b(i) = 3 * ( Y[i+1] - Y[i] )/pow(X[i+1]-X[i],2);
-      }
-      else if( i == n-1 )
-      {   
-        b(i) = 3 * (Y[i] - Y[i-1])/pow(X[i] - X[i-1],2);
-      }
-      else
-      { 
-        b(i) = 3 * ( (Y[i] - Y[i-1])/(pow(X[i]-X[i-1],2)) + (Y[i+1] - Y[i])/pow(X[i+1] - X[i],2));     
-      }
-  }
-
-
-  solver.compute(A);
-  VectorType x = solver.solve(b);
-
-  for (int i = 0; i < this->n - 1; ++i)
-  {
-      this->a[i] = x(i) * (X[i+1]-X[i]) - (Y[i+1] - Y[i]);
-      this->b[i] = -x(i+1) * (X[i+1] - X[i]) + (Y[i+1] - Y[i]);
-  }
-
-#else
-
   /*
    * Solves Ax=B using the Thomas algorithm, because the matrix A will be tridiagonal and diagonally dominant.
    *
@@ -367,7 +291,5 @@ void SplineInterp<Real>::initCoefficients()
       this->a[i] = x[i] * (X[i+1]-X[i]) - (Y[i+1] - Y[i]);
       this->b[i] = -x[i+1] * (X[i+1] - X[i]) + (Y[i+1] - Y[i]);
   }
-
-#endif
 
 }/*}}}*/

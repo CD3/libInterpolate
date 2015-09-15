@@ -122,15 +122,19 @@ Real SplineInterp2D<Real>::operator()( Real _x, Real _y )
 
 
 
+template<typename Real>
+void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &_y, std::vector<Real> &_z )
+{
+}
 
 /**
  * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.
  * Basically, x[i], y[i], and z[i] should correspond to the first, second, and third columns of a gnuplot file.
  *
- * WARNING: we a
+ * WARNING: we are assuming that data is on a regular grid and not a scatter plot
  */
 template<typename Real>
-void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &_y, std::vector<Real> &_z )
+void BilinearInterp2D<Real>::setData( size_t _n, Real *_x, Real *_y, Real *_z )
 {
 
   // we need to unpack the points in _x, _y, and _z
@@ -138,35 +142,33 @@ void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &
   // we need to split out the x and y coordinates and then map the z values onto a 2D array
   
   // figure out what the dimensions of the grid are first
-  if( _x.size() == _y.size() && _x.size() == _z.size() )
-  {
-    // first we will determine the number of y coordinates by finding the index at
-    // which the x value changes
-    int Ny = 0;
-    while( std::abs( _x[Ny] - _x[0] ) < std::numeric_limits<Real>::min() )
-      Ny++;
 
-    // Nz should be the size of _x, _y, and _z
-    int Nz = _z.size();
-    
-    // Now we should have Nx * Ny == Nz
-    // so Nx = Nz / Ny
-    int Nx = Nz / Ny;
+  // first we will determine the number of y coordinates by finding the index at
+  // which the x value changes
+  int Ny = 0;
+  while( Ny < _n && std::abs( _x[Ny] - _x[0] ) < std::numeric_limits<Real>::min() )
+    Ny++;
 
-    this->X.resize( Nx );
-    this->Y.resize( Ny );
-    this->Z.resize( Nx, Ny );
+  // Nz should be the size of _x, _y, and _z
+  int Nz = _n;
+  
+  // Now we should have Nx * Ny == Nz
+  // so Nx = Nz / Ny
+  int Nx = Nz / Ny;
 
-    // grab x-coordinates. we are ASSUMING grid is regular
-    this->X = VectorMap( _x.data(), Nx, InnerStrideType(Ny) );
+  this->X.resize( Nx );
+  this->Y.resize( Ny );
+  this->Z.resize( Nx, Ny );
 
-    // grab y-coordinates. we are ASSUMING grid is regular
-    this->Y = VectorMap( _y.data(), Ny, InnerStrideType(1) );
+  // grab x-coordinates. we are ASSUMING grid is regular
+  this->X = VectorMap( _x, Nx, InnerStrideType(Ny) );
 
-    // grab z values. we are ASSUMING grid is regular
-    this->Z = MatrixMap(_z.data(), Nx, Ny, StrideType(Ny,1));
+  // grab y-coordinates. we are ASSUMING grid is regular
+  this->Y = VectorMap( _y, Ny, InnerStrideType(1) );
 
-  }
+  // grab z values. we are ASSUMING grid is regular
+  this->Z = MatrixMap( _z, Nx, Ny, StrideType(Ny,1));
+
 
   this->C = ArrayArray22( X.size()-1, Y.size()-1 );
 

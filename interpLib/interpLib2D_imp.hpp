@@ -170,7 +170,9 @@ void BilinearInterp2D<Real>::setData( size_t _n, Real *_x, Real *_y, Real *_z )
   this->Z = MatrixMap( _z, Nx, Ny, StrideType(Ny,1));
 
 
-  this->C = ArrayArray22( X.size()-1, Y.size()-1 );
+  // Interpolation will be done by multiplying the coordinates by coefficients.
+
+  this->C = Matrix22Array( X.size()-1, Y.size()-1 );
 
   // we are going to precompute the interpolation coefficients so
   // that we can interpolate quickly
@@ -207,11 +209,15 @@ Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
       j++;
   
 
-  Array22 Q;  // coordinate matrix (see Wikipedia)
-  Q << (this->X(i+1) -       _x  ) * (this->Y(j+1) - _y  ) ,  (this->X(i+1) -       _x  ) * (    _y - this->Y(j))
-    ,  (          _x - this->X(i)) * (this->Y(j+1) - _y  ) ,  (          _x - this->X(i)) * (    _y - this->Y(j));
+  // first, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
+  RowVector2 x;
+  ColVector2 y;
+  x << (this->X(i+1) - _x), (_x - this->X(i));
+  y << (this->Y(j+1) - _y), (_y - this->Y(j));
 
-  return (Q*this->C(i,j)).sum();
+  // interpolation will now just be x*Q*y
+
+  return x*this->C(i,j)*y;
 
 }
 

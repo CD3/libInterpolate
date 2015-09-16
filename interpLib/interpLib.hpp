@@ -95,8 +95,11 @@ class BilinearInterp2D
       typedef Map< VectorType,0,InnerStride<> > VectorMap;
       typedef Map< MatrixType,0,StrideType > MatrixMap;
 
-      typedef Array<Real,2,2> Array22;
-      typedef Array<Array22, Dynamic, Dynamic> ArrayArray22;
+      typedef Matrix<Real,2,2> Matrix22;
+      typedef Array<Matrix22, Dynamic, Dynamic> Matrix22Array;
+
+      typedef Matrix<Real,2,1 > ColVector2;
+      typedef Matrix<Real,1,2 > RowVector2;
 
       // data we are interpolating from
       VectorType X;
@@ -105,7 +108,7 @@ class BilinearInterp2D
 
 
       // coeficient matrixes
-      ArrayArray22 C;
+      Matrix22Array C;
 
 
     public:

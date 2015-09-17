@@ -65,6 +65,8 @@ BOOST_AUTO_TEST_CASE(Validation)
     }
   }
 
+  double sum = interp.integral( 1,3,0,4 );
+
 
   delete[] X;
   delete[] Y;

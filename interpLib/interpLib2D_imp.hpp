@@ -210,14 +210,14 @@ Real BilinearInterp2D<Real>::operator()( Real _x, Real _y )
   
 
   // first, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
-  RowVector2 x;
-  ColVector2 y;
-  x << (this->X(i+1) - _x), (_x - this->X(i));
-  y << (this->Y(j+1) - _y), (_y - this->Y(j));
+  RowVector2 vx;
+  ColVector2 vy;
+  vx << (this->X(i+1) - _x), (_x - this->X(i));
+  vy << (this->Y(j+1) - _y), (_y - this->Y(j));
 
   // interpolation will now just be x*Q*y
 
-  return x*this->C(i,j)*y;
+  return vx*this->C(i,j)*vy;
 
 }
 
@@ -225,50 +225,83 @@ template<typename Real>
 Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
 {
   // No extrapolation
+  int nx = X.size();
+  int ny = Y.size();
   _xa = std::max( _xa, X(0) );
-  _xb = std::min( _xb, X(this->n-1) );
+  _xb = std::min( _xb, X(nx-1) );
   _ya = std::max( _ya, Y(0) );
-  _yb = std::min( _yb, Y(this->n-1) );
+  _yb = std::min( _yb, Y(ny-1) );
 
   // find bottom-left and top-right corners
 
   // bottom-left corner
   int ia = 0;
-  while( ia < this->X.size()-2 && this->X(ia+1) < _xa )
+  while( ia < nx-2 && this->X(ia+1) < _xa )
       ia++;
   int ja = 0;
-  while( ja < this->Y.size()-2 && this->Y(ja+1) < _ya )
+  while( ja < ny-2 && this->Y(ja+1) < _ya )
       ja++;
 
   // top-right corner
   int ib = 0;
-  while( ib < this->X.size()-2 && this->X(ib+1) < _xb )
+  while( ib < nx-2 && this->X(ib+1) < _xb )
       ib++;
   int jb = 0;
-  while( jb < this->Y.size()-2 && this->Y(jb+1) < _yb )
+  while( jb < ny-2 && this->Y(jb+1) < _yb )
       jb++;
 
   /*
    * We can integrate the function directly from the interpolation polynomial.
+   * In Matrix form the polynomial looks like this
    *
-   * See wikipedia:
-   * z = C_11 (x_2 - x  )*(y_2 - y  )
-   *   + C_12 (x_2 - x  )*(y   - y_1)
-   *   + C_21 (x   - x_1)*(y_2 - y  )
-   *   + C_22 (x_2 - x_1)*(y   - y_1)
+   * /               \ /             \ /       \
+   * | x_2-x   x-x_1 | | F_11   F_12 | | y_2-x |
+   * \               / |             | |       |
+   *                   | F_21   F_22 | | y-y_1 |
+   *                   \             / \       /
    *
-   * I = \int \int z(x,y) dx dy
-   *   = \int
-   *     C_11 (x_2 x   - 0.5 x^2 )*(y_2 - y  )
-   *   + C_12 (x_2 x   - 0.5 x^2 )*(y   - y_1)
-   *   + C_21 (0.5 x^2 - x_1 x   )*(y_2 - y  )
-   *   + C_22 (0.5 x^2 - x_1 x   )*(y   - y_1)
-   *   dx |_xa^xb
+   * We can integrate this matrix equation to get the
+   * matrix equation for the integral.
    *
-   *   = C_11 (x_2 x   - 0.5 x^2)*(y_2 y   - 0.5 y^2)
-   *   + C_12 (x_2 x   - 0.5 x^2)*(0.5 y^2 - y_1 y  )
-   *   + C_21 (0.5 x^2 - x_1 x  )*(y_2 y   - 0.5 y^2)
-   *   + C_22 (0.5 x^2 - x_1 x  )*(0.5 y^2 - y_1 y  )
-   *   |_xa^xb |_ya^yb
+   * /                                   \ /             \ /                 \
+   * | x_2 x - 0.5 x^2   0.5 x^2 - x_1 x | | F_11   F_12 | | y_2 y - 0.5 y^2 |
+   * \                                   / |             | |                 |
+   *                                       | F_21   F_22 | | 0.5 y^2 - y_1 y |
+   *                                       \             / \                 /
+   * 
+   * This must be evaluated at the limits for x and y. Note that if the limits on x are [a,b],
+   * and the limits on y are [c,d], then to evaluate a function f(x,y) at the limits
+   *
+   *        |xb |xb
+   * f(x,y) |   |   =  ( f(xb,yb) - f(xb,ya) ) - ( f(xa,yb) - f(xa,ya) )
+   *        |xa |xa
    */
+
+   // integrate the whole elements first...
+   
+   RowVector2 vxa,vxb;
+   ColVector2 vya,vyb;
+   Real xa,xb,ya,yb;
+   Real sum = 0;
+   for(int i = ia; i < ib; i++)
+   {
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     for(int j = ja; j < jb; j++)
+     {
+       ya = Y(j);
+       yb = Y(j+1);
+       vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+       vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+       sum += vxb*this->C(i,j)*vyb;
+       sum -= vxb*this->C(i,j)*vyb;
+       sum -= vxa*this->C(i,j)*vya;
+       sum += vxa*this->C(i,j)*vya;
+     }
+   }
+
+   return sum;
 }

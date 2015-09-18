@@ -233,6 +233,8 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
   _yb = std::min( _yb, Y(ny-1) );
 
   // find bottom-left and top-right corners
+  // ia and ib will be to LEFT of _xa and _xb
+  // ja and jb will be to BELOW _ya and _yb
 
   // bottom-left corner
   int ia = 0;
@@ -283,13 +285,14 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
    ColVector2 vya,vyb;
    Real xa,xb,ya,yb;
    Real sum = 0;
-   for(int i = ia; i < ib; i++)
+   int i,j;
+   for(i = ia+1; i < ib; i++)
    {
      xa = X(i);
      xb = X(i+1);
      vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
      vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
-     for(int j = ja; j < jb; j++)
+     for(j = ja+1; j < jb; j++)
      {
        ya = Y(j);
        yb = Y(j+1);
@@ -302,6 +305,161 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
        sum += vxa*this->C(i,j)*vya;
      }
    }
+   // now add the partial elements along the edge.
+   
+   // bottom-left corner
+   i = ia;
+   xa = _xa;
+   xb = X(i+1);
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+   j = ja;
+   ya = _ya;
+   yb = Y(j+1);
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   sum += vxb*this->C(i,j)*vyb;
+   sum -= vxb*this->C(i,j)*vyb;
+   sum -= vxa*this->C(i,j)*vya;
+   sum += vxa*this->C(i,j)*vya;
+   
+
+   // bottom-right corner
+   i = ib;
+   xa = X(i);
+   xb = _xb;
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+   j = ja;
+   ya = _ya;
+   yb = Y(j+1);
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   sum += vxb*this->C(i,j)*vyb;
+   sum -= vxb*this->C(i,j)*vyb;
+   sum -= vxa*this->C(i,j)*vya;
+   sum += vxa*this->C(i,j)*vya;
+
+
+   // top-left corner
+   i = ia;
+   xa = _xa;
+   xb = X(i+1);
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+   j = jb;
+   ya = Y(jb);
+   yb = _yb;
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   sum += vxb*this->C(i,j)*vyb;
+   sum -= vxb*this->C(i,j)*vyb;
+   sum -= vxa*this->C(i,j)*vya;
+   sum += vxa*this->C(i,j)*vya;
+
+
+   // top-right corner
+   i = ib;
+   xa = X(i);
+   xb = _xb;
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+   j = jb;
+   ya = Y(jb);
+   yb = _yb;
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   sum += vxb*this->C(i,j)*vyb;
+   sum -= vxb*this->C(i,j)*vyb;
+   sum -= vxa*this->C(i,j)*vya;
+   sum += vxa*this->C(i,j)*vya;
+
+
+
+   // left side (excluding corners)
+   i = ia;
+   xa = _xa;
+   xb = X(i+1);
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+   for(j = ja+1; j < jb; j++)
+   {
+     ya = Y(j);
+     yb = Y(j+1);
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vyb;
+     sum -= vxa*this->C(i,j)*vya;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   // right side (excluding corners)
+   i = ib;
+   xa = X(i);
+   xb = _xb;
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+   for(j = ja+1; j < jb; j++)
+   {
+     ya = Y(j);
+     yb = Y(j+1);
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vyb;
+     sum -= vxa*this->C(i,j)*vya;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   // bottom side (excluding corners)
+   j = ja;
+   ya = _ya;
+   yb = Y(j+1);
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   for(i = ia+1; i < ib; i++)
+   {
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vyb;
+     sum -= vxa*this->C(i,j)*vya;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   // top side (excluding corners)
+   j = jb;
+   ya = Y(jb);
+   yb = _yb;
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   for(i = ia+1; i < ib; i++)
+   {
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vyb;
+     sum -= vxa*this->C(i,j)*vya;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
 
    return sum;
 }

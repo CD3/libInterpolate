@@ -65,7 +65,26 @@ BOOST_AUTO_TEST_CASE(Validation)
     }
   }
 
-  double sum = interp.integral( 1,3,0,4 );
+  // \int f(x,y) dx dy = x^2 y^2 / 4 + x^2 y + 3 x y^2 / 2 = g(x,y) |_xa^xb | _ya^yb
+  // 
+  // = ( g(xb,yb) - g(xb,ya) ) - ( g(xa,yb) - g(xa,ya) ) = g(xb,yb) - g(xb,ya) - g(xa,yb) + g(xa,ya)
+  //
+  double sum = 0;
+  double xa = 1;
+  double xb = 3;
+  double ya = 0;
+  double yb = 4;
+
+  x = xb; y = yb;
+  sum += x*x*y*y/4 + x*x*y + 3*x*y*y/2;
+  x = xb; y = ya;
+  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2;
+  x = xa; y = yb;
+  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2;
+  x = xa; y = ya;
+  sum += x*x*y*y/4 + x*x*y + 3*x*y*y/2;
+
+  BOOST_CHECK_CLOSE( sum, interp.integral( xa, xb, ya, yb ), 0.1 );
 
 
   delete[] X;

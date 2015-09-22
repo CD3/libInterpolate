@@ -45,59 +45,6 @@ void SplineInterp2D<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, 
         tmpz.clear();
     }
 
-    //old method
-    // This puts the input data into blocks similar to gnuplot 2D data/*{{{*/
-    //Real xlast = x[0];
-    //this->x.push_back(x[0]);
-    //std::vector<Real> tmpy, tmpz;
-    //for (size_t i = 0; i < x.size(); ++i)
-    //{
-        //if( x[i] != xlast )
-        //{
-            //this->x.push_back(x[i]);
-            //this->y.push_back(tmpy);
-            //this->z.push_back(tmpz);
-
-            //tmpy.clear();
-            //tmpz.clear();
-        //}
-
-        //tmpy.push_back(y[i]);
-        //tmpz.push_back(z[i]);
-
-        //if( i == x.size() - 1 )
-        //{
-            //this->y.push_back(tmpy);
-            //this->z.push_back(tmpz);
-        //}
-
-        //xlast = x[i];
-    //}
-
-    
-    // This rearranges that data to being blocked out by the original second column.
-    //
-    // Ideally, this would just be done directly instead of blocking out in X first.
-    //this->d2y = this->y[0];
-    //std::vector<Real> tmpd2x, tmpd2z;
-    //for (size_t i = 0; i < this->x.size(); ++i)
-    //{
-        //for (size_t j = 0; j < this->z[i].size(); ++j)
-        //{
-           //tmpd2x.push_back(this->x[j]);  
-           //tmpd2z.push_back(this->z[j][i]);
-        //}
-        
-        //this->d2x.push_back(tmpd2x);
-        //this->d2z.push_back(tmpd2z);
-
-        //tmpd2x.clear();
-        //tmpd2z.clear();
-    //}
-
-    //this->x.clear();
-    //this->y.clear();
-    //this->z.clear();/*}}}*/
 }/*}}}*/
 
 template<typename Real>
@@ -300,13 +247,309 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
        vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
        sum += vxb*this->C(i,j)*vyb;
-       sum -= vxb*this->C(i,j)*vyb;
-       sum -= vxa*this->C(i,j)*vya;
+       sum -= vxb*this->C(i,j)*vya;
+       sum -= vxa*this->C(i,j)*vyb;
        sum += vxa*this->C(i,j)*vya;
      }
    }
-   // now add the partial elements along the edge.
+
+   // The double loop above will take care of all whole elements,
+   // now we need to add the partial elements along the edge.
+   //
+   // However, there are some special cases we need to consider.
+   // If we are integrating over the domain between the points a, b, c, and d
+   // there is 1 whole element, and 8 partial elements.
+   //
+   // +------+-------------+---------------+-----+
+   // |   c  |             |        d      |     |
+   // |   +  |             |        +      |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |   +  |             |        +      |     |
+   // |   a  |             |        b      |     |
+   // +------+-------------+---------------+-----+
+   //
+   // 
+   // We can integrate the function over this domain by:
+   //
+   // 1. integrate over all whole elements
+   //    - limits of integration for each element will be:
+   //      - lower x: x coordinate of the left edge of the element
+   //      - upper x: x coordinate of the right edge of the element
+   //      - lower y: y coordinate of bottom edge of the element
+   //      - upper y: y coordinate of top edge of the element
+   // 2. integrate over the bottom-left corner
+   //    - limits of integration for will be:
+   //      - lower x: x coordinate of point a
+   //      - upper x: x coordinate of the right edge of the element
+   //      - lower y: y coordinate of point a
+   //      - upper y: y coordinate of top edge of the element
+   // 3. integrate over the bottom-right corner
+   //    - limits of integration for will be:
+   //      - lower x: x coordinate of left edge of the element
+   //      - upper x: x coordinate of point b
+   //      - lower y: y coordinate of point b
+   //      - upper y: y coordinate of top edge of the element
+   // 4. integrate over the top-left corner
+   //    - limits of integration for will be:
+   //      - lower x: x coordinate of point c
+   //      - upper x: x coordinate of the right edge of the element
+   //      - lower y: y coordinate of the bottom edge of the element
+   //      - upper y: y coordinate of point c
+   // 5. integrate over the top-right corner
+   //    - limits of integration for will be:
+   //      - lower x: x coordinate of left edge of the element
+   //      - upper x: x coordinate of point d
+   //      - lower y: y coordinate of bottom edge of the elment
+   //      - upper y: y coordinate of point d
+   // 6. integrate over the left side elements
+   //    - limits of integration for each element will be:
+   //      - lower x: x coordinate of point a (same as x coordinate of point c)
+   //      - upper x: x coordinate of right edge of the element
+   //      - lower y: y coordinate of bottom edge of the elment
+   //      - upper y: y coordinate of top edge of the element
+   // 7. integrate over the right side elements
+   //    - limits of integration for each element will be:
+   //      - lower x: x coordinate of left edge of the element
+   //      - upper x: x coordinate of point b (same as x coordinate of point d)
+   //      - lower y: y coordinate of bottom edge of the elment
+   //      - upper y: y coordinate of top edge of the element
+   // 8. integrate over the bottom side elements
+   //    - limits of integration for each element will be:
+   //      - lower x: x coordinate of left edge of the element
+   //      - upper x: x coordinate of right edge of the element
+   //      - lower y: y coordinate of point a (same as y coordinate of point b)
+   //      - upper y: y coordinate of top edge of the element
+   // 9. integrate over the top side elements
+   //    - limits of integration for each element will be:
+   //      - lower x: x coordinate of left edge of the element
+   //      - upper x: x coordinate of right edge of the element
+   //      - lower y: y coordinate of bottom edge of the elment
+   //      - upper y: y coordinate of point c (same as y coordinate of point d)
+   //
+   //
+   // As long as the points a, b, c, and d are all in different elements, the above
+   // algorithm will work. Steps 2 - 5 will alwasy be necessary, but steps 1, 6-9 will not be necessary
+   // if two or more points are in ajacent elements. For example,
+   // +------+-------------+---------------+-----+
+   // |      |       c     |        d      |     |
+   // |      |       +     |        +      |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |       +     |        +      |     |
+   // |      |       a     |        b      |     |
+   // +------+-------------+---------------+-----+
+   // in this case, steps 1, 8, and 9 would not be required. The logic for determining when these steps
+   // are required will automatically be handled by the for loops.
+   //
+   // However, if two or more points are in the same elements, we need to be careful. Consider:
+   // +------+-------------+---------------+-----+
+   // |      |             |    c   d      |     |
+   // |      |             |    +   +      |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |    +   +      |     |
+   // |      |             |    a   b      |     |
+   // +------+-------------+---------------+-----+
+   //
+   // The method described above will not work because it will include the area between the left side
+   // of each element and d AND the area between c and the right side of the element. Not only would it
+   // be including an area that should not be included (between the left side of the element and c, and between
+   // the right side of the element and d) it would double count the area that should be included (the area between c and d)
+   //
+   // Consider the middle element first (the one that does not contain any of the points a - d) 
+   // Let the area between the left side and c be A_lc, the area between c and d be A_cd, and the area between d and the right
+   // side be A_dr. The area that we want then is A_cd. The method above will give us A = A_lc + A_cd + A_cd + A_dr. If we note that
+   // A_lc + A_cd + A_dr = A_E, the area of the element, then A_cd can be written as A_cd = A - A_E. So, we can subtract the integral
+   // over the entire element from the integral that was computed above to get the correct integral.
+   //
+   // Subtracting the element area will work for the interior elements, but not for the elements containing the corners. In the top element
+   // of the example above, we need to subtract the area of the element between the bottom edge and c instead of the entire element.
+   // For the bottom element, we need to subtract the area between the top edge and a.
+   //
+   // Now consider an element that contains all 4 elements.
+   // +------+-------------+---------------+-----+
+   // |      |             |    c   d      |     |
+   // |      |             |    +   +      |     |
+   // |      |             |    +   +      |     |
+   // |      |             |    a   b      |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   // |      |             |               |     |
+   // |      |             |               |     |
+   // +------+-------------+---------------+-----+
+   //
+   // In this case, the method above will only require steps 2 - 5.
+   // The four points defined 9 different areas:
+   // +-+-+-+
+   // |1|2|3|
+   // +-+-+-+
+   // |4|5|6|
+   // +-+-+-+
+   // |7|8|9|
+   // +-+-+-+
+   //
+   // Step 2 (bottom-left corner) will A2, A3, A5, and A6
+   // Step 3 (bottom-right corner) will A1, A2, A4, and A5
+   // Step 4 (top-left corner) will A5, A6, A8, and A9
+   // Step 5 (top-left corner) will A4, A5, A7, and A8
+   //
+   // So, the total area covered will be
+   // A = A1 + 2*A2 + A3 + 2*A4 + 4*A5 + 2*A6 + A7 + 2*A8 + A9 = AT + A2 + A4 + 3*A5 + A6 + A8
+   //
+   // The area we need is A5,
+   //
+   // A5 = (A - AT - A2 - A4 - A6 - A8)/3
+   //
+   // The cases with only two corners in an element would be different, so we probably are better
+   // off just handling the corner cases directly.
+   //
+   // So, after all this...
    
+   // add contributions from left side (excluding corners)
+   i = ia;
+   xa = _xa;
+   xb = X(i+1);
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+   for(j = ja+1; j < jb; j++)
+   {
+     ya = Y(j);
+     yb = Y(j+1);
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   // add contributions from right side (excluding corners)
+   i = ib;
+   xa = X(i);
+   xb = _xb;
+   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+   for(j = ja+1; j < jb; j++)
+   {
+     ya = Y(j);
+     yb = Y(j+1);
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   if( ia == ib )
+   {
+     // the min and max limits on x are in the same element.
+     // we need to subtract the integral over the entire element (see above)
+     i  = ia;
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     for(j = ja+1; j < jb; j++)
+     {
+       ya = Y(j);
+       yb = Y(j+1);
+       vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+       vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+       sum += -vxb*this->C(i,j)*vyb;
+       sum -= -vxb*this->C(i,j)*vya;
+       sum -= -vxa*this->C(i,j)*vyb;
+       sum += -vxa*this->C(i,j)*vya;
+     }
+   }
+
+
+   // add contributions from bottom side (excluding corners)
+   j = ja;
+   ya = _ya;
+   yb = Y(j+1);
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   for(i = ia+1; i < ib; i++)
+   {
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   // add contributions from top side (excluding corners)
+   j = jb;
+   ya = Y(j);
+   yb = _yb;
+   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+   for(i = ia+1; i < ib; i++)
+   {
+     xa = X(i);
+     xb = X(i+1);
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
+     sum += vxa*this->C(i,j)*vya;
+   }
+
+   if( ja == jb )
+   {
+     // the min and max limits on y are in the same element.
+     // we need to subtract the integral over the entire element (see above)
+     j = ja;
+     ya = Y(j);
+     yb = Y(j+1);
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     for(i = ia+1; i < ib; i++)
+     {
+       xa = X(i);
+       xb = X(i+1);
+       vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+       vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+       sum += -vxb*this->C(i,j)*vyb;
+       sum -= -vxb*this->C(i,j)*vya;
+       sum -= -vxa*this->C(i,j)*vyb;
+       sum += -vxa*this->C(i,j)*vya;
+     }
+   }
+
+
+
+
+
+   if( ia != ib && ja != jb )
+   {
+
    // bottom-left corner
    i = ia;
    xa = _xa;
@@ -321,8 +564,8 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
    vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
    sum += vxb*this->C(i,j)*vyb;
-   sum -= vxb*this->C(i,j)*vyb;
-   sum -= vxa*this->C(i,j)*vya;
+   sum -= vxb*this->C(i,j)*vya;
+   sum -= vxa*this->C(i,j)*vyb;
    sum += vxa*this->C(i,j)*vya;
    
 
@@ -340,8 +583,8 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
    vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
    sum += vxb*this->C(i,j)*vyb;
-   sum -= vxb*this->C(i,j)*vyb;
-   sum -= vxa*this->C(i,j)*vya;
+   sum -= vxb*this->C(i,j)*vya;
+   sum -= vxa*this->C(i,j)*vyb;
    sum += vxa*this->C(i,j)*vya;
 
 
@@ -353,14 +596,14 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
    vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
 
    j = jb;
-   ya = Y(jb);
+   ya = Y(j);
    yb = _yb;
    vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
    vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
    sum += vxb*this->C(i,j)*vyb;
-   sum -= vxb*this->C(i,j)*vyb;
-   sum -= vxa*this->C(i,j)*vya;
+   sum -= vxb*this->C(i,j)*vya;
+   sum -= vxa*this->C(i,j)*vyb;
    sum += vxa*this->C(i,j)*vya;
 
 
@@ -372,93 +615,104 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
    vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
 
    j = jb;
-   ya = Y(jb);
+   ya = Y(j);
    yb = _yb;
    vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
    vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
    sum += vxb*this->C(i,j)*vyb;
-   sum -= vxb*this->C(i,j)*vyb;
-   sum -= vxa*this->C(i,j)*vya;
+   sum -= vxb*this->C(i,j)*vya;
+   sum -= vxa*this->C(i,j)*vyb;
    sum += vxa*this->C(i,j)*vya;
 
+   }
 
-
-   // left side (excluding corners)
-   i = ia;
-   xa = _xa;
-   xb = X(i+1);
-   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
-   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
-   for(j = ja+1; j < jb; j++)
+   if( ia == ib )
    {
-     ya = Y(j);
+     xa = _xa;
+     xb = _xb;
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+     // bottom block
+     j = ja;
+     ya = _ya;
      yb = Y(j+1);
      vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
      vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
      sum += vxb*this->C(i,j)*vyb;
-     sum -= vxb*this->C(i,j)*vyb;
-     sum -= vxa*this->C(i,j)*vya;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
      sum += vxa*this->C(i,j)*vya;
-   }
 
-   // right side (excluding corners)
-   i = ib;
-   xa = X(i);
-   xb = _xb;
-   vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
-   vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
-   for(j = ja+1; j < jb; j++)
-   {
+     // top block
+     j = jb;
      ya = Y(j);
-     yb = Y(j+1);
+     yb = _yb;
      vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
      vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
 
      sum += vxb*this->C(i,j)*vyb;
-     sum -= vxb*this->C(i,j)*vyb;
-     sum -= vxa*this->C(i,j)*vya;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
      sum += vxa*this->C(i,j)*vya;
    }
 
-   // bottom side (excluding corners)
-   j = ja;
-   ya = _ya;
-   yb = Y(j+1);
-   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
-   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
-
-   for(i = ia+1; i < ib; i++)
+   if( ja == jb )
    {
-     xa = X(i);
+     ya = _ya;
+     yb = _yb;
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     // left block
+     i = ia;
+     xa = _xa;
      xb = X(i+1);
      vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
      vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
      sum += vxb*this->C(i,j)*vyb;
-     sum -= vxb*this->C(i,j)*vyb;
-     sum -= vxa*this->C(i,j)*vya;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
      sum += vxa*this->C(i,j)*vya;
-   }
 
-   // top side (excluding corners)
-   j = jb;
-   ya = Y(jb);
-   yb = _yb;
-   vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
-   vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
-
-   for(i = ia+1; i < ib; i++)
-   {
-     xa = X(i);
+     // right block
+     i = ia;
+     xa = _xa;
      xb = X(i+1);
      vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
      vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
      sum += vxb*this->C(i,j)*vyb;
-     sum -= vxb*this->C(i,j)*vyb;
-     sum -= vxa*this->C(i,j)*vya;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
+     sum += vxa*this->C(i,j)*vya;
+
+   }
+
+   if( ia == ib && ja == jb )
+   {
+     xa = _xa;
+     xb = _xb;
+     vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
+     vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
+
+     ya = _ya;
+     yb = _yb;
+     vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
+     vyb << this->Y(j+1)*yb - 0.5*yb*yb, 0.5*yb*yb - this->Y(j)*yb;
+
+     sum += vxb*this->C(i,j)*vyb;
+     sum -= vxb*this->C(i,j)*vya;
+     sum -= vxa*this->C(i,j)*vyb;
      sum += vxa*this->C(i,j)*vya;
    }
+
+
+
+
 
 
    return sum;

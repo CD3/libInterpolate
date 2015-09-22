@@ -18,13 +18,13 @@ BOOST_AUTO_TEST_CASE(Validation)
   double z;
 
   nx = 10;
-  ny = 6;
+  ny = 5;
 
-  xmin = 0;
-  xmax = 4;
+  xmin = -1;
+  xmax = 8;
 
   ymin = -1;
-  ymax = 5;
+  ymax = 3;
 
   dx = (xmax - xmin)/(nx - 1);
   dy = (ymax - ymin)/(ny - 1);
@@ -61,7 +61,8 @@ BOOST_AUTO_TEST_CASE(Validation)
     {
       y = ymin + j*dy;
       z = x*y + 2*x + 3*y;
-      BOOST_CHECK_CLOSE( z, interp(x,y), 0.1 );
+      if( abs(z) > 1e-10 )
+        BOOST_CHECK_CLOSE( z, interp(x,y), 0.1 );
     }
   }
 
@@ -69,22 +70,56 @@ BOOST_AUTO_TEST_CASE(Validation)
   // 
   // = ( g(xb,yb) - g(xb,ya) ) - ( g(xa,yb) - g(xa,ya) ) = g(xb,yb) - g(xb,ya) - g(xa,yb) + g(xa,ya)
   //
-  double sum = 0;
-  double xa = 1;
-  double xb = 3;
-  double ya = 0;
-  double yb = 4;
+  
+  double sum, xa, xb, ya, yb;
 
-  x = xb; y = yb;
-  sum += x*x*y*y/4 + x*x*y + 3*x*y*y/2;
-  x = xb; y = ya;
-  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2;
-  x = xa; y = yb;
-  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2;
-  x = xa; y = ya;
+#define integrate(_xa,_xb,_ya,_yb) \
+  sum = 0; \
+  xa = _xa; \
+  xb = _xb; \
+  ya = _ya; \
+  yb = _yb; \
+  x = xb; y = yb; \
+  sum += x*x*y*y/4 + x*x*y + 3*x*y*y/2; \
+  x = xb; y = ya; \
+  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2; \
+  x = xa; y = yb; \
+  sum -= x*x*y*y/4 + x*x*y + 3*x*y*y/2; \
+  x = xa; y = ya; \
   sum += x*x*y*y/4 + x*x*y + 3*x*y*y/2;
 
-  BOOST_CHECK_CLOSE( sum, interp.integral( xa, xb, ya, yb ), 0.1 );
+
+  // function we are interpolating is defined over
+  // x -> [-1,8] (increments of 1)
+  // y -> [-1,3] (increments of 1)
+
+  // integral over domain containing only whole element
+  integrate(                               1, 3, 0, 2 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1, 3, 0, 2 ), 0.1 );
+
+  // integral over domain containing some partial elements, but each corner is in a different element
+  integrate(                               1.5, 3.5, 0.5, 2.5 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1.5, 3.5, 0.5, 2.5 ), 0.1 );
+
+  // integral over domain with the x limits contained in the same element
+  integrate(                               1.5, 1.75, 0, 2 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1.5, 1.75, 0, 2 ), 0.1 );
+
+  // same thing, but offset y limits
+  integrate(                               1.5, 1.75, 0.5, 2.5 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1.5, 1.75, 0.5, 2.5 ), 0.1 );
+
+  // integral over domain with the y limits contained in the same element
+  integrate(                               1, 3, 0.5, 0.75 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1, 3, 0.5, 0.75 ), 0.1 );
+
+  // same thing, but offset x limits
+  integrate(                               1.5, 3.5, 0.5, 0.75 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1.5, 3.5, 0.5, 0.75 ), 0.1 );
+
+  // integral over domain with both x and y limits in the same element
+  integrate(                               1.5, 1.75, 0.5, 0.75 );
+  BOOST_CHECK_CLOSE( sum, interp.integral( 1.5, 1.75, 0.5, 0.75 ), 0.1 );
 
 
   delete[] X;

@@ -627,7 +627,7 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
 
    }
 
-   if( ia == ib )
+   if( ia == ib && ja != jb )
    {
      xa = _xa;
      xb = _xb;
@@ -659,8 +659,9 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
      sum += vxa*this->C(i,j)*vya;
    }
 
-   if( ja == jb )
+   if( ia != ib && ja == jb )
    {
+     j = ja;
      ya = _ya;
      yb = _yb;
      vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
@@ -679,9 +680,9 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
      sum += vxa*this->C(i,j)*vya;
 
      // right block
-     i = ia;
-     xa = _xa;
-     xb = X(i+1);
+     i = ib;
+     xa = X(i);
+     xb = _xb;
      vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
      vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
 
@@ -694,11 +695,14 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
 
    if( ia == ib && ja == jb )
    {
+
+     i = ia;
      xa = _xa;
      xb = _xb;
      vxa << this->X(i+1)*xa - 0.5*xa*xa, 0.5*xa*xa - this->X(i)*xa;
      vxb << this->X(i+1)*xb - 0.5*xb*xb, 0.5*xb*xb - this->X(i)*xb;
 
+     j = ja;
      ya = _ya;
      yb = _yb;
      vya << this->Y(j+1)*ya - 0.5*ya*ya, 0.5*ya*ya - this->Y(j)*ya;
@@ -708,6 +712,8 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
      sum -= vxb*this->C(i,j)*vya;
      sum -= vxa*this->C(i,j)*vyb;
      sum += vxa*this->C(i,j)*vya;
+
+     
    }
 
 

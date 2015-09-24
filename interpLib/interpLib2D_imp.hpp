@@ -72,6 +72,7 @@ Real SplineInterp2D<Real>::operator()( Real _x, Real _y )
 template<typename Real>
 void BilinearInterp2D<Real>::setData( std::vector<Real> &_x, std::vector<Real> &_y, std::vector<Real> &_z )
 {
+  this->setData( _x.size(), _x.data(), _y.data(), _z.data() );
 }
 
 /**
@@ -722,4 +723,10 @@ Real BilinearInterp2D<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
 
 
    return sum;
+}
+
+template<typename Real>
+Real BilinearInterp2D<Real>::integral( )
+{
+  return this->integral( X(0), X(X.size()-1), Y(0), Y(Y.size()-1) );
 }

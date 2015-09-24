@@ -116,7 +116,7 @@ class BilinearInterp2D
       void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z );
       Real operator() (Real _x, Real _y);
       Real integral( Real xa, Real xb, Real ya, Real yb );
-      //Real integral( );
+      Real integral( );
 
 };
 

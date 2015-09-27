@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_EIGEN
-#include <eigen3/Eigen/Sparse>
+#include <boost/shared_array.hpp>
 #include <eigen3/Eigen/Dense>
-#endif
+#include <eigen3/Eigen/Sparse>
+
+using namespace Eigen;
 
 template<class Real>
 class SplineInterp
@@ -76,6 +77,47 @@ class SplineInterp2D
         void setData( size_t n, Real *_x, Real *_y, Real *_z );
 
         Real operator() (Real _x, Real _y);
+};
+
+/**
+ * A 2D interpolation class that does bilinear interpoaltion
+ */
+template<class Real>
+class BilinearInterp2D
+{
+
+    private:
+      //some typedefs for using Eigen vectors and matrixes
+      typedef Matrix<Real,Dynamic,1               > VectorType;
+      typedef Matrix<Real,Dynamic,Dynamic,RowMajor> MatrixType;
+      typedef InnerStride<> InnerStrideType;
+      typedef Stride<Dynamic,Dynamic> StrideType;
+      typedef Map< VectorType,0,InnerStride<> > VectorMap;
+      typedef Map< MatrixType,0,StrideType > MatrixMap;
+
+      typedef Matrix<Real,2,2> Matrix22;
+      typedef Array<Matrix22, Dynamic, Dynamic> Matrix22Array;
+
+      typedef Matrix<Real,2,1 > ColVector2;
+      typedef Matrix<Real,1,2 > RowVector2;
+
+      // data we are interpolating from
+      VectorType X;
+      VectorType Y;
+      MatrixType Z;
+
+
+      // coeficient matrixes
+      Matrix22Array C;
+
+
+    public:
+      void setData( size_t n, Real* x, Real* y, Real* z );
+      void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z );
+      Real operator() (Real _x, Real _y);
+      Real integral( Real xa, Real xb, Real ya, Real yb );
+      Real integral( );
+
 };
 
 #include "interpLib_imp.hpp"

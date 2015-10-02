@@ -52,7 +52,7 @@ Real SplineInterp<Real>::integral(Real _a, Real _b)
     Real sign = 1;
     if( _a > _b )
     {
-      std::swap( a, b );
+      std::swap( _a, _b );
       sign = -1;
     }
     //No extrapolation

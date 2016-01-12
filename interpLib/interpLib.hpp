@@ -1,6 +1,7 @@
 #ifndef interplib_hpp
 #define interplib_hpp
 
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -14,19 +15,20 @@ using namespace Eigen;
 template<class Real>
 class SplineInterp
 {
+    typedef Matrix<Real, Dynamic,1 > VectorType;
 
     private:
         //this is the length of the data vector
         int n;
 
         //These are the vectors that the data will be stored in
-        std::vector<Real> X;
-        std::vector<Real> Y;
+        //Matrix<Real, -1, 1> X, Y;
+        VectorType X,Y;
 
         //When these coefficients are determined,
         //they can be used to generate the splines that are evaluated for the interpolation
-        std::vector<Real> a;
-        std::vector<Real> b;
+        VectorType a,b;
+
 
         void initCoefficients();
         void solveForCoefficients();

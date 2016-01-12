@@ -2,21 +2,21 @@ template<typename Real>
 Real SplineInterp<Real>::operator()(Real x)
 {/*{{{*/
   // don't extrapolate at all
-  if( x < X[0] )
+  if( x < X(0) )
     return 0;
      
-  if( x > X[this->n-1] )
+  if( x > X(this->n-1) )
     return 0;
   
   // find the index that is just to the right of the x
   int i = 1;
-  while( i < this->n-1 && X[i] < x )
+  while( i < this->n-1 && X(i) < x )
     i++;
 
   // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
   // for a derivation this interpolation.
-  Real t = ( x - X[i-1] ) / ( X[i] - X[i-1] );
-  Real q = ( 1 - t ) * Y[i-1] + t * Y[i] + t*(1-t)*(a[i-1]*(1-t)+b[i-1]*t);
+  Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
+  Real q = ( 1 - t ) * Y(i-1) + t * Y(i) + t*(1-t)*(a[i-1]*(1-t)+b[i-1]*t);
   
   return q;
 } /*}}}*/
@@ -25,22 +25,22 @@ template<typename Real>
 Real SplineInterp<Real>::derivative(Real x)
 {/*{{{*/
     //No extrapolation
-    if( x < X[0] )
+    if( x < X(0) )
         return 0;
 
-    if( x > X[this->n-1] )
+    if( x > X(this->n-1) )
         return 0;
 
     // find the index that is just to the right of x
     int i = 1;
-    while( i < this->n-1 && X[i] < x )
+    while( i < this->n-1 && X(i) < x )
         i++;
 
     //this should be the same t as in the regular interpolation case
-    Real t = ( x - X[i-1] ) / ( X[i] - X[i-1] );
+    Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
 
-    Real qprime = ( Y[i] - Y[i-1] )/( X[i]-X[i-1] ) + ( 1 - 2*t )*( a[i-1]*(1-t) + b[i-1]*t )/( X[i] - X[i-1])
-                    + t*(1-t)*(b[i-1]-a[i-1])/(X[i]-X[i-1]) ;
+    Real qprime = ( Y(i) - Y(i-1) )/( X(i)-X(i-1) ) + ( 1 - 2*t )*( a[i-1]*(1-t) + b[i-1]*t )/( X(i) - X(i-1))
+                    + t*(1-t)*(b[i-1]-a[i-1])/(X(i)-X(i-1)) ;
 
     return qprime;
 }/*}}}*/
@@ -164,16 +164,13 @@ Real SplineInterp<Real>::integral()
 template<typename Real>
 void SplineInterp<Real>::setData( size_t _n, Real *_x, Real *_y )
 {/*{{{*/
+
+    Eigen::Map< VectorType > tmpX(_x, _n);
+    Eigen::Map< VectorType > tmpY(_y, _n);
+
+    this->X = tmpX;
+    this->Y = tmpY;
     this->n = _n;
-
-    this->X.resize(this->n);
-    this->Y.resize(this->n);
-
-    for (int i = 0; i < this->n; ++i)
-    {
-       this->X[i] = _x[i];
-       this->Y[i] = _y[i];
-    }
 
     this->initCoefficients();
 }/*}}}*/
@@ -188,8 +185,8 @@ template<typename Real>
 void SplineInterp<Real>::initCoefficients()
 {/*{{{*/
   // these are the vectors we want to setup
-  this->a.resize(this->n - 1);
-  this->b.resize(this->n - 1);
+  this->a = VectorType(this->n-1);
+  this->b = VectorType(this->n-1);
 
 
   // we need to solve A x = b, where A is a matrix and b is a vector...
@@ -202,8 +199,8 @@ void SplineInterp<Real>::initCoefficients()
    */
 
   //init the matrices that get solved
-  std::vector<Real> Aa(this->n), Ab(this->n), Ac(this->n);  // three three diagonals of the tridiagonal matrix A
-  std::vector<Real> b(this->n); // RHS vector
+  VectorType Aa(this->n), Ab(this->n), Ac(this->n);
+  VectorType b(this->n);
 
 
   //Ac is a vector of the upper diagonals of matrix A
@@ -211,26 +208,28 @@ void SplineInterp<Real>::initCoefficients()
   //Since there is no upper diagonal on the last row, the last value must be zero.
   for (size_t i = 0; i < this->n-1; ++i)
   {
-      Ac[i] = 1/(X[i+1] - X[i]);
+      Ac(i) = 1/(X(i+1) - X(i));
   }
-  Ac[this->n] = 0.0;
+
+  //This is the line that was causing breakage for n=odd. It was Ac(this->n) and should have been Ac(this->n-1)
+  Ac(this->n-1) = 0.0;
 
   //Ab is a vector of the diagnoals of matrix A
-  Ab[0] = 2/(X[1] - X[0]);
+  Ab(0) = 2/(X(1) - X(0));
   for (size_t i = 1; i < this->n-1; ++i)
   {
-      Ab[i] = 2 / (X[i]-X[i-1]) + 2 / (X[i+1] - X[i]);
+      Ab(i) = 2 / (X(i)-X(i-1)) + 2 / (X(i+1) - X(i));
   }
-  Ab[this->n-1] = 2/(X[this->n-1] - X[this->n-1-1]);
+  Ab(this->n-1) = 2/(X(this->n-1) - X(this->n-1-1));
 
 
   //Aa is a vector of the lower diagonals of matrix A
   //
   //Since there is no upper diagonal on the first row, the first value must be zero.
-  Aa[0] = 0.0;
+  Aa(0) = 0.0;
   for (size_t i = 1; i < this->n; ++i)
   {
-      Aa[i] = 1 / (X[i] - X[i-1]);
+      Aa(i) = 1 / (X(i) - X(i-1));
   }
 
 
@@ -240,56 +239,47 @@ void SplineInterp<Real>::initCoefficients()
   {   
       if(i == 0)
       {   
-        b[i] = 3 * ( Y[i+1] - Y[i] )/pow(X[i+1]-X[i],2);
+        b(i) = 3 * ( Y(i+1) - Y(i) )/pow(X(i+1)-X(i),2);
       }
       else if( i == n-1 )
       {   
-        b[i] = 3 * (Y[i] - Y[i-1])/pow(X[i] - X[i-1],2);
+        b(i) = 3 * (Y(i) - Y(i-1))/pow(X(i) - X(i-1),2);
       }
       else
       { 
-        b[i] = 3 * ( (Y[i] - Y[i-1])/(pow(X[i]-X[i-1],2)) + (Y[i+1] - Y[i])/pow(X[i+1] - X[i],2));     
+        b(i) = 3 * ( (Y(i) - Y(i-1))/(pow(X(i)-X(i-1),2)) + (Y(i+1) - Y(i))/pow(X(i+1) - X(i),2));     
       }
   }
 
 
+  VectorType c_star(this->n);
 
-
-
-
-
-
-
-  std::vector<Real> c_star;
-  c_star.resize( Ac.size() );
-  c_star[0] = Ac[0]/Ab[0];
+  c_star(0) = Ac(0)/Ab(0);
   for (size_t i = 1; i < c_star.size(); ++i)
   {
-     c_star[i] = Ac[i] / (Ab[i]-Aa[i]*c_star[i-1]); 
+     c_star(i) = Ac(i) / (Ab(i)-Aa(i)*c_star(i-1)); 
   }
 
-  std::vector<Real> d_star;
-  d_star.resize(this->n);
-  d_star[0] = b[0]/Ab[0];
+  VectorType d_star(this->n);
+  d_star(0) = b(0)/Ab(0);
 
-  for (size_t i = 1; i < d_star.size(); ++i)
+  for (size_t i = 1; i < this->n; ++i)
   {
-      d_star[i] = (b[i] - Aa[i]*d_star[i-1])/(Ab[i]-Aa[i]*c_star[i-1]);
+      d_star(i) = (b(i) - Aa(i)*d_star(i-1))/(Ab(i)-Aa(i)*c_star(i-1));
   }
 
-  std::vector<Real> x;
-  x.resize( this->n );
-  x[ x.size() - 1 ] = d_star[ d_star.size() - 1 ];
+  VectorType x(this->n);
+  x( this->n - 1 ) = d_star( this->n - 1 );
 
-  for (size_t i = x.size() - 1; i-- > 0;)
+  for (size_t i = this->n - 1; i-- > 0;)
   {
-      x[i] = d_star[i] - c_star[i]*x[i+1];
+      x(i) = d_star(i) - c_star(i)*x(i+1);
   }
 
   for (int i = 0; i < this->n - 1; ++i)
   {
-      this->a[i] = x[i] * (X[i+1]-X[i]) - (Y[i+1] - Y[i]);
-      this->b[i] = -x[i+1] * (X[i+1] - X[i]) + (Y[i+1] - Y[i]);
+      this->a(i) = x(i) * (X(i+1)-X(i)) - (Y(i+1) - Y(i));
+      this->b(i) = -x(i+1) * (X(i+1) - X(i)) + (Y(i+1) - Y(i));
   }
 
 }/*}}}*/

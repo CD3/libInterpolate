@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "InterpolatorInterface.hpp"
+#include "Utils/Indexing.hpp"
 
 
 namespace _1D {

@@ -120,14 +120,10 @@ BilinearInterpolator<Real>::operator()( Real x, Real y )
 
 
   // find the x index that is just to the LEFT of x
-  int i = 0;
-  while( i < X->size()-2 && (*X)(i+1) < x )
-      i++;
+  int i = Utils::index_just_less( x, *X );
 
   // find the y index that is just BELOW y
-  int j = 0;
-  while( j < Y->size()-2 && (*Y)(j+1) < y )
-      j++;
+  int j = Utils::index_just_less( y, *Y );
   
 
   // now, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
@@ -146,14 +142,10 @@ auto
 BilinearInterpolator<Real>::gradient( Real x, Real y ) -> GradientType
 {
   // find the x index that is just to the LEFT of x
-  int i = 0;
-  while( i < X->size()-2 && (*X)(i+1) < x )
-      i++;
+  int i = Utils::index_just_less( x, *X );
 
   // find the y index that is just BELOW y
-  int j = 0;
-  while( j < Y->size()-2 && (*Y)(j+1) < y )
-      j++;
+  int j = Utils::index_just_less( y, *Y );
   
 
   // now, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
@@ -191,20 +183,12 @@ BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
   // ja and jb will be to BELOW _ya and _yb
 
   // bottom-left corner
-  int ia = 0;
-  while( ia < nx-2 && (*X)(ia+1) < _xa )
-      ia++;
-  int ja = 0;
-  while( ja < ny-2 && (*Y)(ja+1) < _ya )
-      ja++;
+  int ia = Utils::index_just_less( _xa, *X );
+  int ja = Utils::index_just_less( _ya, *Y );
 
   // top-right corner
-  int ib = 0;
-  while( ib < nx-2 && (*X)(ib+1) < _xb )
-      ib++;
-  int jb = 0;
-  while( jb < ny-2 && (*Y)(jb+1) < _yb )
-      jb++;
+  int ib = Utils::index_just_less( _xb, *X );
+  int jb = Utils::index_just_less( _yb, *Y );
 
    //We can integrate the function directly from the interpolation polynomial.
    //In Matrix form the polynomial looks like this

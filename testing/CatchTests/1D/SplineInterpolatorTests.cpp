@@ -48,3 +48,21 @@ TEST_CASE( "SplineInterpolator Tests", "[spline]" ) {
 
 }
 
+TEST_CASE("SplineInterpolator Edge Case Tests")
+{
+  _1D::SplineInterpolator<double> interp;
+
+  std::vector<double> x, y;
+  x.push_back( 1.0 ); y.push_back( 2.0 );
+  x.push_back( 2.0 ); y.push_back( 8.0 );
+  x.push_back( 3.0 ); y.push_back(16.0 );
+  x.push_back( 4.0 ); y.push_back(64.0 );
+
+  interp.setData(x,y);
+
+  REQUIRE( interp(1.0) == Approx( 2.0));
+  REQUIRE( interp(2.0) == Approx( 8.0));
+  REQUIRE( interp(3.0) == Approx(16.0));
+  REQUIRE( interp(4.0) == Approx(64.0));
+
+}

@@ -87,9 +87,7 @@ SplineInterpolator<Real>::operator()( Real x )
     return 0;
   
   // find the index that is just to the right of the x
-  int i = 1;
-  while( i < X.size()-1 && X(i) < x )
-    i++;
+  int i = Utils::index_just_greater( x, X, 1);
 
   // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
   // for a derivation this interpolation.
@@ -114,9 +112,7 @@ SplineInterpolator<Real>::derivative( Real x )
     return 0;
 
   // find the index that is just to the right of x
-  int i = 1;
-  while( i < X.size()-1 && X(i) < x )
-    i++;
+  int i = Utils::index_just_greater( x, X, 1);
 
   //this should be the same t as in the regular interpolation case
   Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
@@ -151,12 +147,8 @@ SplineInterpolator<Real>::integral( Real _a, Real _b )
   _b = std::min( _b, X[X.size()-1] );
 
   // find the indexes that is just to the right of a and b
-  int ai = 1;
-  while( ai < X.size()-1 && X[ai] < _a )
-      ai++;
-  int bi = 1;
-  while( bi < X.size()-1 && X[bi] < _b )
-      bi++;
+  int ai = Utils::index_just_greater( _a, X, 1 );
+  int bi = Utils::index_just_greater( _b, X, 1 );
 
   /**
    *

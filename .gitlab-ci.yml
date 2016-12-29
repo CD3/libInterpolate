@@ -1,0 +1,8 @@
+build_and_test:
+  script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
+    - make test
+

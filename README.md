@@ -1,64 +1,18 @@
-## Synopsis
+# libInterp
 
-This is a spline interpolator based on the method outlined on the [Wikipedia Page](https://en.wikipedia.org/wiki/Spline_interpolation). It currently supports reading code in from a file, or just interpolating from two std::vector<double> type arrays. Dr.Clark's multicolumn file reader is used for reading data files.
+A C++ library interpolation library.
 
-## 1D Interpolator Example
+This library provides classes to perform various types of function interpolation (linear, spline, etc).
 
-Initializing with two STL vectors:
+## Installing
 
-	//populate these, obviously
-	std::vector<double> x, y;
+`libInterp` is a header-only C++ library. To use it, simply include the headers you want/need in your source code. If you use
+`git subrepo`, you can clone the source into your externals directory and use it from there. Just add the `src/` directory
+to your compiler includes. For example, if you are using the RHDO C++ component template:
 
-	SplineInterp<double> testInterp;
-	testInterp.setData(x,y);
-	
-	double interpolatedValue = testInterp(pointToInterpolate);
+    > git subrepo clone http://fermi.fhsu.edu/CD3/libInterp.git externals/libInterp 
+    > vim CMakeLists.txt
+        Add the following line:
+        include_directories( ${PROJECT_SOURCE_DIR}/externals/libInterp/src )
 
-The setData member function can be called multiple times and will functionally make a new interpolator object.
 
-There's a short example for the 1D case in the example directory.
-
-## Member functions (1D)
-| **Function** | **Description** |
-|----------|-------------|
-| operator()(Real _x) | return interpolated value |
-| integral(Real _a, Real _b) | Return the integral of the given range |
-| integral() | Return the integral of the entire range |
-| derivative(Real x) | Return the derivative at point x |
-| setData(size_t n, Real *_x, Real *_y) | Set data using pointer arrays |
-| setData(std::vector<Real> x, std::vector<Real> y) | Set data using std::vectors |
-
-## 2D Interpolation Method
-
-The 2D interpolator accepts 2D gnuplot formatted data similar to:
-
-	0	0	0
-	0	1	2
-	0	2	4
-
-	1	0	1
-	1	1	3
-	1	2	5
-
-The data should be input as three STL vectors or double pointers. The code is only tested for data in which every block is the same lengths (each x point has the same number of y points).
-
-Although the method expects input data ordered by x, it reorders the input data directly to be ordered by y.
-
-Each x,z vector pair is interpolated at the target x point. These interpolated  values are put into a vector, which would correspond to the 3rd column in the original data ordering. Because of the assumption mentioned earlier, the y vector in the second ordering is assumed to be the proper second column for the new block. The y vector from the second ordering and the newly interpolated z vector are interpolated for the targeted y value, returning the final value.
-
-## 2D Interpolator Example
-
-	//populate these
-	std::vector<double> x, y, z;
-
-	SplineInterp2D<double> testInterp;
-	testInterp.setData(x,y,z);
-	
-	double interpolatedValue = testInterp(xPoint, yPoint);
-
-## Member functions (2D)
-| **Function** | **Description** |
-|----------|-------------|
-| operator()(Real _x, Real _y) | return interpolated value |
-| setData(size_t n, Real \*_x, Real \*_y, Real \*_z) | Set data using pointer arrays |
-| setData(std::vector<Real> x, std::vector<Real> y, std::vector<Real> z) | Set data using std::vectors |

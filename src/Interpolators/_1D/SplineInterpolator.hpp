@@ -18,9 +18,9 @@ class SplineInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
-    virtual Real operator()( Real x );
-    virtual Real derivative( Real x );
-    virtual Real integral( Real a, Real b);
+    virtual Real operator()( Real x ) const;
+    virtual Real derivative( Real x ) const;
+    virtual Real integral( Real a, Real b) const;
 
     virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
     virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
@@ -74,7 +74,7 @@ SplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy
 
 template<class Real>
 Real
-SplineInterpolator<Real>::operator()( Real x )
+SplineInterpolator<Real>::operator()( Real x ) const
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -99,7 +99,7 @@ SplineInterpolator<Real>::operator()( Real x )
 
 template<typename Real>
 Real
-SplineInterpolator<Real>::derivative( Real x )
+SplineInterpolator<Real>::derivative( Real x ) const
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -127,7 +127,7 @@ SplineInterpolator<Real>::derivative( Real x )
 
 template<class Real>
 Real
-SplineInterpolator<Real>::integral( Real _a, Real _b )
+SplineInterpolator<Real>::integral( Real _a, Real _b ) const
 {
   if( this->xv->size() < 1 )
     return 0;

@@ -32,8 +32,8 @@ class InterpolatorBase : public InterpolatorInterface<Real>
     virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
 
     // additional methods
-    virtual Real derivative( Real x );
-    virtual Real integral(   Real a, Real b );
+    virtual Real derivative( Real x ) const;
+    virtual Real integral(   Real a, Real b ) const;
     virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
     virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
 
@@ -81,7 +81,7 @@ InterpolatorBase<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
 
 template<class Real>
 Real
-InterpolatorBase<Real>::derivative( Real x )
+InterpolatorBase<Real>::derivative( Real x ) const
 {
   if( xv->size() < 1 )
     return 0;
@@ -95,7 +95,7 @@ InterpolatorBase<Real>::derivative( Real x )
 
 template<class Real>
 Real
-InterpolatorBase<Real>::integral( Real a, Real b )
+InterpolatorBase<Real>::integral( Real a, Real b ) const
 {
   if( xv->size() < 1 )
     return 0;

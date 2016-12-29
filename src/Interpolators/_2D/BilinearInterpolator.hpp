@@ -37,9 +37,9 @@ class BilinearInterpolator : public InterpolatorBase<Real>
     typedef Eigen::Matrix<Real,1,2 > RowVector2;
 
     // methods required by the interface
-    virtual Real operator()( Real x, Real y );
-    virtual Real integral( Real a, Real b, Real c, Real d );
-    virtual GradientType gradient( Real x, Real y );
+    virtual Real operator()( Real x, Real y ) const;
+    virtual Real integral( Real a, Real b, Real c, Real d ) const;
+    virtual GradientType gradient( Real x, Real y ) const;
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
     using InterpolatorBase<Real>::setData;
 
@@ -101,7 +101,7 @@ BilinearInterpolator<Real>::setData( size_t n, Real *x, Real *y, Real *z, bool d
 
 template<class Real>
 Real
-BilinearInterpolator<Real>::operator()( Real x, Real y )
+BilinearInterpolator<Real>::operator()( Real x, Real y ) const
 {
   // we want to interpolate to a point inside of a rectangle.
   // first, determine what element the point (x,y) is in.
@@ -139,7 +139,7 @@ BilinearInterpolator<Real>::operator()( Real x, Real y )
 
 template<class Real>
 auto
-BilinearInterpolator<Real>::gradient( Real x, Real y ) -> GradientType
+BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
 {
   // find the x index that is just to the LEFT of x
   int i = Utils::index_just_less( x, *X );
@@ -168,7 +168,7 @@ BilinearInterpolator<Real>::gradient( Real x, Real y ) -> GradientType
 
 template<class Real>
 Real
-BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb )
+BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb ) const
 {
   // No extrapolation
   int nx = X->size();

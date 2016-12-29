@@ -32,8 +32,8 @@ class InterpolatorBase : public InterpolatorInterface<Real>
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
 
     // additional methods
-    virtual GradientType gradient( Real x, Real y );
-    virtual Real integral(   Real a, Real b, Real c, Real d );
+    virtual GradientType gradient( Real x, Real y ) const;
+    virtual Real integral(   Real a, Real b, Real c, Real d ) const;
     virtual void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z, bool deep_copy = true );
     virtual void setData( VectorType  &x, VectorType &y, VectorType &z, bool deep_copy = true );
 
@@ -91,7 +91,7 @@ InterpolatorBase<Real>::setData( VectorType  &x, VectorType &y, VectorType &z, b
 
 template<class Real>
 auto
-InterpolatorBase<Real>::gradient( Real x, Real y ) -> GradientType
+InterpolatorBase<Real>::gradient( Real x, Real y ) const -> GradientType
 {
   if( xv->size() < 1 )
     return {0,0};
@@ -107,7 +107,7 @@ InterpolatorBase<Real>::gradient( Real x, Real y ) -> GradientType
 
 template<class Real>
 Real
-InterpolatorBase<Real>::integral( Real a, Real b, Real c, Real d )
+InterpolatorBase<Real>::integral( Real a, Real b, Real c, Real d ) const
 {
   if( xv->size() < 1 )
     return 0;

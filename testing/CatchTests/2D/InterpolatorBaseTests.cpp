@@ -9,7 +9,7 @@ namespace _2D {
 class TestInterp : public InterpolatorBase<double>
 {
   public:
-    virtual double operator()( double x, double y )
+    virtual double operator()( double x, double y ) const
     {
       return x + 2*y + 10;
     }

@@ -19,7 +19,7 @@ template<class Real>
 class InterpolatorInterface
 {
   public:
-    virtual Real operator()( Real x, Real y ) = 0;
+    virtual Real operator()( Real x, Real y ) const = 0;
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true ) = 0;
 };
 

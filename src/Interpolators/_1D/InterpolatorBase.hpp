@@ -40,8 +40,18 @@ class InterpolatorBase : public InterpolatorInterface<Real>
   protected:
     VectorType xd, yd;               // data
     std::shared_ptr<MapType> xv, yv; // map view of the data
+    void checkData() const; ///< Check that data has been initialized and throw exception if not.
+
 
 };
+
+template<class Real>
+void
+InterpolatorBase<Real>::checkData() const
+{
+  if(!this->xv || !this->yv)
+    throw std::logic_error("Interpolator data is not initialized. Did you call setData()?");
+}
 
 template<class Real>
 void

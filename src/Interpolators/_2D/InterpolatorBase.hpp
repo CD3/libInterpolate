@@ -40,10 +40,19 @@ class InterpolatorBase : public InterpolatorInterface<Real>
   protected:
     VectorType xd, yd, zd;               // data
     std::shared_ptr<MapType> xv, yv, zv; // map view of the data
+    void checkData() const; ///< Check that data has been initialized and throw exception if not.
 
 
 
 };
+
+template<class Real>
+void
+InterpolatorBase<Real>::checkData() const
+{
+  if(!this->xv || !this->yv || !this->zv)
+    throw std::logic_error("Interpolator data is not initialized. Did you call setData()?");
+}
 
 /**
  * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.

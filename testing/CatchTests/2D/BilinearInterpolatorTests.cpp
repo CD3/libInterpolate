@@ -79,13 +79,14 @@ TEST_CASE( "BilinearInterpolator Tests", "[bilinear]" ) {
 
   SECTION("Interpolation")
   {
-    REQUIRE( interp(0,0) == Approx(f(0,0)).epsilon(0.00002 )) ;
-    REQUIRE( interp(1,2) == Approx(f(1,2)).epsilon(0.00002 )) ;
-    REQUIRE( interp(2,1) == Approx(f(2,1)).epsilon(0.00002 )) ;
-    REQUIRE( interp(2,-1) == Approx(f(2,-1)).epsilon(0.00002 )) ;
+    REQUIRE( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+    REQUIRE( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+    REQUIRE( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+    REQUIRE( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+    REQUIRE( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
     REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-    REQUIRE( interp(8,3) == Approx(f(8,3)).epsilon(0.00002 )) ;
-    REQUIRE( interp(10,3) == Approx(0).epsilon(0.00002 )) ;
+    REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
   }
 
 
@@ -94,15 +95,22 @@ TEST_CASE( "BilinearInterpolator Tests", "[bilinear]" ) {
     auto dfdx = [](double x, double y){return y + 2;};
     auto dfdy = [](double x, double y){return x + 3;};
     double x,y;
-    x = 10.5*dx; y = 10.5*dy;
+    x = xmin + 1.5*dx; y = ymin + 1.5*dy;
     REQUIRE( interp.gradient( x,y )(0) == Approx( dfdx(x,y) ).epsilon(0.0003));
     REQUIRE( interp.gradient( x,y )(1) == Approx( dfdy(x,y) ).epsilon(0.0003));
-    x = 30*dx; y = 10*dy;                                               
+    x = xmin + 3*dx; y = ymin + 1*dy;                                               
     REQUIRE( interp.gradient( x,y )(0) == Approx( dfdx(x,y) ).epsilon(0.0003));
     REQUIRE( interp.gradient( x,y )(1) == Approx( dfdy(x,y) ).epsilon(0.0003));
-    x = 15*dx; y = 50.25*dy;                                               
+    x = xmin + 1.5*dx; y = ymin + 3.25*dy;                                               
     REQUIRE( interp.gradient( x,y )(0) == Approx( dfdx(x,y) ).epsilon(0.0003));
     REQUIRE( interp.gradient( x,y )(1) == Approx( dfdy(x,y) ).epsilon(0.0003));
+
+    x = -2; y = -1;
+    REQUIRE( interp.gradient( x,y )(0) == Approx( 0 ).epsilon(0.0003));
+    REQUIRE( interp.gradient( x,y )(1) == Approx( 0 ).epsilon(0.0003));
+    x = 10; y = 3;
+    REQUIRE( interp.gradient( x,y )(0) == Approx( 0 ).epsilon(0.0003));
+    REQUIRE( interp.gradient( x,y )(1) == Approx( 0 ).epsilon(0.0003));
   }
 
 

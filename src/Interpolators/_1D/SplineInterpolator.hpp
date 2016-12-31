@@ -76,18 +76,17 @@ template<class Real>
 Real
 SplineInterpolator<Real>::operator()( Real x ) const
 {
+  InterpolatorBase<Real>::checkData();
+
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
 
-  // don't extrapolate at all
-  if( x < X(0) )
-    return 0;
-     
-  if( x > X(X.size()-1) )
-    return 0;
-  
   // find the index that is just to the right of the x
-  int i = Utils::index_just_greater( x, X, 1);
+  int i = Utils::index_first_ge( x, X, 1);
+
+  // don't extrapolate at all
+  if( i == 0 || i == X.size())
+    return 0;
 
   // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
   // for a derivation this interpolation.
@@ -112,7 +111,7 @@ SplineInterpolator<Real>::derivative( Real x ) const
     return 0;
 
   // find the index that is just to the right of x
-  int i = Utils::index_just_greater( x, X, 1);
+  int i = Utils::index_first_gt( x, X, 1);
 
   //this should be the same t as in the regular interpolation case
   Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );
@@ -147,8 +146,8 @@ SplineInterpolator<Real>::integral( Real _a, Real _b ) const
   _b = std::min( _b, X[X.size()-1] );
 
   // find the indexes that is just to the right of a and b
-  int ai = Utils::index_just_greater( _a, X, 1 );
-  int bi = Utils::index_just_greater( _b, X, 1 );
+  int ai = Utils::index_first_gt( _a, X, 1 );
+  int bi = Utils::index_first_gt( _b, X, 1 );
 
   /**
    *

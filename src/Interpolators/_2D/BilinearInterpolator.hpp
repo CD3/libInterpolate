@@ -103,10 +103,7 @@ template<class Real>
 Real
 BilinearInterpolator<Real>::operator()( Real x, Real y ) const
 {
-  // we want to interpolate to a point inside of a rectangle.
-  // first, determine what element the point (x,y) is in.
-  // the indices of the of bottom-left corner are the indecies of the element,
-  // so we want to find the grid point to the left and below (x,y)
+  InterpolatorBase<Real>::checkData();
   
   // no extrapolation...
   if( x < (*X)(0)
@@ -116,15 +113,17 @@ BilinearInterpolator<Real>::operator()( Real x, Real y ) const
   {
     return 0;
   }
-
-
-
   // find the x index that is just to the LEFT of x
-  int i = Utils::index_just_less( x, *X );
+  int i  = Utils::index_last_lt( x, *X );
+  if(i < 0)
+    i = 0;
 
   // find the y index that is just BELOW y
-  int j = Utils::index_just_less( y, *Y );
+  int j  = Utils::index_last_lt( y, *Y );
+  if(j < 0)
+    j = 0;
   
+
 
   // now, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
   RowVector2 vx;
@@ -141,12 +140,25 @@ template<class Real>
 auto
 BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
 {
+  // no extrapolation...
+  if( x < (*X)(0)
+   || x > (*X)(X->size()-1)
+   || y < (*Y)(0)
+   || y > (*Y)(Y->size()-1) )
+  {
+    return {0,0};
+  }
+
   // find the x index that is just to the LEFT of x
-  int i = Utils::index_just_less( x, *X );
+  int i  = Utils::index_last_lt( x, *X );
+  if(i < 0)
+    i = 0;
 
   // find the y index that is just BELOW y
-  int j = Utils::index_just_less( y, *Y );
-  
+  int j  = Utils::index_last_lt( y, *Y );
+  if(j < 0)
+    j = 0;
+
 
   // now, create the coordinate vectors (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
   RowVector2 vx;
@@ -183,12 +195,12 @@ BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb ) c
   // ja and jb will be to BELOW _ya and _yb
 
   // bottom-left corner
-  int ia = Utils::index_just_less( _xa, *X );
-  int ja = Utils::index_just_less( _ya, *Y );
+  int ia = Utils::index_last_lt( _xa, *X );
+  int ja = Utils::index_last_lt( _ya, *Y );
 
   // top-right corner
-  int ib = Utils::index_just_less( _xb, *X );
-  int jb = Utils::index_just_less( _yb, *Y );
+  int ib = Utils::index_last_lt( _xb, *X );
+  int jb = Utils::index_last_lt( _yb, *Y );
 
    //We can integrate the function directly from the interpolation polynomial.
    //In Matrix form the polynomial looks like this

@@ -9,6 +9,8 @@ namespace _1D {
 /** @class 
   * @brief An implementation of the spline interpolation algorithm (see the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation).
   * @author C.D. Clark III
+  *
+  * This class does *not* do extrapolation.
   */
 template<class Real>
 class SplineInterpolator : public InterpolatorBase<Real>
@@ -103,15 +105,12 @@ SplineInterpolator<Real>::derivative( Real x ) const
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
 
-  //No extrapolation
-  if( x < X(0) )
-    return 0;
-
-  if( x > X(X.size()-1) )
-    return 0;
-
-  // find the index that is just to the right of x
+  // find the index that is just to the right of the x
   int i = Utils::index_first_gt( x, X, 1);
+
+  // don't extrapolate at all
+  if( i == 0 || i == X.size())
+    return 0;
 
   //this should be the same t as in the regular interpolation case
   Real t = ( x - X(i-1) ) / ( X(i) - X(i-1) );

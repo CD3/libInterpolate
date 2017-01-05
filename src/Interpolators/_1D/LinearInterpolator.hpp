@@ -9,6 +9,8 @@ namespace _1D {
 /** @class 
   * @brief A simple linear interpolator.
   * @author C.D. Clark III
+  *
+  * This class does *not* do extrapolation.
   */
 template<class Real>
 class LinearInterpolator : public InterpolatorBase<Real>

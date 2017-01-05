@@ -186,11 +186,11 @@ message( STATUS "library target name: ${LIB_NAME}" )
 
 # Build applications
 
-#if( Boost_PROGRAM_OPTIONS_FOUND )
-  #add_executable( <TARGET>-cli applications/TLV-cli.cpp )
-  #target_link_libraries( TLV-cli TLV ${Boost_PROGRAM_OPTIONS_LIBRARY} )
-  #target_compile_features( TLV-cli PRIVATE ${cxx_needed_features})
-#endif()
+if( Boost_PROGRAM_OPTIONS_FOUND )
+  add_executable( interp-cli applications/interp-cli.cpp )
+  target_link_libraries( interp-cli ${Boost_PROGRAM_OPTIONS_LIBRARY} )
+  target_compile_features( interp-cli PRIVATE ${cxx_needed_features})
+endif()
 
 
 

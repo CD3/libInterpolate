@@ -54,3 +54,13 @@ add_test(NAME ${testName}
 
 # Copy the data directory to the build directory
 file(COPY data DESTINATION ${buildDir} )
+
+
+#Copy config files to build directory
+add_custom_command( OUTPUT do_copyPythonTests
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/testing/PythonTests"
+                    "${CMAKE_BINARY_DIR}"
+                  )
+
+add_custom_target(pythonTests ALL DEPENDS do_copyPythonTests)

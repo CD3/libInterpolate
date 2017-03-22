@@ -139,8 +139,6 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
 
   }
 
-
-
   SECTION("Raw Pointer Initialization")
   {
     double *xx, *yy, *zz;
@@ -202,6 +200,41 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
     delete[] zz;
   }
 
+  SECTION("Eigen Vector Initialization")
+  {
+    _2D::InterpolatorBase<double>::VectorType xx(N), yy(N), zz(N);
+
+    for( int i = 0; i < N; i++)
+    {
+      xx(i) = 0.1*i;
+      yy(i) = 0.2*i;
+      zz(i) = xx(i) + yy(i);
+    }
+
+    interp.setData( xx, yy, zz );
+
+    auto x = interp.getXData();
+    auto y = interp.getYData();
+    auto z = interp.getZData();
+
+    REQUIRE( x.size() > 0 );
+    CHECK( x[0] == Approx(0) );
+    REQUIRE( x.size() == N );
+    CHECK( x[N-1] == Approx( xx(N-1) ) );
+
+    REQUIRE( y.size() > 0 );
+    CHECK( y[0] == Approx(0) );
+    REQUIRE( y.size() == N );
+    CHECK( y[N-1] == Approx( yy(N-1) ) );
+
+    REQUIRE( z.size() > 0 );
+    CHECK( z[0] == Approx(0) );
+    REQUIRE( z.size() == N );
+    CHECK( z[N-1] == Approx( xx(N-1) + yy(N-1) ) );
+
+
+
+  }
 
 }
 

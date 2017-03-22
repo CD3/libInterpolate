@@ -128,8 +128,6 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
 
   }
 
-
-
   SECTION("Raw Pointer Initialization")
   {
     double *xx, *yy;
@@ -184,6 +182,32 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
     delete[] yy;
   }
 
+  SECTION("Data Get Functions")
+  {
+    _1D::InterpolatorBase<double>::VectorType xx(N), yy(N);
+
+    for( int i = 0; i < N; i++)
+    {
+      xx(i) = 0.1*i;
+      yy(i) = xx(i)*xx(i);
+    }
+
+    interp.setData( xx, yy );
+
+    auto x = interp.getXData();
+    auto y = interp.getYData();
+
+    REQUIRE( x.size() > 0 );
+    CHECK( x[0] == Approx(0) );
+    REQUIRE( x.size() == N );
+    CHECK( x[N-1] == Approx( xx(N-1) ) );
+
+    REQUIRE( y.size() > 0 );
+    CHECK( y[0] == Approx(0) );
+    REQUIRE( y.size() == N );
+    CHECK( y[N-1] == Approx( pow(xx(N-1),2) ) );
+
+  }
 
 }
 
@@ -216,7 +240,6 @@ TEST_CASE( "InterpolatorBase Derivative/Integration Tests", "[plumbing]" ) {
   REQUIRE( interp.integral(0.1,0.0) == Approx(-10.1*10.1/2 + 10*10/2) );
   REQUIRE( interp.integral(0.2,0.1) == Approx(-10.2*10.2/2 + 10.1*10.1/2) );
   REQUIRE( interp.integral(0.3,0.2) == Approx(-10.3*10.3/2 + 10.2*10.2/2) );
-
 
 
 }

@@ -18,7 +18,7 @@ namespace _1D {
   * @brief A base class for interpolators that provides default implementations of the interface.
   * @author C.D. Clark III
   *
-  * This class provides an implementation for the setData method as well as adding a few additional
+  * This class provides an implementation for the setData and getData methods, as well as adding a few additional
   * useful methods, including derivative and integral methods.
   */
 template<class Real>
@@ -30,6 +30,10 @@ class InterpolatorBase : public InterpolatorInterface<Real>
 
     // methods required by interface
     virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
+
+    // methods to get the data
+    virtual std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
+    virtual std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
 
     // additional methods
     virtual Real derivative( Real x ) const;

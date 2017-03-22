@@ -31,6 +31,12 @@ class InterpolatorBase : public InterpolatorInterface<Real>
     // methods required by interface
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
 
+    // methods to get interpolated data
+    virtual std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
+    virtual std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
+    virtual std::vector<Real> getZData() const { return std::vector<Real>(&zd(0),&zd(0)+zd.size()); }
+    
+
     // additional methods
     virtual GradientType gradient( Real x, Real y ) const;
     virtual Real integral(   Real a, Real b, Real c, Real d ) const;

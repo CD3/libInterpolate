@@ -22,11 +22,11 @@ namespace Utils
    * \param _x            pointer through which coordinates are returned
    * \param _y            pointer through which values are returned
    * \param _n            pointer through which number of points in each dimension is returned
-   * \param _multiplicity specifies the number of columns that make up a single value of the function
    * \param _dimensions   specifies the number of columns that are coordinates
+   * \param _multiplicity specifies the number of columns that make up a single value of the function
    * */
   template < typename ArgType, typename ValType >
-  void ReadFunction(std::istream &_in, ArgType  *&_x, ValType *&_y, int *&_n, int _multiplicity = 1, int _dimensions = 1)
+  void ReadFunction(std::istream &_in, ArgType  *&_x, ValType *&_y, int *&_n, int _dimensions = 1, int _multiplicity = 1)
   {
 
     ArgType *xbuffer1, *xbuffer2;
@@ -117,10 +117,10 @@ namespace Utils
    * and reads in a 1D function
    */
   template < typename ArgType, typename ValType >
-  void ReadFunction(std::istream &_in, ArgType  *&_x, ValType *&_y, int &_n, int _multiplicity = 1)
+  void ReadFunction(std::istream &_in, ArgType  *&_x, ValType *&_y, int &_n, int _dimensions = 1, int _multiplicity = 1)
   {
     int *n;
-    ReadFunction(_in, _x, _y, n, _multiplicity);
+    ReadFunction(_in, _x, _y, n, _dimensions, _multiplicity);
     _n = n[0];
     delete[] n;
   }

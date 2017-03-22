@@ -110,7 +110,7 @@ int main( int argc, char* argv[])
 
     // load x values
     in.open( vm["x-values"].as<string>().c_str() );
-    Utils::ReadFunction( in, x, y, n, 0 );
+    Utils::ReadFunction( in, x, y, n, 1, 0 ); // multiplicity 0, only 1 column with coordinates.
     in.close();
 
 

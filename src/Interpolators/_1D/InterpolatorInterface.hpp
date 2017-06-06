@@ -21,7 +21,7 @@ class InterpolatorInterface
 {
   public:
     virtual Real operator()( Real x ) const = 0;
-    virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true ) = 0;
+    virtual void setData( size_t n, Real *x, Real *y, bool deep_copy = true ) = 0;
 };
 
 }

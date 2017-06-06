@@ -18,7 +18,7 @@ namespace _1D {
   * @brief A base class for interpolators that provides default implementations of the interface.
   * @author C.D. Clark III
   *
-  * This class provides an implementation for the setData and getData methods, as well as adding a few additional
+  * This class provides an implementation for the setData method, as well as adding a few additional
   * useful methods, including derivative and integral methods.
   */
 template<class Real>
@@ -29,17 +29,22 @@ class InterpolatorBase : public InterpolatorInterface<Real>
     typedef Eigen::Map<VectorType> MapType;
 
     // methods required by interface
-    virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
+    virtual void setData( size_t n, Real *x, Real *y, bool deep_copy = true );
+    using InterpolatorInterface<Real>::operator();
+    virtual void operator()( size_t n, Real *x, Real *y ) const;
+
+    // additional methods
+    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
+    virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
 
     // methods to get the data
     virtual std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
     virtual std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
 
-    // additional methods
+    // integral and derivative
     virtual Real derivative( Real x ) const;
     virtual Real integral(   Real a, Real b ) const;
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
+
 
   protected:
     VectorType xd, yd;               // data
@@ -48,6 +53,16 @@ class InterpolatorBase : public InterpolatorInterface<Real>
 
 
 };
+
+template<class Real>
+void
+InterpolatorBase<Real>::operator()( size_t n, Real *x, Real *y ) const
+{
+  // we *could* parallelize this loop, but some interpolators might
+  // not be thread safe.
+  for( int i = 0; i < n; i++ )
+    y[i] = this->operator()(x[i]);
+}
 
 template<class Real>
 void

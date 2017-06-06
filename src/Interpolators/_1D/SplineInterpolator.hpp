@@ -20,6 +20,7 @@ class SplineInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
+    using InterpolatorBase<Real>::operator();
     virtual Real operator()( Real x ) const;
     virtual Real derivative( Real x ) const;
     virtual Real integral( Real a, Real b) const;
@@ -345,10 +346,6 @@ SplineInterpolator<Real>::calcCoefficients()
   }
 
 }
-
-
-
-
 
 }
 

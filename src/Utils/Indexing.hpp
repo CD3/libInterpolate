@@ -100,7 +100,7 @@ int index_last_le( Val val, const Indexable& vals, size_t N, int i = -1, int str
   if( vals[N-1] < val )
     return N-1;
 
-  // N is unsigned, so -1 < N will alwasy be false
+  // N is unsigned, so -1 < N will always be false
   while( (i < 0 || i < N-1) && vals[i+1] <= val )
   {
     i += stride;

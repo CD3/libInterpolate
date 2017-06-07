@@ -4,11 +4,44 @@ A C++ interpolation library.
 
 This library provides classes to perform various types of function interpolation (linear, spline, etc).
 
+Currently implemented methods are:
+
+- 1D Interpolation
+    - linear (https://en.wikipedia.org/wiki/Linear_interpolation)
+    - cubic spline (https://en.wikipedia.org/wiki/Spline_interpolation)
+    - monotonic spline interpolation (http://adsabs.harvard.edu/full/1990A%26A...239..443S)
+- 2D Interpolation
+    - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
+    - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
+
 ## Installing
 
-Curretnly, `libInterp` is a header-only C++ library. To use it, simply include
+Currently, `libInterp` is a header-only C++ library. To use it, simply include
 the headers you want/need in your source code. If you use `git subrepo`, you
 can clone the source into your externals directory and use it from there.
+
+`libInterp` depends on Boost and Eigen3, so you will need to include the directories
+containing their header files when compiling.
+
+This simplest way to use the library is to build your project using CMake. You can then
+put a copy of this project in a directory named `externals/libInterp` and include it in
+your `CMakeLists.txt` file with the `add_subdirectory` command
+
+```CMake
+# add libInterp
+add_subdirectory(externals/libInterp)
+```
+
+The `libInterp` `CMakeLists.txt` will check for its dependencies and export the required include
+directories to a cache variable named `libInterp_INCLUDE_DIRS`, so you can just include them rather
+than needing to search yourself.
+
+```CMake
+# add libInterp
+add_subdirectory(externals/libInterp)
+# add include dirs required by libInterp
+include_directories( ${libInterp_INCLUDE_DIRS} )
+```
 
 ## Design
 

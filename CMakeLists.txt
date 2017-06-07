@@ -36,12 +36,12 @@ else()
     message( STATUS "${PROJECT_NAME} being configured as stand-alone" )
 endif()
 
+# we want to turn on C++11 support
 
-# You can specify a list of features that you need the compler to support here.
+# You can specify a list of features that you need the compler to support here (see CMake documentation for a list of features).
 # The cxx_needed_features variable is passed to `tartget_compile_features` command later one
 # when the targets are defined.
 set( cxx_needed_features
-     cxx_nonstatic_member_init
    )
 
 
@@ -88,6 +88,16 @@ set( CPACK_PACKAGE_VERSION_MINOR ${${PROJECT_NAME}_VERSION_MINOR} )
 set( CPACK_PACKAGE_VERSION_PATCH ${${PROJECT_NAME}_VERSION_PATCH} )
 
 
+# rather than call include_directories multiple times
+# we will collect all the include directories in a list named _${PROJECT_NAME}_INCLUDE_DIRS.
+# then we can add them all at once with a single include_directories call.
+# we will also "export" the list by setting a CACHE variable named ${PROJECT_NAME}_INCLUDE_DIRS.
+# this will allow other proejcts to access the list if they need.
+# we'll do the same for definitions and anything else that might be useful for external projects
+# to have access to.
+set( _${PROJECT_NAME}_INCLUDE_DIRS "" )
+set( _${PROJECT_NAME}_DEFINITIONS "" )
+
 
 
 #     _                           _                              _               _        
@@ -106,7 +116,7 @@ set( CPACK_PACKAGE_VERSION_PATCH ${${PROJECT_NAME}_VERSION_PATCH} )
 set(Boost_USE_STATIC_LIBS ON )
 set(Boost_USE_DYN_LIBS OFF )
 # dynamic link to boost
-#add_definitions( -DBOOST_ALL_DYN_LINK )
+#list( APPEND _${PROJECT_NAME}_DEFINITIONS -DBOOST_ALL_DYN_LINK )
 
 # If you need a specific boost component, check for it here.
 MESSAGE( "NOTE: Checking for various boost components. If a specific
@@ -115,18 +125,17 @@ message saying that Boost was NOT found. This does not mean that no boost
 installation was found." )
 # The boost command line argument parser.
 find_package( Boost COMPONENTS program_options)
-include_directories( ${Boost_INCLUDE_DIRS} )
+list( APPEND _${PROJECT_NAME}_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 set( Boost_LIBS ${Boost_LIBS} ${Boost_LIBRARIES} )
 
 # The boost header libraries
 #find_package( Boost REQUIRED ) # if boost is a required dependency, use this
 find_package( Boost )
-include_directories( ${Boost_INCLUDE_DIRS} )
+list( APPEND _${PROJECT_NAME}_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
 # The eigen linear algebra library.
 find_package( Eigen3 REQUIRED )
-include_directories( ${EIGEN3_INCLUDE_DIR} )
-set( HAVE_LIBEIGEN3 1 )
+list( APPEND _${PROJECT_NAME}_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR} )
 
 # _           _ _     _ 
 #| |__  _   _(_) | __| |
@@ -138,7 +147,7 @@ set( HAVE_LIBEIGEN3 1 )
 # Add any specific comiler defines that you need. These should be
 # defines that your source code uses. Don't add things like --std=g++11 for example,
 # this will be taken care of by target_compile_features command.
-add_definitions(  )
+list( APPEND _${PROJECT_NAME}_DEFINITIONS "" )
 
 # The configure_file command is used to create a source file from a template.
 # For example, we can insert version information into our source code by creating
@@ -150,11 +159,14 @@ configure_file( "${PROJECT_SOURCE_DIR}/src/version.h"
                 "${PROJECT_SOURCE_DIR}/src/version.h")
 
 
-include_directories( "${PROJECT_SOURCE_DIR}"
-                     "${PROJECT_SOURCE_DIR}/src") 
+# add the source directory to the includes list
+list( APPEND _${PROJECT_NAME}_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
 
 # Add the source code for your project here.
 # This command will find all *.cpp, *.hpp, and *.h files in the source directory.
+# While not required to build the project, you should
+# add .h and .hpp files here so that they will be displayed
+# in IDE's like Visual Studio.
 file( GLOB_RECURSE ${PROJECT_NAME}_DETECTED_SOURCES
       RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
       "src/*.cpp" )
@@ -162,16 +174,19 @@ message(STATUS "Detected Source Files:")
 foreach(detectedSrc ${${PROJECT_NAME}_DETECTED_SOURCES})
   message(STATUS "  ${detectedSrc}" )
 endforeach()
-# While not required to build the project, you should
-# add .h and .hpp files here so that they will be displayed
-# in IDE's like Visual Studio.
+# add additional source code files here.
 # Note: you should prefix filenames with ${PROJECT_SOURCE_DIR} so that relative path
 #       names don't cause any problems
 # Add any additional sources here. For example, if you want to compile source from
 # an included external dependency, you could add the sources here.
 set( ${PROJECT_NAME}_SOURCES ${${PROJECT_NAME}_DETECTED_SOURCES}
+   # ${PROJECT_SOURCE_DIR}/src/SourceCode.cpp
+   )
 
-)
+
+ # add the includes, definitions, etc
+ include_directories( ${_${PROJECT_NAME}_INCLUDE_DIRS} )
+ add_definitions( ${_${PROJECT_NAME}_DEFINITIONS} )
 
 
 
@@ -189,7 +204,7 @@ message( STATUS "library target name: ${LIB_NAME}" )
 if( Boost_PROGRAM_OPTIONS_FOUND )
   add_executable( interp-cli applications/interp-cli.cpp )
   target_link_libraries( interp-cli ${Boost_PROGRAM_OPTIONS_LIBRARY} )
-  target_compile_features( interp-cli PRIVATE ${cxx_needed_features})
+  set_target_properties( interp-cli PROPERTIES CXX_STANDARD 11 )
 endif()
 
 
@@ -210,3 +225,14 @@ if( BUILD_SWIG_WRAPPERS )
 add_subdirectory( swig )
 endif( BUILD_SWIG_WRAPPERS )
 
+#                _          
+#  ___ __ _  ___| |__   ___ 
+# / __/ _` |/ __| '_ \ / _ \
+#| (_| (_| | (__| | | |  __/
+# \___\__,_|\___|_| |_|\___|
+
+
+# add variables to the cache so other projects can see them
+set( ${PROJECT_NAME}_INCLUDE_DIRS ${_${PROJECT_NAME}_INCLUDE_DIRS} CACHE INTERNAL "${PROJECT_NAME} Include Dirs:" FORCE)
+set( ${PROJECT_NAME}_DEFINITIONS  ${_${PROJECT_NAME}_DEFINITIONS}  CACHE INTERNAL "${PROJECT_NAME} Compiler Definitions:" FORCE)
+set( ${PROJECT_NAME}_CONFIGURED   1                                CACHE INTERNAL "${PROJECT_NAME} Configured:" FORCE) # that indicates this project has been configured

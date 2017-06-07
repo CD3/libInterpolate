@@ -43,7 +43,7 @@ target_compile_definitions( ${testName} PRIVATE -DTESTING )
 target_link_libraries(${testName} ) # If your project builds a library, link to it here
 
 # Make sure that testing binaries are created in the binDir directory
-set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${binDir} )
+set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
 
 # Now add the unit test binary to the CMake test target
 #Notice the WORKING_DIRECTORY and COMMAND

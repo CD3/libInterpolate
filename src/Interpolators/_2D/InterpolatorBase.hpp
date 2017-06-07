@@ -112,8 +112,10 @@ InterpolatorBase<Real>::gradient( Real x, Real y ) const -> GradientType
     return {0,0};
 
   // simple Finite-Difference approximation
-  Real dx = (*xv)(1) - (*xv)(0);
-  Real dy = (*yv)(1) - (*yv)(0);
+  // NOTE: consecutive values in xv and yv may be the same.
+  //       so be careful here
+  Real dx = (xv->maxCoeff() - xv->minCoeff())/xv->cols();
+  Real dy = (yv->maxCoeff() - yv->minCoeff())/yv->cols();
   Real dzx = this->operator()( x + dx/2, y        ) - this->operator()( x - dx/2, y        );
   Real dzy = this->operator()( x       , y + dy/2 ) - this->operator()( x       , y - dy/2 );
 

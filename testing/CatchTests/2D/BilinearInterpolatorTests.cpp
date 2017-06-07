@@ -1,6 +1,8 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
+#include <fstream>
+
 #include "Interpolators/_2D/BilinearInterpolator.hpp"
 
 namespace _2D {
@@ -19,7 +21,7 @@ namespace _2D {
 }
 
 
-TEST_CASE( "BilinearInterpolator Tests", "[bilinear]" ) {
+TEST_CASE( "BilinearInterpolator Tests - Monotonic Data", "[bilinear]" ) {
 
   _2D::TestBilinearInterp interp;
 
@@ -52,6 +54,28 @@ TEST_CASE( "BilinearInterpolator Tests", "[bilinear]" ) {
     zz(i) = f(xx(i),yy(i));
   }
   interp.setData( xx, yy, zz );
+
+  SECTION("Write Data")
+  {
+    std::ofstream out;
+
+    out.open("Bilinear-input.txt");
+    for(int i = 0; i < nx*ny; i++)
+      out << xx(i) << " " << yy(i) << " " << zz(i) << "\n";
+    out.close();
+
+    out.open("Bilinear-output.txt");
+    for(int i = 0; i < 5*nx; i++)
+    {
+      for(int j = 0; j < 5*ny; j++)
+      {
+        out << xmin + dx*i/5. << " " << ymin + dy*j/5. << " " << interp(xmin+dx*i/5., ymin+dy*j/5.) << "\n";
+      }
+      out << "\n";
+    }
+    out.close();
+
+  }
 
   SECTION("1D -> 2D Mappings")
   {
@@ -169,6 +193,82 @@ TEST_CASE( "BilinearInterpolator Tests", "[bilinear]" ) {
 
 
   }
+
+
+
+}
+
+TEST_CASE( "BilinearInterpolator Tests - Oscillating Data", "[thin plate spline]" ) {
+
+  _2D::TestBilinearInterp interp;
+
+  int nx, ny;
+  double xmin, xmax, dx, x;
+  double ymin, ymax, dy, y;
+  double z;
+
+  nx = 10;
+  ny = 5;
+
+  xmin = -1;
+  xmax = 8;
+
+  ymin = -1;
+  ymax = 3;
+
+  dx = (xmax - xmin)/(nx - 1);
+  dy = (ymax - ymin)/(ny - 1);
+
+  _2D::BilinearInterpolator<double>::VectorType xx(nx*ny), yy(nx*ny), zz(nx*ny);
+
+  auto f  = [](double x, double y){return sin(x)*sin(y);};
+
+  for( int i = 0; i < nx*ny; i++)
+  {
+    // gnuplot format is essentially row-major
+    xx(i) = xmin+dx*(i/ny);
+    yy(i) = ymin+dy*(i%ny);
+    zz(i) = f(xx(i),yy(i));
+  }
+  interp.setData( xx, yy, zz );
+
+  SECTION("Write Data")
+  {
+    std::ofstream out;
+
+    out.open("Bilinear-oscillations-input.txt");
+    for(int i = 0; i < nx*ny; i++)
+      out << xx(i) << " " << yy(i) << " " << zz(i) << "\n";
+    out.close();
+
+    out.open("Bilinear-oscillations-output.txt");
+    for(int i = 0; i < 5*nx; i++)
+    {
+      for(int j = 0; j < 5*ny; j++)
+      {
+        out << xmin + dx*i/5. << " " << ymin + dy*j/5. << " " << interp(xmin+dx*i/5., ymin+dy*j/5.) << "\n";
+      }
+      out << "\n";
+    }
+
+    out.close();
+
+  }
+
+  SECTION("Interpolation")
+  {
+    CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+    CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+    CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+    CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+    CHECK( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+    CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
+    CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+  }
+
+
+
 
 
 

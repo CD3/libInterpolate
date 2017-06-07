@@ -219,11 +219,14 @@ endif()
 
 
 # These directories should contain their own CMakeLists.txt files.
+if( STANDALONE_CONFIG )
 add_subdirectory( testing )
 add_subdirectory( doc )
+endif()
 if( BUILD_SWIG_WRAPPERS )
 add_subdirectory( swig )
 endif( BUILD_SWIG_WRAPPERS )
+
 
 #                _          
 #  ___ __ _  ___| |__   ___ 

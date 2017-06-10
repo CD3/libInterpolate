@@ -116,12 +116,12 @@ ThinPlateSplineInterpolator<Real>::calcCoefficients()
 
 
   }
-  auto Minv = M.inverse().eval();
 
-  // TODO: could optimize for computations, but would require more memory. i.e. store the
-  // inverse of M and transpose of N in temporary matrices.
-  b = (N.transpose()*M.inverse()*N).inverse()*N.transpose()*M.inverse()*this->zd;
-  a = M.inverse()*(this->zd - N*b);
+  MatrixType Minv = M.inverse();
+  MatrixType Ntra = N.transpose();
+
+  b = (Ntra*Minv*N).inverse()*Ntra*Minv*this->zd;
+  a = Minv*(this->zd - N*b);
 
   return;
 

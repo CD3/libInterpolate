@@ -36,7 +36,6 @@ endforeach()
 # Add unit test executable
 set( testName CatchTests )
 add_executable(${testName} ${unitTest_SOURCES})
-target_compile_features( ${testName} PRIVATE ${cxx_needed_features})
 target_compile_definitions( ${testName} PRIVATE -DTESTING )
 
 # Link dependencies
@@ -55,12 +54,50 @@ add_test(NAME ${testName}
 # Copy the data directory to the build directory
 file(COPY data DESTINATION ${buildDir} )
 
+# _   _             _             ____                  _                          _        
+#| \ | | ___  _ __ (_)_   _ ___  | __ )  ___ _ __   ___| |__  _ __ ___   __ _ _ __| | _____ 
+#|  \| |/ _ \| '_ \| | | | / __| |  _ \ / _ \ '_ \ / __| '_ \| '_ ` _ \ / _` | '__| |/ / __|
+#| |\  | (_) | | | | | |_| \__ \ | |_) |  __/ | | | (__| | | | | | | | | (_| | |  |   <\__ \
+#|_| \_|\___/|_| |_|_|\__,_|___/ |____/ \___|_| |_|\___|_| |_|_| |_| |_|\__,_|_|  |_|\_\___/
+                                                                                           
 
-#Copy config files to build directory
-add_custom_command( OUTPUT do_copyPythonTests
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                    "${CMAKE_SOURCE_DIR}/testing/PythonTests"
-                    "${CMAKE_BINARY_DIR}"
-                  )
+set( binDir ${CMAKE_BINARY_DIR}/benchmarkBin )
 
-add_custom_target(pythonTests ALL DEPENDS do_copyPythonTests)
+# Benchmarks written with the Nonius framework are
+# automatically detected. Just put the source files
+# in the `NoniusBenchmarks` directory.
+
+set( benchmark_DIR ./NoniusBenchmarks)
+# Search for sources.
+file( GLOB_RECURSE benchmark_SOURCES
+      RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+      "${benchmark_DIR}/*.cpp" )
+    message(STATUS "Detected Nonius-based Benchmark Sources:")
+foreach(benchmarkSrc ${benchmark_SOURCES})
+  message(STATUS "  ${benchmarkSrc}" )
+endforeach()
+
+# Nonius requires a threading library
+find_package(Threads)
+
+if(Threads_FOUND)
+
+# Add benchmark executable
+set( benchmarkName NoniusBenchmarks )
+add_executable(${benchmarkName} ${benchmark_SOURCES})
+#target_compile_definitions( ${benchmarkName} )
+
+# Link dependencies
+target_link_libraries(${benchmarkName} Threads::Threads ) # If your project builds a library, link to it here
+
+# Make sure that testing binaries are created in the binDir directory and use C++11
+set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
+
+# Now add the unit benchmark binary to the CMake test target
+#Notice the WORKING_DIRECTORY and COMMAND
+add_test(NAME ${benchmarkName} 
+         WORKING_DIRECTORY ${buildDir}
+         COMMAND ${binDir}/${benchmarkName} )
+
+endif()
+

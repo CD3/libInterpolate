@@ -1,46 +1,37 @@
 #include "nonius/nonius.h++"
 
+#include "../Utils/DataSet.hpp"
 
 #include "Interpolators/_2D/BilinearInterpolator.hpp"
 
 
-NONIUS_BENCHMARK("BilinearInterpolator Small Data Set",
-//[](nonius::chronometer meter)
-[]()
+NONIUS_BENCHMARK("BilinearInterpolator 5x5 Data Set Construct",
+[](nonius::chronometer meter)
 {
   _2D::BilinearInterpolator<double> interp;
-  int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  _2D::DataSet data(5,5);
 
-  nx = 10;
-  ny = 5;
+  meter.measure( [&](){ interp.setData( data.x, data.y, data.z ); } );
 
-  xmin = -1;
-  xmax = 8;
+})
 
-  ymin = -1;
-  ymax = 3;
 
-  dx = (xmax - xmin)/(nx - 1);
-  dy = (ymax - ymin)/(ny - 1);
 
-  _2D::BilinearInterpolator<double>::VectorType xx(nx*ny), yy(nx*ny), zz(nx*ny);
+NONIUS_BENCHMARK("BilinearInterpolator 5x5 Data Set 1000 Point Interpolation",
+[](nonius::chronometer meter)
+{
+  _2D::BilinearInterpolator<double> interp;
+  _2D::DataSet data(5,5);
 
-  auto f  = [](double x, double y){return x*y + 2*x + 3*y;};
+  interp.setData( data.x, data.y, data.z );
 
-  for( int i = 0; i < nx*ny; i++)
-  {
-    // gnuplot format is essentially row-major
-    xx(i) = xmin+dx*(i/ny);
-    yy(i) = ymin+dy*(i%ny);
-    zz(i) = f(xx(i),yy(i));
-  }
-  interp.setData( xx, yy, zz );
-
-  for(int i = 0; i < 100; i++)
-    interp(2,2);
+  double dx = 5/100;
+  double dy = 5/10;
+  meter.measure( [&](){
+  for(double i = 0; i < 100; i++)
+    for(double j = 0; j < 10; j++)
+      interp(i*dx,j*dy);
+  } );
 
 })
 

@@ -43,7 +43,10 @@ _1D::InterpolatorInterface<double>* create(std::string type)
     return new _1D::LinearInterpolator<double>();
 
   if( type == "spline" )
-    return new _1D::SplineInterpolator<double>();
+    return new _1D::CubicSplineInterpolator<double>();
+
+  if( type == "monotonic" )
+    return new _1D::MonotonicInterpolator<double>();
 
   return nullptr;
 }

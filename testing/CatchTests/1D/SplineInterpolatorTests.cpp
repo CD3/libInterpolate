@@ -1,18 +1,18 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_1D/SplineInterpolator.hpp"
+#include "Interpolators/_1D/CubicSplineInterpolator.hpp"
 
 
-TEST_CASE( "SplineInterpolator Tests", "[spline]" ) {
+TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
 
-  _1D::SplineInterpolator<double> interp;
+  _1D::CubicSplineInterpolator<double> interp;
 
   int N = 100;
   double xmin = 0, xmax = 2*M_PI;
   double dx = (xmax - xmin)/(N-1);
 
-  _1D::SplineInterpolator<double>::VectorType xx(N), yy(N);
+  _1D::CubicSplineInterpolator<double>::VectorType xx(N), yy(N);
 
   CHECK_THROWS_AS( interp(1), std::logic_error );
 
@@ -66,9 +66,9 @@ TEST_CASE( "SplineInterpolator Tests", "[spline]" ) {
 
 }
 
-TEST_CASE("SplineInterpolator Edge Case Tests")
+TEST_CASE("CubicSplineInterpolator Edge Case Tests")
 {
-  _1D::SplineInterpolator<double> interp;
+  _1D::CubicSplineInterpolator<double> interp;
 
   std::vector<double> x, y;
   x.push_back( 1.0 ); y.push_back( 2.0 );

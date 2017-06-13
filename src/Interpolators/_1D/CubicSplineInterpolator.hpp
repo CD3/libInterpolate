@@ -1,5 +1,5 @@
-#ifndef Interpolators__1D_SplineInterpolator_hpp
-#define Interpolators__1D_SplineInterpolator_hpp
+#ifndef Interpolators__1D_CubicSplineInterpolator_hpp
+#define Interpolators__1D_CubicSplineInterpolator_hpp
 
 #include "InterpolatorBase.hpp"
 
@@ -13,7 +13,7 @@ namespace _1D {
   * This class does *not* do extrapolation.
   */
 template<class Real>
-class SplineInterpolator : public InterpolatorBase<Real>
+class CubicSplineInterpolator : public InterpolatorBase<Real>
 {
 
   public:
@@ -44,7 +44,7 @@ class SplineInterpolator : public InterpolatorBase<Real>
 
 template<class Real>
 void
-SplineInterpolator<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
+CubicSplineInterpolator<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( n, x, y, deep_copy );
   calcCoefficients();
@@ -52,7 +52,7 @@ SplineInterpolator<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
 
 template<class Real>
 void
-SplineInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy )
+CubicSplineInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( x, y, deep_copy );
   calcCoefficients();
@@ -60,7 +60,7 @@ SplineInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, b
 
 template<class Real>
 void
-SplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
+CubicSplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( x, y, deep_copy );
   calcCoefficients();
@@ -77,7 +77,7 @@ SplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy
 
 template<class Real>
 Real
-SplineInterpolator<Real>::operator()( Real x ) const
+CubicSplineInterpolator<Real>::operator()( Real x ) const
 {
   InterpolatorBase<Real>::checkData();
 
@@ -101,7 +101,7 @@ SplineInterpolator<Real>::operator()( Real x ) const
 
 template<typename Real>
 Real
-SplineInterpolator<Real>::derivative( Real x ) const
+CubicSplineInterpolator<Real>::derivative( Real x ) const
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -126,7 +126,7 @@ SplineInterpolator<Real>::derivative( Real x ) const
 
 template<class Real>
 Real
-SplineInterpolator<Real>::integral( Real _a, Real _b ) const
+CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
 {
   if( this->xv->size() < 1 )
     return 0;
@@ -244,7 +244,7 @@ SplineInterpolator<Real>::integral( Real _a, Real _b ) const
  */
 template<typename Real>
 void
-SplineInterpolator<Real>::calcCoefficients()
+CubicSplineInterpolator<Real>::calcCoefficients()
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);

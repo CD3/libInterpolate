@@ -93,11 +93,6 @@ target_link_libraries(${benchmarkName} Threads::Threads ) # If your project buil
 # Make sure that testing binaries are created in the binDir directory and use C++11
 set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
 
-# Now add the unit benchmark binary to the CMake test target
-#Notice the WORKING_DIRECTORY and COMMAND
-add_test(NAME ${benchmarkName} 
-         WORKING_DIRECTORY ${buildDir}
-         COMMAND ${binDir}/${benchmarkName} )
 
 endif()
 

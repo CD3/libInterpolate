@@ -12,6 +12,7 @@ Currently implemented methods are:
     - monotonic spline interpolation (http://adsabs.harvard.edu/full/1990A%26A...239..443S)
 - 2D Interpolation
     - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
+    - bilcubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
     - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
 
 ## Installing

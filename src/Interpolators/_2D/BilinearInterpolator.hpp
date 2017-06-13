@@ -51,7 +51,7 @@ class BilinearInterpolator : public InterpolatorBase<Real>
     std::shared_ptr<_2DVectorView> X,Y;
     std::shared_ptr<_2DMatrixView> Z;
     
-    Matrix22Array Q; // naming convension used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
+    Matrix22Array Q; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
 
 
 };
@@ -80,14 +80,14 @@ BilinearInterpolator<Real>::setData( size_t n, Real *x, Real *y, Real *z, bool d
   // Eigen defaults to COLUMN MAJOR
   // consecutive elements in a column are separated by Ny (this is the inner stride)
   // consecutive elements in a row are located next to each other (this is the outer stride)
-  // Stride object takes outer,inner as aruments.
+  // Stride object takes outer,inner as arguments.
   Z.reset( new _2DMatrixView( &(*zv)(0), Nx, Ny, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(1,Ny) ) );
 
   // Interpolation will be done by multiplying the coordinates by coefficients.
 
   Q = Matrix22Array( X->size()-1, Y->size()-1 );
 
-  // We are going to precompute the interpolation coefficients so
+  // We are going to pre-compute the interpolation coefficients so
   // that we can interpolate quickly
   for(int i = 0; i < X->size() - 1; i++)
   {

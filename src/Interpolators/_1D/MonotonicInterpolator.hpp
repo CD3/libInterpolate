@@ -173,7 +173,7 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
 
   // find the index that is just to the left of the x
   // this will correspond to the "interval index"
-  int i = Utils::index_first_ge( x, X, 1);
+  int i = Utils::index_first_ge( x, X, X.size(), 1);
 
   // don't extrapolate at all
   if( i == 0 || i == X.size())

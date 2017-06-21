@@ -34,11 +34,6 @@ int index_first_gt( Val val, const Indexable& vals, size_t N, int i = 0, int str
   return i;
 }
 
-template<class Val, class Indexable>
-int index_first_gt( Val val, const Indexable& vals, int i = 0, int stride = 1 )
-{
-  return index_first_gt( val, vals, vals.size(), i, stride );
-}
 
 /**
  * @brief Find index of last element in a sorted array with value less than a given value.
@@ -67,12 +62,6 @@ int index_last_lt( Val val, const Indexable& vals, size_t N, int i = -1, int str
   return i;
 }
 
-template<class Val, class Indexable>
-int index_last_lt( Val val, const Indexable& vals, int i = -1, int stride = 1 )
-{
-  return index_last_lt( val, vals, vals.size(), i, stride );
-}
-
 
 template<class Val, class Indexable>
 int index_first_ge( Val val, const Indexable& vals, size_t N, int i = 0, int stride = 1 )
@@ -87,11 +76,6 @@ int index_first_ge( Val val, const Indexable& vals, size_t N, int i = 0, int str
   return i;
 }
 
-template<class Val, class Indexable>
-int index_first_ge( Val val, const Indexable& vals, int i = 0, int stride = 1 )
-{
-  return index_first_ge( val, vals, vals.size(), i, stride );
-}
 
 template<class Val, class Indexable>
 int index_last_le( Val val, const Indexable& vals, size_t N, int i = -1, int stride = 1 )
@@ -109,11 +93,6 @@ int index_last_le( Val val, const Indexable& vals, size_t N, int i = -1, int str
   return i;
 }
 
-template<class Val, class Indexable>
-int index_last_le( Val val, const Indexable& vals, int i = -1, int stride = 1 )
-{
-  return index_last_le( val, vals, vals.size(), i, stride );
-}
 
 }
 

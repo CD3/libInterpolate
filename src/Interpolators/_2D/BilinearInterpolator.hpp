@@ -114,12 +114,12 @@ BilinearInterpolator<Real>::operator()( Real x, Real y ) const
     return 0;
   }
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X );
+  int i  = Utils::index_last_lt( x, *X, X->size() );
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y );
+  int j  = Utils::index_last_lt( y, *Y, Y->size() );
   if(j < 0)
     j = 0;
   
@@ -150,12 +150,12 @@ BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
   }
 
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X );
+  int i  = Utils::index_last_lt( x, *X, X->size() );
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y );
+  int j  = Utils::index_last_lt( y, *Y, Y->size() );
   if(j < 0)
     j = 0;
 
@@ -195,12 +195,12 @@ BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb ) c
   // ja and jb will be to BELOW _ya and _yb
 
   // bottom-left corner
-  int ia = Utils::index_last_lt( _xa, *X );
-  int ja = Utils::index_last_lt( _ya, *Y );
+  int ia = Utils::index_last_lt( _xa, *X, X->size() );
+  int ja = Utils::index_last_lt( _ya, *Y, Y->size() );
 
   // top-right corner
-  int ib = Utils::index_last_lt( _xb, *X );
-  int jb = Utils::index_last_lt( _yb, *Y );
+  int ib = Utils::index_last_lt( _xb, *X, X->size() );
+  int jb = Utils::index_last_lt( _yb, *Y, Y->size() );
 
    //We can integrate the function directly from the interpolation polynomial.
    //In Matrix form the polynomial looks like this

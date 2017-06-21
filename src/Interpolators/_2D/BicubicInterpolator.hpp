@@ -302,12 +302,12 @@ BicubicInterpolator<Real>::operator()( Real x, Real y ) const
 
 
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X );
+  int i  = Utils::index_last_lt( x, *X, X->size() );
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y );
+  int j  = Utils::index_last_lt( y, *Y, Y->size() );
   if(j < 0)
     j = 0;
   

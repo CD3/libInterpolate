@@ -38,7 +38,7 @@ LinearInterpolator<Real>::operator()( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the left of the x
-  int i = Utils::index_last_lt( x, X, 0);
+  int i = Utils::index_last_lt( x, X, X.size(), 0);
 
   // don't extrapolate at all
   if( i == -1 || i == X.size() - 1 )
@@ -59,7 +59,7 @@ LinearInterpolator<Real>::derivative( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the left of the x
-  int i = Utils::index_last_lt( x, X, 0);
+  int i = Utils::index_last_lt( x, X, X.size(), 0);
 
   // don't extrapolate at all
   if( i == -1 || i == X.size() - 1 )

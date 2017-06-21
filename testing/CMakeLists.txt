@@ -82,16 +82,22 @@ find_package(Threads)
 
 if(Threads_FOUND)
 
-# Add benchmark executable
-set( benchmarkName NoniusBenchmarks )
-add_executable(${benchmarkName} ${benchmark_SOURCES})
-#target_compile_definitions( ${benchmarkName} )
+foreach(benchmarkSrc ${benchmark_SOURCES})
 
-# Link dependencies
-target_link_libraries(${benchmarkName} Threads::Threads ) # If your project builds a library, link to it here
+  get_filename_component(benchmarkName ${benchmarkSrc} NAME_WE)
 
-# Make sure that testing binaries are created in the binDir directory and use C++11
-set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
+  # Add benchmark executable
+  add_executable(${benchmarkName} ${benchmarkSrc})
+
+  # Link dependencies
+  target_link_libraries(${benchmarkName} Threads::Threads ) # If your project builds a library, link to it here
+
+  # Make sure that testing binaries are created in the binDir directory and use C++11
+  set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
+
+endforeach()
+
+
 
 
 endif()

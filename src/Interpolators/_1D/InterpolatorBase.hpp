@@ -60,7 +60,7 @@ InterpolatorBase<Real>::operator()( size_t n, Real *x, Real *y ) const
 {
   // we *could* parallelize this loop, but some interpolators might
   // not be thread safe.
-  for( int i = 0; i < n; i++ )
+  for( size_t i = 0; i < n; i++ )
     y[i] = this->operator()(x[i]);
 }
 

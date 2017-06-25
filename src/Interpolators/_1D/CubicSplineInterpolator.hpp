@@ -2,6 +2,8 @@
 #define Interpolators__1D_CubicSplineInterpolator_hpp
 
 #include "InterpolatorBase.hpp"
+#include <boost/range/algorithm/upper_bound.hpp>
+#include <boost/range/algorithm/lower_bound.hpp>
 
 namespace _1D {
 
@@ -85,7 +87,9 @@ CubicSplineInterpolator<Real>::operator()( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the right of the x
-  int i = Utils::index_first_ge( x, X, X.size(), 1);
+  //int i = Utils::index__first_ge( x, X, X.size(), 1);
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int i = boost::lower_bound( rng, x ) - X.data();
 
   // don't extrapolate at all
   if( i == 0 || i == X.size())
@@ -107,7 +111,9 @@ CubicSplineInterpolator<Real>::derivative( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the right of the x
-  int i = Utils::index_first_gt( x, X, X.size(), 1);
+  //int i = Utils::index__first_gt( x, X, X.size(), 1);
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int i = boost::upper_bound(rng,x) - X.data();
 
   // don't extrapolate at all
   if( i == 0 || i == X.size())
@@ -146,8 +152,11 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
   _b = std::min( _b, X[X.size()-1] );
 
   // find the indexes that is just to the right of a and b
-  int ai = Utils::index_first_gt( _a, X, X.size(), 1 );
-  int bi = Utils::index_first_gt( _b, X, X.size(), 1 );
+  //int ai = Utils::index__first_gt( _a, X, X.size(), 1 );
+  //int bi = Utils::index__first_gt( _b, X, X.size(), 1 );
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int ai = boost::upper_bound(rng,_a) - X.data();
+  int bi = boost::upper_bound(rng,_b) - X.data();
 
   /**
    *

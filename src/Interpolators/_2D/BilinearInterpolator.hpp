@@ -8,6 +8,8 @@
   */
 
 #include "InterpolatorBase.hpp"
+#include <boost/range/algorithm/lower_bound.hpp>
+#include <boost/range/adaptor/strided.hpp>
 
 /** @class 
   * @brief Linear interpolation for 2D functions.
@@ -114,12 +116,18 @@ BilinearInterpolator<Real>::operator()( Real x, Real y ) const
     return 0;
   }
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X, X->size() );
+  //int i  = Utils::index__last_lt( x, *X, X->size() );
+  // NOTE: X data is strided.
+  auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
+  int i = boost::lower_bound( xrng, x) - boost::begin(xrng) - 1;
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y, Y->size() );
+  //int j  = Utils::index__last_lt( y, *Y, Y->size() );
+  // NOTE: Y data is NOT strided
+  auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
+  int j = boost::lower_bound( yrng, y) - boost::begin(yrng) - 1;
   if(j < 0)
     j = 0;
   
@@ -150,12 +158,18 @@ BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
   }
 
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X, X->size() );
+  //int i  = Utils::index__last_lt( x, *X, X->size() );
+  // NOTE: X data is strided.
+  auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
+  int i = boost::lower_bound( xrng, x) - boost::begin(xrng) - 1;
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y, Y->size() );
+  //int j  = Utils::index__last_lt( y, *Y, Y->size() );
+  // NOTE: Y data is NOT strided
+  auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
+  int j = boost::lower_bound( yrng, y) - boost::begin(yrng) - 1;
   if(j < 0)
     j = 0;
 
@@ -195,12 +209,27 @@ BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb ) c
   // ja and jb will be to BELOW _ya and _yb
 
   // bottom-left corner
-  int ia = Utils::index_last_lt( _xa, *X, X->size() );
-  int ja = Utils::index_last_lt( _ya, *Y, Y->size() );
+  //int ia = Utils::index__last_lt( _xa, *X, X->size() );
+  //int ja = Utils::index__last_lt( _ya, *Y, Y->size() );
+  // Note: X data is strided. Y data is NOT strided.
+  auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
+  auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
+  int ia = boost::lower_bound( xrng, _xa) - boost::begin(xrng) - 1;
+  int ja = boost::lower_bound( yrng, _ya) - boost::begin(yrng) - 1;
+  if(ia < 0)
+    ia = 0;
+  if(ja < 0)
+    ja = 0;
 
   // top-right corner
-  int ib = Utils::index_last_lt( _xb, *X, X->size() );
-  int jb = Utils::index_last_lt( _yb, *Y, Y->size() );
+  //int ib = Utils::index__last_lt( _xb, *X, X->size() );
+  //int jb = Utils::index__last_lt( _yb, *Y, Y->size() );
+  int ib = boost::lower_bound( xrng, _xb) - boost::begin(xrng) - 1;
+  int jb = boost::lower_bound( yrng, _yb) - boost::begin(yrng) - 1;
+  if(ib < 0)
+    ib = 0;
+  if(jb < 0)
+    jb = 0;
 
    //We can integrate the function directly from the interpolation polynomial.
    //In Matrix form the polynomial looks like this

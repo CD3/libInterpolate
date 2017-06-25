@@ -3,6 +3,8 @@
 
 #include "InterpolatorBase.hpp"
 
+#include<boost/range/algorithm.hpp>
+
 namespace _1D {
 
 
@@ -38,7 +40,9 @@ LinearInterpolator<Real>::operator()( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the left of the x
-  int i = Utils::index_last_lt( x, X, X.size(), 0);
+  //int i = Utils::index__last_lt( x, X, X.size(), 0);
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int i = boost::lower_bound( rng, x) - X.data() - 1;
 
   // don't extrapolate at all
   if( i == -1 || i == X.size() - 1 )
@@ -59,7 +63,9 @@ LinearInterpolator<Real>::derivative( Real x ) const
   const VectorType &Y = *(this->yv);
 
   // find the index that is just to the left of the x
-  int i = Utils::index_last_lt( x, X, X.size(), 0);
+  //int i = Utils::index__last_lt( x, X, X.size(), 0);
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int i = boost::lower_bound( rng, x) - X.data() - 1;
 
   // don't extrapolate at all
   if( i == -1 || i == X.size() - 1 )

@@ -8,6 +8,7 @@
   */
 
 #include "InterpolatorBase.hpp"
+#include <boost/range/algorithm/lower_bound.hpp>
 
 namespace _1D {
 
@@ -173,7 +174,9 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
 
   // find the index that is just to the left of the x
   // this will correspond to the "interval index"
-  int i = Utils::index_first_ge( x, X, X.size(), 1);
+  //int i = Utils::index__first_ge( x, X, X.size(), 1);
+  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
+  int i = boost::lower_bound( rng, x ) - X.data();
 
   // don't extrapolate at all
   if( i == 0 || i == X.size())

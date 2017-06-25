@@ -8,6 +8,8 @@
   */
 
 #include "InterpolatorBase.hpp"
+#include <boost/range/algorithm/lower_bound.hpp>
+#include <boost/range/adaptor/strided.hpp>
 
 /** @class 
   * @brief Cubic spline interpolation for for 2D functions.
@@ -302,12 +304,18 @@ BicubicInterpolator<Real>::operator()( Real x, Real y ) const
 
 
   // find the x index that is just to the LEFT of x
-  int i  = Utils::index_last_lt( x, *X, X->size() );
+  //int i  = Utils::index__last_lt( x, *X, X->size() );
+  // NOTE: X data is strided.
+  auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
+  int i = boost::lower_bound( xrng, x) - boost::begin(xrng) - 1;
   if(i < 0)
     i = 0;
 
   // find the y index that is just BELOW y
-  int j  = Utils::index_last_lt( y, *Y, Y->size() );
+  //int j  = Utils::index__last_lt( y, *Y, Y->size() );
+  // NOTE: Y data is NOT strided
+  auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
+  int j = boost::lower_bound( yrng, y) - boost::begin(yrng) - 1;
   if(j < 0)
     j = 0;
   

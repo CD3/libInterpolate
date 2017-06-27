@@ -88,7 +88,17 @@ set( binDir ${CMAKE_BINARY_DIR}/benchmarkBin )
 # in the `NoniusBenchmarks` directory.
 
 if(BUILD_NONIUS_BENCHMARKS)
-set( benchmark_DIR ./NoniusBenchmarks)
+
+set( benchmark_DIR ${CMAKE_CURRENT_SOURCE_DIR}/NoniusBenchmarks)
+
+if( EXISTS ${benchmark_DIR} )
+
+set(NONIUS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/nonius CACHE PATH "")
+
+if( NOT EXISTS ${NONIUS_DIRECTORY} )
+  message(SEND_ERROR "Nonius directory not found. Please clone https://github.com/libnonius/nonius into ${NONIUS_DIRECTORY} or disable Nonius benchmarks." )
+endif()
+
 # Search for sources.
 file( GLOB_RECURSE benchmark_SOURCES
       RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -121,7 +131,11 @@ foreach(benchmarkSrc ${benchmark_SOURCES})
   set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
 
 endforeach()
-endif()
+endif(Threads_FOUND)
+
+else(EXISTS ${benchmark_DIR})
+  message(WARNING "Nonius benchmarks were enabled, but the ${benchmark_DIR} directory was not found.")
+endif(EXISTS ${benchmark_DIR})
 endif()
 
 
@@ -179,6 +193,8 @@ target_link_libraries(${benchmarkName} celero ${CELERO_EXTRA_LIBS} ) # If your p
 set_target_properties(${benchmarkName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir} CXX_STANDARD 11)
 
 endforeach()
-endif()
 
+else(EXISTS ${benchmark_DIR})
+  message(WARNING "Clero benchmarks were enabled, but the ${benchmark_DIR} directory was not found.")
+endif(EXISTS ${benchmark_DIR})
 endif()

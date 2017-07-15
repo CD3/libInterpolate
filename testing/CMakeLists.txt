@@ -43,7 +43,7 @@ endforeach()
 
 
 # Add unit test executable
-set( testName CatchTests )
+set( testName ${PROJECT_NAME}_CatchTests )
 add_executable(${testName} ${unitTest_SOURCES})
 target_compile_definitions( ${testName} PRIVATE -DTESTING )
 

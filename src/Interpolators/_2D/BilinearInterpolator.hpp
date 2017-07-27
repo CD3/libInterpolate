@@ -39,9 +39,18 @@ class BilinearInterpolator : public InterpolatorBase<Real>
     typedef Eigen::Matrix<Real,1,2 > RowVector2;
 
     // methods required by the interface
-    virtual Real operator()( Real x, Real y ) const;
-    virtual Real integral( Real a, Real b, Real c, Real d ) const;
-    virtual GradientType gradient( Real x, Real y ) const;
+    virtual Real operator()( Real x, Real y ) const {return call(x,y);}
+    virtual Real integral( Real a, Real b, Real c, Real d ) const {return integral_imp(a,b,c,d);}
+    virtual GradientType gradient( Real x, Real y ) const {return gradient_imp(x,y);}
+
+    // non-virtual implementations
+    // we want to implement the interpolation as a non-virtual method
+    // in case somebody thinks that will be too slow. the virtual methods
+    // will then just call these (they are already slow, right?).
+    Real call(Real x, Real y ) const;
+    virtual Real integral_imp( Real a, Real b, Real c, Real d ) const;
+    GradientType gradient_imp( Real x, Real y ) const;
+
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
     using InterpolatorBase<Real>::setData;
 
@@ -103,7 +112,7 @@ BilinearInterpolator<Real>::setData( size_t n, Real *x, Real *y, Real *z, bool d
 
 template<class Real>
 Real
-BilinearInterpolator<Real>::operator()( Real x, Real y ) const
+BilinearInterpolator<Real>::call( Real x, Real y ) const
 {
   InterpolatorBase<Real>::checkData();
   
@@ -146,7 +155,7 @@ BilinearInterpolator<Real>::operator()( Real x, Real y ) const
 
 template<class Real>
 auto
-BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
+BilinearInterpolator<Real>::gradient_imp( Real x, Real y ) const -> GradientType
 {
   // no extrapolation...
   if( x < (*X)(0)
@@ -194,7 +203,7 @@ BilinearInterpolator<Real>::gradient( Real x, Real y ) const -> GradientType
 
 template<class Real>
 Real
-BilinearInterpolator<Real>::integral( Real _xa, Real _xb, Real _ya, Real _yb ) const
+BilinearInterpolator<Real>::integral_imp( Real _xa, Real _xb, Real _ya, Real _yb ) const
 {
   // No extrapolation
   int nx = X->size();

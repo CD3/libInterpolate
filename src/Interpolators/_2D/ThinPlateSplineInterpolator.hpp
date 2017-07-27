@@ -40,7 +40,14 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
     typedef Eigen::Map<MatrixType,Eigen::Unaligned,     Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>> _2DMatrixView;
 
     // methods required by the interface
-    virtual Real operator()( Real x, Real y ) const;
+    virtual Real operator()( Real x, Real y ) const {return call(x,y);}
+
+    // non-virtual implementations
+    // we want to implement the interpolation as a non-virtual method
+    // in case somebody thinks that will be too slow. the virtual methods
+    // will then just call these (they are already slow, right?).
+    Real call(Real x, Real y ) const;
+
     virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
     using InterpolatorBase<Real>::setData;
 
@@ -142,7 +149,7 @@ ThinPlateSplineInterpolator<Real>::G(Real x1, Real y1, Real x2, Real y2) const
 
 template<class Real>
 Real
-ThinPlateSplineInterpolator<Real>::operator()( Real x, Real y ) const
+ThinPlateSplineInterpolator<Real>::call( Real x, Real y ) const
 {
   InterpolatorBase<Real>::checkData();
   

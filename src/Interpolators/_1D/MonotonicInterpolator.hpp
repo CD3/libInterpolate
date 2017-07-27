@@ -24,9 +24,20 @@ class MonotonicInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
+    // function required by interface
+    virtual Real operator()( Real x ) const      {return call(x);}
+    //virtual Real derivative( Real x ) const      {return derivative_imp(x);}
+    //virtual Real integral( Real a, Real b) const {return integral_imp(a,b);}
+    // use the base class operator to interpolate multiple points at once.
     using InterpolatorBase<Real>::operator();
-    virtual Real operator()( Real x ) const;
 
+    // non-virtual implementations
+    // we want to implement the interpolation as a non-virtual method
+    // in case somebody thinks that will be too slow. the virtual methods
+    // will then just call these (they are already slow, right?).
+    Real call(Real x ) const; // can't really create a function called oeprator()_imp
+
+    // need to overload setData function to trigger setup calculations
     virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
     virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
     virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
@@ -165,7 +176,7 @@ MonotonicInterpolator<Real>::calcCoefficients()
 
 template<class Real>
 Real
-MonotonicInterpolator<Real>::operator()( Real x ) const
+MonotonicInterpolator<Real>::call( Real x ) const
 {
   InterpolatorBase<Real>::checkData();
 

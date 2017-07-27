@@ -22,17 +22,26 @@ class LinearInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
+    // function required by interface
+    virtual Real operator()( Real x ) const {return call(x);}
+    virtual Real derivative( Real x ) const {return derivative_imp(x);}
+    // virtual Real integral( Real a, Real b) const {return integral_imp(a,b);}
+    // use the base class operator to interpolate multiple points at once.
     using InterpolatorBase<Real>::operator();
-    virtual Real operator()( Real x ) const;
-    virtual Real derivative( Real x ) const;
-    // virtual Real integral( Real a, Real b) const;
+
+    // non-virtual implementations
+    // we want to implement the interpolation as a non-virtual method
+    // in case somebody thinks that will be too slow. the virtual methods
+    // will then just call these (they are already slow, right?).
+    Real call(Real x ) const; // can't really create a function called oeprator()_imp
+    Real derivative_imp( Real x ) const;
 
 
 };
 
 template<class Real>
 Real
-LinearInterpolator<Real>::operator()( Real x ) const
+LinearInterpolator<Real>::call( Real x ) const
 {
   InterpolatorBase<Real>::checkData();
 
@@ -57,7 +66,7 @@ LinearInterpolator<Real>::operator()( Real x ) const
 
 template<typename Real>
 Real
-LinearInterpolator<Real>::derivative( Real x ) const
+LinearInterpolator<Real>::derivative_imp( Real x ) const
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);

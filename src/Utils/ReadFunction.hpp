@@ -37,7 +37,7 @@ namespace Utils
     //////////////////////////////
 
     const int chunck = 1000;
-    int buffsize;
+    int buffsize,buffsize_old;
     int i,j;
     int n;
 
@@ -68,16 +68,15 @@ namespace Utils
 
       if(i == buffsize - 1)  // this "grows" the buffer
       {
+        buffsize_old = buffsize;
         buffsize = buffsize + chunck;
 
         xbuffer2 = new ArgType[buffsize*_dimensions  ];
-        ybuffer2 = new ValType[buffsize*_multiplicity];
-        for(j = 0; j < buffsize*_dimensions; j++)
-          xbuffer2[j] = xbuffer1[j];
-        for(j = 0; j < buffsize*_multiplicity; j++)
-          ybuffer2[j] = ybuffer1[j];
-
+        std::copy( xbuffer1, xbuffer1 + buffsize_old*_dimensions, xbuffer2);
         delete[] xbuffer1;
+
+        ybuffer2 = new ValType[buffsize*_multiplicity];
+        std::copy( ybuffer1, ybuffer1 + buffsize_old*_multiplicity, ybuffer2);
         delete[] ybuffer1;
 
         xbuffer1 = xbuffer2;

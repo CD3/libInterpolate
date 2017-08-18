@@ -2,7 +2,7 @@
 #include "fakeit.hpp"
 
 #include "Utils/Indexing.hpp"
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <boost/range/adaptor/strided.hpp>
 #include <boost/range/algorithm/upper_bound.hpp>
 #include <boost/range/algorithm/lower_bound.hpp>

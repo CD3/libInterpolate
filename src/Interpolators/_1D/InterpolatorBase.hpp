@@ -51,6 +51,8 @@ class InterpolatorBase
     void checkData() const;         ///< Check that data has been initialized and throw exception if not.
 
   private:
+    // this helps to make sure that the derived class actually
+    // passes itself as the template argument.
     InterpolatorBase(){ }
     friend Derived;
 

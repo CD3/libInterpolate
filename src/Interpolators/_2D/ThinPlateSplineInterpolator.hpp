@@ -26,30 +26,30 @@
 namespace _2D {
 
 template<class Real>
-class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
+class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInterpolator<Real>>
 {
   public:
-    // typedefs
-    typedef typename InterpolatorBase<Real>::VectorType VectorType;
-    typedef typename InterpolatorBase<Real>::MapType MapType;
-    typedef typename InterpolatorBase<Real>::GradientType GradientType;
+    using BASE = InterpolatorBase<ThinPlateSplineInterpolator<Real>>;
+    using VectorType = typename BASE::VectorType;
+    using MapType = typename BASE::MapType;
 
     // types used to view data as 2D coordinates
-    typedef typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixType;
-    typedef Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic               >> _2DVectorView;
-    typedef Eigen::Map<MatrixType,Eigen::Unaligned,     Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>> _2DMatrixView;
+    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
+    using _2DVectorView = Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
+    using _2DMatrixView = Eigen::Map<MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
+
+    // types used for 2x2 matrix algebra
+    using Matrix22 = Eigen::Matrix<Real,2,2 >;
+    using Matrix22Array = Eigen::Array< Matrix22, Eigen::Dynamic, Eigen::Dynamic >;
+    using ColVector2 = Eigen::Matrix<Real,2,1 >;
+    using RowVector2 = Eigen::Matrix<Real,1,2 >;
 
     Real operator()( Real x, Real y ) const;
 
-    template<typename I>
-    void setData( I n, Real *x, Real *y, Real *z, bool deep_copy = true );
-    template<typename XT, typename YT, typename ZT>
-    void setData( XT &x, YT &y, ZT &z, bool deep_copy = true );
-
   protected:
-    using InterpolatorBase<Real>::xv;
-    using InterpolatorBase<Real>::yv;
-    using InterpolatorBase<Real>::zv;
+    using BASE::xv;
+    using BASE::yv;
+    using BASE::zv;
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
     std::shared_ptr<_2DVectorView> X,Y;
     std::shared_ptr<_2DMatrixView> Z;
@@ -58,7 +58,8 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
 
     Real G(Real x, Real y, Real xi, Real yi) const;
 
-    void calcCoefficients();
+    void setupInterpolator();
+    friend BASE;
 
 
 
@@ -66,26 +67,8 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
 };
 
 template<class Real>
-template<typename I>
 void
-ThinPlateSplineInterpolator<Real>::setData( I n, Real *x, Real *y, Real *z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(n,x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-template<typename XT, typename YT, typename ZT>
-void
-ThinPlateSplineInterpolator<Real>::setData( XT &x, YT &y, ZT &z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-void
-ThinPlateSplineInterpolator<Real>::calcCoefficients()
+ThinPlateSplineInterpolator<Real>::setupInterpolator()
 {
   a = MatrixType(this->xv->rows(),1);
   b = MatrixType(this->xv->rows(),3);
@@ -136,7 +119,7 @@ template<class Real>
 Real
 ThinPlateSplineInterpolator<Real>::operator()( Real x, Real y ) const
 {
-  InterpolatorBase<Real>::checkData();
+  BASE::checkData();
   
   // no extrapolation...
   if( x < this->xv->minCoeff()

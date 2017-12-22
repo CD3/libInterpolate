@@ -23,69 +23,45 @@
 namespace _2D {
 
 template<class Real>
-class BicubicInterpolator : public InterpolatorBase<Real>
+class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>>
 {
   public:
-    // typedefs
-    typedef typename InterpolatorBase<Real>::VectorType VectorType;
-    typedef typename InterpolatorBase<Real>::MapType MapType;
-    typedef typename InterpolatorBase<Real>::GradientType GradientType;
+    using BASE = InterpolatorBase<BicubicInterpolator<Real>>;
+    using VectorType = typename BASE::VectorType;
+    using MapType = typename BASE::MapType;
 
     // types used to view data as 2D coordinates
-    typedef typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixType;
-    typedef Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic               >> _2DVectorView;
-    typedef Eigen::Map<MatrixType,Eigen::Unaligned,     Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>> _2DMatrixView;
+    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
+    using _2DVectorView = Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
+    using _2DMatrixView = Eigen::Map<MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
 
-    typedef Eigen::Matrix<Real,4,4 > Matrix44;
-    typedef Eigen::Array< Matrix44, Eigen::Dynamic, Eigen::Dynamic > Matrix44Array;
-    typedef Eigen::Matrix<Real,4,1 > ColVector4;
-    typedef Eigen::Matrix<Real,1,4 > RowVector4;
+    // types used for 4x4 matrix algebra
+    using Matrix44 = Eigen::Matrix<Real,4,4 >;
+    using Matrix44Array = Eigen::Array< Matrix44, Eigen::Dynamic, Eigen::Dynamic >;
+    using ColVector4 = Eigen::Matrix<Real,4,1 >;
+    using RowVector4 = Eigen::Matrix<Real,1,4 >;
 
     // methods required by the interface
     Real operator()( Real x, Real y ) const;
 
-    template<typename I>
-    void setData( I n, Real *x, Real *y, Real *z, bool deep_copy = true );
-    template<typename X, typename Y, typename Z>
-    void setData( X &x, Y &y, Z &z, bool deep_copy = true );
-
   protected:
-    using InterpolatorBase<Real>::xv;
-    using InterpolatorBase<Real>::yv;
-    using InterpolatorBase<Real>::zv;
+    using BASE::xv;
+    using BASE::yv;
+    using BASE::zv;
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
     std::shared_ptr<_2DVectorView> X,Y;
     std::shared_ptr<_2DMatrixView> Z;
     
     Matrix44Array a; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bicubic_interpolation)
 
-    void calcCoefficients();
-
-
+    void setupInterpolator();
+    friend BASE;
 
 };
 
 template<class Real>
-template<typename I>
 void
-BicubicInterpolator<Real>::setData( I n, Real *x, Real *y, Real *z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(n,x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-template<typename XT, typename YT, typename ZT>
-void
-BicubicInterpolator<Real>::setData( XT &x, YT &y, ZT &z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-void
-BicubicInterpolator<Real>::calcCoefficients()
+BicubicInterpolator<Real>::setupInterpolator()
 {
   // setup 2D view of the data
   // We need to figure out what the x and y dimensions are.
@@ -284,7 +260,7 @@ template<class Real>
 Real
 BicubicInterpolator<Real>::operator()( Real x, Real y ) const
 {
-  InterpolatorBase<Real>::checkData();
+  BASE::checkData();
   
   // no extrapolation...
   if( x < this->xv->minCoeff()

@@ -6,7 +6,7 @@
 
 namespace _2D {
 
-class TestInterp : public InterpolatorBase<double>
+class TestInterp : public InterpolatorBase<TestInterp>
 {
   public:
     virtual double operator()( double x, double y ) const

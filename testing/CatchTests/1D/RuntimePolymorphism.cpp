@@ -19,7 +19,6 @@ TEST_CASE( "Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
     x.push_back(10); y.push_back(14);  // slope of 1 
 
     interp = _1D::LinearInterpolator<double>();
-
     interp.target<_1D::LinearInterpolator<double>>()->setData(x,y);
 
     //CHECK( interp( -1 ) == Approx( -3 ) );

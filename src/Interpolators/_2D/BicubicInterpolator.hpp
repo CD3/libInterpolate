@@ -42,56 +42,42 @@ class BicubicInterpolator : public InterpolatorBase<Real>
     typedef Eigen::Matrix<Real,1,4 > RowVector4;
 
     // methods required by the interface
-    virtual Real operator()( Real x, Real y ) const {return call(x,y);}
+    Real operator()( Real x, Real y ) const;
 
-    // non-virtual implementations
-    // we want to implement the interpolation as a non-virtual method
-    // in case somebody thinks that will be too slow. the virtual methods
-    // will then just call these (they are already slow, right?).
-    Real call( Real x, Real y ) const;
-
-    virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
-    using InterpolatorBase<Real>::setData;
-
-    // additional methods
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, VectorType &z, bool deep_copy = true );
+    template<typename I>
+    void setData( I n, Real *x, Real *y, Real *z, bool deep_copy = true );
+    template<typename X, typename Y, typename Z>
+    void setData( X &x, Y &y, Z &z, bool deep_copy = true );
 
   protected:
     using InterpolatorBase<Real>::xv;
     using InterpolatorBase<Real>::yv;
     using InterpolatorBase<Real>::zv;
-
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
     std::shared_ptr<_2DVectorView> X,Y;
     std::shared_ptr<_2DMatrixView> Z;
     
-    void calcCoefficients();
     Matrix44Array a; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bicubic_interpolation)
+
+    void calcCoefficients();
 
 
 
 };
 
 template<class Real>
+template<typename I>
 void
-BicubicInterpolator<Real>::setData( size_t n, Real *x, Real *y, Real *z, bool deep_copy )
+BicubicInterpolator<Real>::setData( I n, Real *x, Real *y, Real *z, bool deep_copy )
 {
   InterpolatorBase<Real>::setData(n,x,y,z,deep_copy);
   calcCoefficients();
 }
 
 template<class Real>
+template<typename XT, typename YT, typename ZT>
 void
-BicubicInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-void
-BicubicInterpolator<Real>::setData( VectorType  &x, VectorType &y, VectorType &z, bool deep_copy )
+BicubicInterpolator<Real>::setData( XT &x, YT &y, ZT &z, bool deep_copy )
 {
   InterpolatorBase<Real>::setData(x,y,z,deep_copy);
   calcCoefficients();
@@ -296,7 +282,7 @@ BicubicInterpolator<Real>::calcCoefficients()
 
 template<class Real>
 Real
-BicubicInterpolator<Real>::call( Real x, Real y ) const
+BicubicInterpolator<Real>::operator()( Real x, Real y ) const
 {
   InterpolatorBase<Real>::checkData();
   

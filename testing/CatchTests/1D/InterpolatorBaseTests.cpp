@@ -9,7 +9,7 @@ namespace _1D {
 class TestInterp : public InterpolatorBase<double>
 {
   public:
-    virtual double operator()( double x ) const
+    double operator()( double x ) const
     {
       return x + 10;
     }
@@ -212,34 +212,3 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
 }
 
 
-TEST_CASE( "InterpolatorBase Derivative/Integration Tests", "[plumbing]" ) {
-
-  _1D::TestInterp interp;
-
-  REQUIRE( interp(1) == Approx(11) );
-  REQUIRE( interp(10) == Approx(20) );
-
-  int N = 10;
-  _1D::InterpolatorBase<double>::VectorType xx(N), yy(N);
-
-  for( int i = 0; i < N; i++)
-  {
-    xx(i) = 0.1*i;
-    yy(i) = 1;
-  }
-  interp.setData(xx,yy);
-
-  REQUIRE( interp.derivative(0.0) == Approx(1) );
-  REQUIRE( interp.derivative(0.1) == Approx(1) );
-  REQUIRE( interp.derivative(0.2) == Approx(1) );
-
-  REQUIRE( interp.integral(0.0,0.1) == Approx(10.1*10.1/2 - 10*10/2) );
-  REQUIRE( interp.integral(0.1,0.2) == Approx(10.2*10.2/2 - 10.1*10.1/2) );
-  REQUIRE( interp.integral(0.2,0.3) == Approx(10.3*10.3/2 - 10.2*10.2/2) );
-  // switching limits should pick up a negative sign
-  REQUIRE( interp.integral(0.1,0.0) == Approx(-10.1*10.1/2 + 10*10/2) );
-  REQUIRE( interp.integral(0.2,0.1) == Approx(-10.2*10.2/2 + 10.1*10.1/2) );
-  REQUIRE( interp.integral(0.3,0.2) == Approx(-10.3*10.3/2 + 10.2*10.2/2) );
-
-
-}

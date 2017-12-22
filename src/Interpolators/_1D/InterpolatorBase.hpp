@@ -8,42 +8,35 @@
   */
 
 #include <memory>
-#include "InterpolatorInterface.hpp"
+#include <Eigen/Dense>
 #include "Utils/Indexing.hpp"
 
 
 namespace _1D {
 
 /** @class 
-  * @brief A base class for interpolators that provides default implementations of the interface.
+  * @brief A base class that provides some useful functions for interpolating data.
   * @author C.D. Clark III
   *
-  * This class provides an implementation for the setData method, as well as adding a few additional
-  * useful methods, including derivative and integral methods.
+  * This class provides eigen matrices to store the data that is interpolated, a few setData methods
+  * to populate the data.
   */
 template<class Real>
-class InterpolatorBase : public InterpolatorInterface<Real>
+class InterpolatorBase
 {
   public:
     typedef Eigen::Matrix<Real,Eigen::Dynamic,1> VectorType;
     typedef Eigen::Map<VectorType> MapType;
 
-    // methods required by interface
-    virtual void setData( size_t n, Real *x, Real *y, bool deep_copy = true );
-    using InterpolatorInterface<Real>::operator();
-    virtual void operator()( size_t n, Real *x, Real *y ) const;
+    template<typename I>
+    void setData( I n, Real *x, Real *y, bool deep_copy = true );
 
-    // additional methods
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
+    template<typename X, typename Y>
+    void setData( X &x, Y &y, bool deep_copy = true );
 
     // methods to get the data
-    virtual std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
-    virtual std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
-
-    // integral and derivative
-    virtual Real derivative( Real x ) const;
-    virtual Real integral(   Real a, Real b ) const;
+    std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
+    std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
 
 
   protected:
@@ -56,16 +49,6 @@ class InterpolatorBase : public InterpolatorInterface<Real>
 
 template<class Real>
 void
-InterpolatorBase<Real>::operator()( size_t n, Real *x, Real *y ) const
-{
-  // we *could* parallelize this loop, but some interpolators might
-  // not be thread safe.
-  for( size_t i = 0; i < n; i++ )
-    y[i] = this->operator()(x[i]);
-}
-
-template<class Real>
-void
 InterpolatorBase<Real>::checkData() const
 {
   if(!this->xv || !this->yv)
@@ -73,8 +56,9 @@ InterpolatorBase<Real>::checkData() const
 }
 
 template<class Real>
+template<typename I>
 void
-InterpolatorBase<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
+InterpolatorBase<Real>::setData( I n, Real *x, Real *y, bool deep_copy )
 {
   Real *xp, *yp;
   if( deep_copy )
@@ -94,61 +78,13 @@ InterpolatorBase<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
 }
 
 template<class Real>
+template<typename X, typename Y>
 void
-InterpolatorBase<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy )
+InterpolatorBase<Real>::setData( X &x, Y &y, bool deep_copy )
 {
   this->setData( x.size(), x.data(), y.data(), deep_copy );
 }
 
-template<class Real>
-void
-InterpolatorBase<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
-{
-  this->setData( x.size(), &x(0), &y(0), deep_copy );
-}
-
-
-template<class Real>
-Real
-InterpolatorBase<Real>::derivative( Real x ) const
-{
-  if( xv->size() < 1 )
-    return 0;
-
-  // simple Finite-Difference approximation
-  Real dx = (*xv)(1) - (*xv)(0);
-  Real dy = this->operator()( x + dx/2 ) - this->operator()( x - dx/2 );
-
-  return dy/dx;
-}
-
-template<class Real>
-Real
-InterpolatorBase<Real>::integral( Real a, Real b ) const
-{
-  if( xv->size() < 1 )
-    return 0;
-
-  int sign = 1;
-
-  if( a > b )
-  {
-    std::swap( a, b );
-    sign = -1;
-  }
-
-  // simple Trapezoid sum
-  Real dx = (*xv)(1) - (*xv)(0);
-  int N = (b-a)/dx;
-  N = std::max(2,N); // make sure N is at least 2
-  dx = (b-a)/(N-1);
-
-  Real sum = 0;
-  for(int i = 0; i < N-1; i++)
-    sum += 0.5*( this->operator()(a+i*dx) + this->operator()(a+(i+1)*dx) )*dx;
-
-  return sign*sum;
-}
 
 }
 

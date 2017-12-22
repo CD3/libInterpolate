@@ -22,25 +22,16 @@ class CubicSplineInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
-    // function required by interface
-    virtual Real operator()( Real x ) const      {return call(x);}
-    virtual Real derivative( Real x ) const      {return derivative_imp(x);}
-    virtual Real integral( Real a, Real b) const {return integral_imp(a,b);}
-    // use the base class operator to interpolate multiple points at once.
-    using InterpolatorBase<Real>::operator();
-
-    // non-virtual implementations
-    // we want to implement the interpolation as a non-virtual method
-    // in case somebody thinks that will be too slow. the virtual methods
-    // will then just call these (they are already slow, right?).
-    Real call(Real x ) const; // can't really create a function called oeprator()_imp
-    Real derivative_imp( Real x ) const;
-    virtual Real integral_imp( Real a, Real b) const;
+    Real operator()( Real x ) const;
 
     // need to overload setData function to trigger setup calculations
-    virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
+    template<typename I>
+    void setData( I n, Real *x, Real *y, bool deep_copy = true );
+    template<typename X, typename Y>
+    void setData( X &x, Y &y, bool deep_copy = true );
+
+    Real derivative( Real x ) const;
+    Real integral( Real a, Real b ) const;
 
   protected:
 
@@ -56,24 +47,18 @@ class CubicSplineInterpolator : public InterpolatorBase<Real>
 
 
 template<class Real>
+template<typename I>
 void
-CubicSplineInterpolator<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
+CubicSplineInterpolator<Real>::setData( I n, Real *x, Real *y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( n, x, y, deep_copy );
   calcCoefficients();
 }
 
 template<class Real>
+template<typename X, typename Y>
 void
-CubicSplineInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( x, y, deep_copy );
-  calcCoefficients();
-}
-
-template<class Real>
-void
-CubicSplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
+CubicSplineInterpolator<Real>::setData( X &x, Y &y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( x, y, deep_copy );
   calcCoefficients();
@@ -90,7 +75,7 @@ CubicSplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep
 
 template<class Real>
 Real
-CubicSplineInterpolator<Real>::call( Real x ) const
+CubicSplineInterpolator<Real>::operator()( Real x ) const
 {
   InterpolatorBase<Real>::checkData();
 
@@ -116,7 +101,7 @@ CubicSplineInterpolator<Real>::call( Real x ) const
 
 template<typename Real>
 Real
-CubicSplineInterpolator<Real>::derivative_imp( Real x ) const
+CubicSplineInterpolator<Real>::derivative( Real x ) const
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -139,11 +124,9 @@ CubicSplineInterpolator<Real>::derivative_imp( Real x ) const
   return qprime;
 }
 
-
-
 template<class Real>
 Real
-CubicSplineInterpolator<Real>::integral_imp( Real _a, Real _b ) const
+CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
 {
   if( this->xv->size() < 1 )
     return 0;

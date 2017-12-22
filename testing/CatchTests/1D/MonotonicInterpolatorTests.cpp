@@ -33,37 +33,6 @@ TEST_CASE( "MonotonicInterpolator Tests", "[monotonic]" ) {
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
 
-  SECTION("Multi-Interpolation")
-  {
-    int nvals = 7;
-    std::vector<double> xvals(nvals), yvals(nvals);
-
-    for(int i = 0; i < nvals; i++)
-      xvals[i] = xmin + i*(xmax - xmin)/(nvals-1);
-
-    interp( nvals, xvals.data(), yvals.data() );
-
-    for(int i = 0; i < nvals; i++)
-      CHECK( yvals[i] == Approx( sin( xvals[i] ) ).epsilon(0.01) );
-  }
-
-
-  SECTION("Derivative")
-  {
-    CHECK( interp.derivative( dx/2          ) == Approx( cos( dx/2          ) ).epsilon(0.01) );
-    CHECK( interp.derivative( M_PI/2 - dx/2 ) == Approx( cos( M_PI/2 - dx/2 ) ).epsilon(0.01) );
-    CHECK( interp.derivative( M_PI/4 - dx/4 ) == Approx( cos( M_PI/4 - dx/4 ) ).epsilon(0.01) );
-  }
-
-
-  SECTION("Integral")
-  {
-    CHECK( interp.integral( 0, dx/2          ) == Approx( -cos( dx/2          ) + cos(0) ).epsilon(0.01) );
-    CHECK( interp.integral( 0, M_PI/2 - dx/2 ) == Approx( -cos( M_PI/2 - dx/2 ) + cos(0) ).epsilon(0.01) );
-    CHECK( interp.integral( 0, M_PI/4 - dx/4 ) == Approx( -cos( M_PI/4 - dx/4 ) + cos(0) ).epsilon(0.01) );
-  }
-
-
 }
 
 TEST_CASE("MonotonicInterpolator Edge Case Tests")

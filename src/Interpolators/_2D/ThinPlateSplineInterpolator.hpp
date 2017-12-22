@@ -39,27 +39,17 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
     typedef Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic               >> _2DVectorView;
     typedef Eigen::Map<MatrixType,Eigen::Unaligned,     Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>> _2DMatrixView;
 
-    // methods required by the interface
-    virtual Real operator()( Real x, Real y ) const {return call(x,y);}
+    Real operator()( Real x, Real y ) const;
 
-    // non-virtual implementations
-    // we want to implement the interpolation as a non-virtual method
-    // in case somebody thinks that will be too slow. the virtual methods
-    // will then just call these (they are already slow, right?).
-    Real call(Real x, Real y ) const;
-
-    virtual void setData( size_t _n, Real *x, Real *y, Real *z, bool deep_copy = true );
-    using InterpolatorBase<Real>::setData;
-
-    // additional methods
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, VectorType &z, bool deep_copy = true );
+    template<typename I>
+    void setData( I n, Real *x, Real *y, Real *z, bool deep_copy = true );
+    template<typename XT, typename YT, typename ZT>
+    void setData( XT &x, YT &y, ZT &z, bool deep_copy = true );
 
   protected:
     using InterpolatorBase<Real>::xv;
     using InterpolatorBase<Real>::yv;
     using InterpolatorBase<Real>::zv;
-
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
     std::shared_ptr<_2DVectorView> X,Y;
     std::shared_ptr<_2DMatrixView> Z;
@@ -67,6 +57,7 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
     MatrixType a, b;
 
     Real G(Real x, Real y, Real xi, Real yi) const;
+
     void calcCoefficients();
 
 
@@ -75,24 +66,18 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<Real>
 };
 
 template<class Real>
+template<typename I>
 void
-ThinPlateSplineInterpolator<Real>::setData( size_t n, Real *x, Real *y, Real *z, bool deep_copy )
+ThinPlateSplineInterpolator<Real>::setData( I n, Real *x, Real *y, Real *z, bool deep_copy )
 {
   InterpolatorBase<Real>::setData(n,x,y,z,deep_copy);
   calcCoefficients();
 }
 
 template<class Real>
+template<typename XT, typename YT, typename ZT>
 void
-ThinPlateSplineInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, std::vector<Real> &z, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData(x,y,z,deep_copy);
-  calcCoefficients();
-}
-
-template<class Real>
-void
-ThinPlateSplineInterpolator<Real>::setData( VectorType  &x, VectorType &y, VectorType &z, bool deep_copy )
+ThinPlateSplineInterpolator<Real>::setData( XT &x, YT &y, ZT &z, bool deep_copy )
 {
   InterpolatorBase<Real>::setData(x,y,z,deep_copy);
   calcCoefficients();
@@ -149,7 +134,7 @@ ThinPlateSplineInterpolator<Real>::G(Real x1, Real y1, Real x2, Real y2) const
 
 template<class Real>
 Real
-ThinPlateSplineInterpolator<Real>::call( Real x, Real y ) const
+ThinPlateSplineInterpolator<Real>::operator()( Real x, Real y ) const
 {
   InterpolatorBase<Real>::checkData();
   

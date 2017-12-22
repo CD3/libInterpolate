@@ -24,23 +24,13 @@ class MonotonicInterpolator : public InterpolatorBase<Real>
     typedef typename InterpolatorBase<Real>::VectorType VectorType;
     typedef typename InterpolatorBase<Real>::MapType MapType;
 
-    // function required by interface
-    virtual Real operator()( Real x ) const      {return call(x);}
-    //virtual Real derivative( Real x ) const      {return derivative_imp(x);}
-    //virtual Real integral( Real a, Real b) const {return integral_imp(a,b);}
-    // use the base class operator to interpolate multiple points at once.
-    using InterpolatorBase<Real>::operator();
-
-    // non-virtual implementations
-    // we want to implement the interpolation as a non-virtual method
-    // in case somebody thinks that will be too slow. the virtual methods
-    // will then just call these (they are already slow, right?).
-    Real call(Real x ) const; // can't really create a function called oeprator()_imp
+    Real operator()( Real x ) const;
 
     // need to overload setData function to trigger setup calculations
-    virtual void setData( size_t _n, Real *x, Real *y, bool deep_copy = true );
-    virtual void setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy = true );
-    virtual void setData( VectorType  &x, VectorType &y, bool deep_copy = true );
+    template<typename I>
+    void setData( I _n, Real *x, Real *y, bool deep_copy = true );
+    template<typename X, typename Y>
+    void setData( X &x, Y &y, bool deep_copy = true );
 
   protected:
     VectorType a,b,yplow,yphigh;
@@ -48,24 +38,18 @@ class MonotonicInterpolator : public InterpolatorBase<Real>
 };
 
 template<class Real>
+template<typename I>
 void
-MonotonicInterpolator<Real>::setData( size_t n, Real *x, Real *y, bool deep_copy )
+MonotonicInterpolator<Real>::setData( I n, Real *x, Real *y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( n, x, y, deep_copy );
   calcCoefficients();
 }
 
 template<class Real>
+template<typename X, typename Y>
 void
-MonotonicInterpolator<Real>::setData( std::vector<Real> &x, std::vector<Real> &y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( x, y, deep_copy );
-  calcCoefficients();
-}
-
-template<class Real>
-void
-MonotonicInterpolator<Real>::setData( VectorType  &x, VectorType &y, bool deep_copy )
+MonotonicInterpolator<Real>::setData( X &x, Y &y, bool deep_copy )
 {
   InterpolatorBase<Real>::setData( x, y, deep_copy );
   calcCoefficients();
@@ -176,7 +160,7 @@ MonotonicInterpolator<Real>::calcCoefficients()
 
 template<class Real>
 Real
-MonotonicInterpolator<Real>::call( Real x ) const
+MonotonicInterpolator<Real>::operator()( Real x ) const
 {
   InterpolatorBase<Real>::checkData();
 

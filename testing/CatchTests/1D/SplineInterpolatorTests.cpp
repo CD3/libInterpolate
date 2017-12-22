@@ -33,20 +33,6 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ) );
   }
 
-  SECTION("Multi-Interpolation")
-  {
-    int nvals = 7;
-    std::vector<double> xvals(nvals), yvals(nvals);
-
-    for(int i = 0; i < nvals; i++)
-      xvals[i] = xmin + i*(xmax - xmin)/(nvals-1);
-
-    interp( nvals, xvals.data(), yvals.data() );
-
-    for(int i = 0; i < nvals; i++)
-      CHECK( yvals[i] == Approx( sin( xvals[i] ) ) );
-  }
-
 
   SECTION("Derivative")
   {

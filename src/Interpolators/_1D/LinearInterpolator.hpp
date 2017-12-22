@@ -15,12 +15,13 @@ namespace _1D {
   * This class does *not* do extrapolation.
   */
 template<class Real>
-class LinearInterpolator : public InterpolatorBase<Real>
+class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>>
 {
 
   public:
-    typedef typename InterpolatorBase<Real>::VectorType VectorType;
-    typedef typename InterpolatorBase<Real>::MapType MapType;
+    using BASE = InterpolatorBase<LinearInterpolator<Real>>;
+    using VectorType = typename BASE::VectorType;
+    using MapType = typename BASE::MapType;
 
     Real operator()( Real x ) const;
 
@@ -30,7 +31,7 @@ template<class Real>
 Real
 LinearInterpolator<Real>::operator()( Real x ) const
 {
-  InterpolatorBase<Real>::checkData();
+  BASE::checkData();
 
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);

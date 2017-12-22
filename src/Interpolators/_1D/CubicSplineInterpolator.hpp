@@ -15,20 +15,15 @@ namespace _1D {
   * This class does *not* do extrapolation.
   */
 template<class Real>
-class CubicSplineInterpolator : public InterpolatorBase<Real>
+class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<Real>>
 {
 
   public:
-    typedef typename InterpolatorBase<Real>::VectorType VectorType;
-    typedef typename InterpolatorBase<Real>::MapType MapType;
+    using BASE = InterpolatorBase<CubicSplineInterpolator<Real>>;
+    using VectorType = typename BASE::VectorType;
+    using MapType = typename BASE::MapType;
 
     Real operator()( Real x ) const;
-
-    // need to overload setData function to trigger setup calculations
-    template<typename I>
-    void setData( I n, Real *x, Real *y, bool deep_copy = true );
-    template<typename X, typename Y>
-    void setData( X &x, Y &y, bool deep_copy = true );
 
     Real derivative( Real x ) const;
     Real integral( Real a, Real b ) const;
@@ -38,46 +33,21 @@ class CubicSplineInterpolator : public InterpolatorBase<Real>
     // Interpolation coefficients
     VectorType a,b;
 
-    void calcCoefficients();
+    // this function will be called by the base class
+    // after reading data in. it needs to be accessible
+    // from the base class, so we declare the base
+    // as a friend (otherwise we would have to make it public)
+    void setupInterpolator();
+    friend BASE;
 
 };
-
-
-
-
-
-template<class Real>
-template<typename I>
-void
-CubicSplineInterpolator<Real>::setData( I n, Real *x, Real *y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( n, x, y, deep_copy );
-  calcCoefficients();
-}
-
-template<class Real>
-template<typename X, typename Y>
-void
-CubicSplineInterpolator<Real>::setData( X &x, Y &y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( x, y, deep_copy );
-  calcCoefficients();
-}
-
-
-
-
-
-
-
-
 
 
 template<class Real>
 Real
 CubicSplineInterpolator<Real>::operator()( Real x ) const
 {
-  InterpolatorBase<Real>::checkData();
+  BASE::checkData();
 
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -247,7 +217,7 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
  */
 template<typename Real>
 void
-CubicSplineInterpolator<Real>::calcCoefficients()
+CubicSplineInterpolator<Real>::setupInterpolator()
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);

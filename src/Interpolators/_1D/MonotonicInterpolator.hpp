@@ -18,46 +18,28 @@ namespace _1D {
   * @author C.D. Clark III
   */
 template<class Real>
-class MonotonicInterpolator : public InterpolatorBase<Real>
+class MonotonicInterpolator : public InterpolatorBase<MonotonicInterpolator<Real>>
 {
+
   public:
-    typedef typename InterpolatorBase<Real>::VectorType VectorType;
-    typedef typename InterpolatorBase<Real>::MapType MapType;
+    using BASE = InterpolatorBase<MonotonicInterpolator<Real>>;
+    using VectorType = typename BASE::VectorType;
+    using MapType = typename BASE::MapType;
 
     Real operator()( Real x ) const;
 
-    // need to overload setData function to trigger setup calculations
-    template<typename I>
-    void setData( I _n, Real *x, Real *y, bool deep_copy = true );
-    template<typename X, typename Y>
-    void setData( X &x, Y &y, bool deep_copy = true );
+  protected:
+
+    void setupInterpolator();
+    friend BASE;
 
   protected:
     VectorType a,b,yplow,yphigh;
-    void calcCoefficients();
 };
 
 template<class Real>
-template<typename I>
 void
-MonotonicInterpolator<Real>::setData( I n, Real *x, Real *y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( n, x, y, deep_copy );
-  calcCoefficients();
-}
-
-template<class Real>
-template<typename X, typename Y>
-void
-MonotonicInterpolator<Real>::setData( X &x, Y &y, bool deep_copy )
-{
-  InterpolatorBase<Real>::setData( x, y, deep_copy );
-  calcCoefficients();
-}
-
-template<class Real>
-void
-MonotonicInterpolator<Real>::calcCoefficients()
+MonotonicInterpolator<Real>::setupInterpolator()
 {
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);
@@ -162,7 +144,7 @@ template<class Real>
 Real
 MonotonicInterpolator<Real>::operator()( Real x ) const
 {
-  InterpolatorBase<Real>::checkData();
+  BASE::checkData();
 
   const VectorType &X = *(this->xv);
   const VectorType &Y = *(this->yv);

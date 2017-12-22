@@ -6,7 +6,7 @@
 
 namespace _1D {
 
-class TestInterp : public InterpolatorBase<double>
+class TestInterp : public InterpolatorBase<TestInterp>
 {
   public:
     double operator()( double x ) const
@@ -34,7 +34,7 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
 
   SECTION("Eigen Vector Initialization")
   {
-    _1D::InterpolatorBase<double>::VectorType xx(N), yy(N);
+    Eigen::Matrix<double,Eigen::Dynamic,1> xx(N), yy(N);
 
     for( int i = 0; i < N; i++)
     {
@@ -184,7 +184,7 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
 
   SECTION("Data Get Functions")
   {
-    _1D::InterpolatorBase<double>::VectorType xx(N), yy(N);
+    Eigen::Matrix<double,Eigen::Dynamic,1> xx(N), yy(N);
 
     for( int i = 0; i < N; i++)
     {

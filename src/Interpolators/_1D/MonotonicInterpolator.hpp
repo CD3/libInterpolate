@@ -28,6 +28,14 @@ class MonotonicInterpolator : public InterpolatorBase<MonotonicInterpolator<Real
 
     Real operator()( Real x ) const;
 
+    MonotonicInterpolator(){}
+    template<typename I>
+    MonotonicInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
+    { this->setData(n,x,y,deep_copy); }
+    template<typename X, typename Y>
+    MonotonicInterpolator( X &x, Y &y, bool deep_copy = true )
+    { this->setData(x,y,deep_copy); }
+
   protected:
 
     void setupInterpolator();

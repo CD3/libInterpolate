@@ -98,7 +98,7 @@ int main( int argc, char* argv[])
     Utils::ReadFunction( in, x, y, n );
     in.close();
 
-    _1D::InterpolatorInterface<double> *interp;
+    std::function<double(double)> interp;
     interp = create(vm["method"].as<string>());
     if( !interp )
     {

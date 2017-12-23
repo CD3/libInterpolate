@@ -28,6 +28,15 @@ class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<
     Real derivative( Real x ) const;
     Real integral( Real a, Real b ) const;
 
+    CubicSplineInterpolator( ) {}
+    template<typename I>
+    CubicSplineInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
+    { this->setData(n,x,y,deep_copy); }
+    template<typename X, typename Y>
+    CubicSplineInterpolator( X &x, Y &y, bool deep_copy = true )
+    { this->setData(x,y,deep_copy); }
+
+
   protected:
 
     // Interpolation coefficients
@@ -39,6 +48,9 @@ class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<
     // as a friend (otherwise we would have to make it public)
     void setupInterpolator();
     friend BASE;
+
+
+
 
 };
 

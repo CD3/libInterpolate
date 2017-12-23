@@ -38,6 +38,14 @@ class BilinearInterpolator : public InterpolatorBase<BilinearInterpolator<Real>>
 
     Real operator()( Real x, Real y ) const;
 
+    BilinearInterpolator(){}
+    template<typename I>
+    BilinearInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
+    {this->setData(n,x,y,z,deep_copy);}
+    template<typename X, typename Y, typename Z>
+    BilinearInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
+    {this->setData(x,y,z,deep_copy);}
+
   protected:
     using BASE::xv;
     using BASE::yv;

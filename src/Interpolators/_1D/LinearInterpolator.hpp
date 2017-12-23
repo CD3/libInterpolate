@@ -25,6 +25,15 @@ class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>>
 
     Real operator()( Real x ) const;
 
+    LinearInterpolator( ) {}
+    template<typename I>
+    LinearInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
+    { this->setData(n,x,y,deep_copy); }
+    template<typename X, typename Y>
+    LinearInterpolator( X &x, Y &y, bool deep_copy = true )
+    { this->setData(x,y,deep_copy); }
+
+
 };
 
 template<class Real>

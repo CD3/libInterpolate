@@ -46,6 +46,14 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInter
 
     Real operator()( Real x, Real y ) const;
 
+    ThinPlateSplineInterpolator(){}
+    template<typename I>
+    ThinPlateSplineInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
+    {this->setData(n,x,y,z,deep_copy);}
+    template<typename X, typename Y, typename Z>
+    ThinPlateSplineInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
+    {this->setData(x,y,z,deep_copy);}
+
   protected:
     using BASE::xv;
     using BASE::yv;

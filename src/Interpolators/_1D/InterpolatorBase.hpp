@@ -53,8 +53,8 @@ class InterpolatorBase
   private:
     // this helps to make sure that the derived class actually
     // passes itself as the template argument.
-    InterpolatorBase(){ }
     friend Derived;
+    InterpolatorBase(){}
 
 
 

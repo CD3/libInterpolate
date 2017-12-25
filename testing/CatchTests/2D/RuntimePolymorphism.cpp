@@ -5,6 +5,11 @@
 #include "Interpolators/_2D/BicubicInterpolator.hpp"
 #include "Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
 
+namespace {
+  double call( std::function<double(double,double)> f, double x, double y)
+  { return f(x,y); }
+}
+
 TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
   std::function<double(double,double)> interp;
@@ -55,6 +60,18 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
     REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
     REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
 
+    SECTION("via copied std::function passed to func")
+    {
+      REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+      REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+      REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+      REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+      REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
+      REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
+    }
+
   }
 
   SECTION("Bicubic Interpolation")
@@ -102,6 +119,19 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
       CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
       CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+
+      SECTION("via copied std::function passed to func")
+      {
+        REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+        REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
+      }
+
     }
 
     SECTION("Oscillating Data")
@@ -194,6 +224,19 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
       CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
       CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+
+      SECTION("via copied std::function passed to func")
+      {
+        REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+        REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
+      }
+
     }
 
     SECTION("Oscillating Data")

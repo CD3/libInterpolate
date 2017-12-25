@@ -28,6 +28,11 @@ TEST_CASE( "1D - Default construction with setData", "[construction]" )
     CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
     CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
+
+    _1D::LinearInterpolator<double> interp2(interp);
+    CHECK( interp2( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
   SECTION("Cubic Spline Interpolator")
   {
@@ -36,6 +41,11 @@ TEST_CASE( "1D - Default construction with setData", "[construction]" )
     CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
     CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
+
+    _1D::CubicSplineInterpolator<double> interp2(interp);
+    CHECK( interp2( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
   SECTION("Monotonic Interpolator")
   {
@@ -44,6 +54,11 @@ TEST_CASE( "1D - Default construction with setData", "[construction]" )
     CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
     CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
+
+    _1D::MonotonicInterpolator<double> interp2(interp);
+    CHECK( interp2( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
+    CHECK( interp2( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
 
 

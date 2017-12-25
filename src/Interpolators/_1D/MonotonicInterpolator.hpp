@@ -28,7 +28,9 @@ class MonotonicInterpolator : public InterpolatorBase<MonotonicInterpolator<Real
 
     Real operator()( Real x ) const;
 
-    MonotonicInterpolator(){}
+    MonotonicInterpolator() = default;
+    MonotonicInterpolator( const MonotonicInterpolator& interp ) = default;
+
     template<typename I>
     MonotonicInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
     { this->setData(n,x,y,deep_copy); }

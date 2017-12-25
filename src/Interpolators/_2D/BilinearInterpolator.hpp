@@ -25,10 +25,11 @@ class BilinearInterpolator : public InterpolatorBase<BilinearInterpolator<Real>>
     using BASE = InterpolatorBase<BilinearInterpolator<Real>>;
     using VectorType = typename BASE::VectorType;
     using MapType = typename BASE::MapType; 
+
     // types used to view data as 2D coordinates
-    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
-    using _2DVectorView = Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
-    using _2DMatrixView = Eigen::Map<MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
+    using MatrixType    = typename BASE::MatrixType;
+    using _2DVectorView = typename BASE::_2DVectorView;
+    using _2DMatrixView = typename BASE::_2DMatrixView;
 
     // types used for 2x2 matrix algebra
     using Matrix22 = Eigen::Matrix<Real,2,2 >;
@@ -36,9 +37,9 @@ class BilinearInterpolator : public InterpolatorBase<BilinearInterpolator<Real>>
     using ColVector2 = Eigen::Matrix<Real,2,1 >;
     using RowVector2 = Eigen::Matrix<Real,1,2 >;
 
-    Real operator()( Real x, Real y ) const;
+    BilinearInterpolator() = default;
+    BilinearInterpolator(const BilinearInterpolator& interp) = default;
 
-    BilinearInterpolator(){}
     template<typename I>
     BilinearInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
     {this->setData(n,x,y,z,deep_copy);}
@@ -46,13 +47,16 @@ class BilinearInterpolator : public InterpolatorBase<BilinearInterpolator<Real>>
     BilinearInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
     {this->setData(x,y,z,deep_copy);}
 
+    Real operator()( Real x, Real y ) const;
+
+
   protected:
     using BASE::xv;
     using BASE::yv;
     using BASE::zv;
-    // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
-    std::shared_ptr<_2DVectorView> X,Y;
-    std::shared_ptr<_2DMatrixView> Z;
+    using BASE::X;
+    using BASE::Y;
+    using BASE::Z;
     
     Matrix22Array Q; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
 
@@ -65,28 +69,6 @@ template<class Real>
 void
 BilinearInterpolator<Real>::setupInterpolator()
 {
-
-  // setup 2D view of the data
-  // We need to figure out what the x and y dimensions are.
-  int N = zv->size();
-  int Nx = 0, Ny = 0;
-  // Ny will be the number of elements that have the same x coordinate
-  Real xlast = (*xv)(0);
-  while( Ny < N-1 && fabs((*xv)(Ny)-xlast) < 1e-40 )
-    Ny++;
-  Nx = N/Ny;
-
-  // consecutive values in the x data are separated by Ny, so this is the inner stride for X
-  X.reset( new _2DVectorView( &(*xv)(0), Nx, Eigen::InnerStride<Eigen::Dynamic>(Ny) ) );
-
-  // consecutive values in the y data are next to each other, so the stride is just 1
-  Y.reset( new _2DVectorView( &(*yv)(0), Ny, Eigen::InnerStride<Eigen::Dynamic>(1) ) );
-
-  // Eigen defaults to COLUMN MAJOR
-  // consecutive elements in a column are separated by Ny (this is the inner stride)
-  // consecutive elements in a row are located next to each other (this is the outer stride)
-  // Stride object takes outer,inner as arguments.
-  Z.reset( new _2DMatrixView( &(*zv)(0), Nx, Ny, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(1,Ny) ) );
 
   // Interpolation will be done by multiplying the coordinates by coefficients.
 

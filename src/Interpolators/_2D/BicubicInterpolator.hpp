@@ -31,9 +31,9 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>>
     using MapType = typename BASE::MapType;
 
     // types used to view data as 2D coordinates
-    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
-    using _2DVectorView = Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
-    using _2DMatrixView = Eigen::Map<MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
+    using MatrixType    = typename BASE::MatrixType;
+    using _2DVectorView = typename BASE::_2DVectorView;
+    using _2DMatrixView = typename BASE::_2DMatrixView;
 
     // types used for 4x4 matrix algebra
     using Matrix44 = Eigen::Matrix<Real,4,4 >;
@@ -41,10 +41,9 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>>
     using ColVector4 = Eigen::Matrix<Real,4,1 >;
     using RowVector4 = Eigen::Matrix<Real,1,4 >;
 
-    // methods required by the interface
-    Real operator()( Real x, Real y ) const;
+    BicubicInterpolator() = default;
+    BicubicInterpolator(const BicubicInterpolator& interp) = default;
 
-    BicubicInterpolator(){}
     template<typename I>
     BicubicInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
     {this->setData(n,x,y,z,deep_copy);}
@@ -52,13 +51,17 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>>
     BicubicInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
     {this->setData(x,y,z,deep_copy);}
 
+    // methods required by the interface
+    Real operator()( Real x, Real y ) const;
+
+
   protected:
     using BASE::xv;
     using BASE::yv;
     using BASE::zv;
-    // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
-    std::shared_ptr<_2DVectorView> X,Y;
-    std::shared_ptr<_2DMatrixView> Z;
+    using BASE::X;
+    using BASE::Y;
+    using BASE::Z;
     
     Matrix44Array a; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bicubic_interpolation)
 
@@ -71,28 +74,6 @@ template<class Real>
 void
 BicubicInterpolator<Real>::setupInterpolator()
 {
-  // setup 2D view of the data
-  // We need to figure out what the x and y dimensions are.
-  int Nx = 0, Ny = 0;
-  int N = xv->size();
-  // Ny will be the number of elements that have the same x coordinate
-  Real xlast = (*xv)(0);
-  while( Ny < N-1 && fabs((*xv)(Ny)-xlast) < 1e-40 )
-    Ny++;
-  Nx = N/Ny;
-
-  // consecutive values in the x data are separated by Ny, so this is the inner stride for X
-  X.reset( new _2DVectorView( &(*xv)(0), Nx, Eigen::InnerStride<Eigen::Dynamic>(Ny) ) );
-
-  // consecutive values in the y data are next to each other, so the stride is just 1
-  Y.reset( new _2DVectorView( &(*yv)(0), Ny, Eigen::InnerStride<Eigen::Dynamic>(1) ) );
-
-  // Eigen defaults to COLUMN MAJOR
-  // consecutive elements in a column are separated by Ny (this is the inner stride)
-  // consecutive elements in a row are located next to each other (this is the outer stride)
-  // Stride object takes outer,inner as aruments.
-  Z.reset( new _2DMatrixView( &(*zv)(0), Nx, Ny, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(1,Ny) ) );
-
   // Interpolation will be done by multiplying the coordinates by coefficients.
 
   a = Matrix44Array( X->size()-1, Y->size()-1 );
@@ -193,8 +174,6 @@ BicubicInterpolator<Real>::setupInterpolator()
       jm = std::max(j,0);
       jp = std::min(j+2,jN-1);
 
-      (*Y)(jp) = (*Y)(jp);
-      (*Y)(jm) = (*Y)(jm);
       dy = ((*Y)(jp) - (*Y)(jm))/yL;
 
       fp = (*Z)(i,jp);

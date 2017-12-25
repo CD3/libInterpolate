@@ -13,9 +13,9 @@ TEST_CASE( "2D - Default construction with setData", "[construction]" )
 
 }
 
-
 TEST_CASE( "2D - Construction with data", "[construction]" )
 {
+
     int nx, ny;
     double xmin, xmax, dx, x;
     double ymin, ymax, dy, y;
@@ -57,6 +57,18 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
 
       REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
       REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+
+
+      _2D::BilinearInterpolator<double> interp2(interp);
+
+      REQUIRE( interp2(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+      REQUIRE( interp2(-2,-1) == Approx(0).epsilon(0.00002 )) ;
+      REQUIRE( interp2(10,3)  == Approx(0).epsilon(0.00002 )) ;
     }
 
     SECTION("Bicubic Interpolation")
@@ -71,6 +83,17 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
 
       REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
       REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+
+      _2D::BicubicInterpolator<double> interp2(interp);
+
+      REQUIRE( interp2(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+      REQUIRE( interp2(-2,-1) == Approx(0).epsilon(0.00002 )) ;
+      REQUIRE( interp2(10,3)  == Approx(0).epsilon(0.00002 )) ;
     }
 
     SECTION("Thin Plate Spline Interpolation")
@@ -85,9 +108,18 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
 
       REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
       REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+
+      _2D::ThinPlateSplineInterpolator<double> interp2(interp);
+
+      REQUIRE( interp2(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+
+      REQUIRE( interp2(-2,-1) == Approx(0).epsilon(0.00002 )) ;
+      REQUIRE( interp2(10,3)  == Approx(0).epsilon(0.00002 )) ;
     }
-
-
 
 }
 

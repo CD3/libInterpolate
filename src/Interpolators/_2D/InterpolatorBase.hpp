@@ -30,12 +30,21 @@ class InterpolatorBase
 {
   public:
     using VectorType = Eigen::Matrix<Real,Eigen::Dynamic,1>;
-    using MapType = Eigen::Map<VectorType>;
+    using MapType = Eigen::Map<const VectorType>;
+    // types used to view data as 2D coordinates
+    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
+    using _2DVectorView = Eigen::Map<const VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
+    using _2DMatrixView = Eigen::Map<const MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
+
+    InterpolatorBase( const InterpolatorBase& interp ) = default;
 
     template<typename I>
-    void setData( I n, Real *x, Real *y, Real *z, bool deep_copy = true );
-    template<typename X, typename Y, typename Z>
-    void setData( X &x, Y &y, Z &z, bool deep_copy = true );
+    void setData( I n, const Real *x, const Real *y, const Real *z, bool deep_copy = true );
+    template<typename XT, typename YT, typename ZT>
+    // this template is ambiguous with the pointer template above,
+    // wo we want to disable it for pointers
+    typename std::enable_if<!std::is_pointer<YT>::value>::type
+    setData( const XT &x, const YT &y, const ZT &z, bool deep_copy = true );
 
     std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
     std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
@@ -45,6 +54,11 @@ class InterpolatorBase
   protected:
     VectorType xd, yd, zd;               // data
     std::shared_ptr<MapType> xv, yv, zv; // map view of the data
+
+    // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
+    std::shared_ptr<_2DVectorView> X,Y;
+    std::shared_ptr<_2DMatrixView> Z;
+
     void checkData() const; ///< Check that data has been initialized and throw exception if not.
 
   private:
@@ -96,14 +110,14 @@ InterpolatorBase<Derived,Real>::checkData() const
 template<class Derived, typename Real>
 template<typename I>
 void
-InterpolatorBase<Derived,Real>::setData( I n, Real *x, Real *y, Real *z, bool deep_copy )
+InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y, const Real *z, bool deep_copy )
 {
-  Real *xp, *yp, *zp;
+  const Real *xp, *yp, *zp;
   if( deep_copy )
   {
-    xd = Eigen::Map<VectorType>( x, n );
-    yd = Eigen::Map<VectorType>( y, n );
-    zd = Eigen::Map<VectorType>( z, n );
+    xd = MapType( x, n );
+    yd = MapType( y, n );
+    zd = MapType( z, n );
     xp = &xd(0);
     yp = &yd(0);
     zp = &zd(0);
@@ -114,17 +128,44 @@ InterpolatorBase<Derived,Real>::setData( I n, Real *x, Real *y, Real *z, bool de
     yp = y;
     zp = z;
   }
-  this->xv.reset( new Eigen::Map<VectorType>( xp, n ) );
-  this->yv.reset( new Eigen::Map<VectorType>( yp, n ) );
-  this->zv.reset( new Eigen::Map<VectorType>( zp, n ) );
+  this->xv.reset( new MapType( xp, n ) );
+  this->yv.reset( new MapType( yp, n ) );
+  this->zv.reset( new MapType( zp, n ) );
+
+
+  // setup 2D view of the data
+  // We need to figure out what the x and y dimensions are.
+  int N = zv->size();
+  int Nx = 0, Ny = 0;
+  // Ny will be the number of elements that have the same x coordinate
+  Real xlast = (*xv)(0);
+  while( Ny < N-1 && fabs((*xv)(Ny)-xlast) < 1e-40 )
+    Ny++;
+  Nx = N/Ny;
+
+  // consecutive values in the x data are separated by Ny, so this is the inner stride for X
+  X.reset( new _2DVectorView( xv->data(), Nx, Eigen::InnerStride<Eigen::Dynamic>(Ny) ) );
+
+  // consecutive values in the y data are next to each other, so the stride is just 1
+  Y.reset( new _2DVectorView( yv->data(), Ny, Eigen::InnerStride<Eigen::Dynamic>(1) ) );
+
+  // Eigen defaults to COLUMN MAJOR
+  // consecutive elements in a column are separated by Ny (this is the inner stride)
+  // consecutive elements in a row are located next to each other (this is the outer stride)
+  // Stride object takes outer,inner as arguments.
+  Z.reset( new _2DMatrixView( zv->data(), Nx, Ny, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(1,Ny) ) );
+
+
+
+
 
   this->callSetupInterpolator<Derived>();
 }
 
 template<class Derived, typename Real>
-template<typename X, typename Y, typename Z>
-void
-InterpolatorBase<Derived,Real>::setData( X &x, Y &y, Z &z, bool deep_copy )
+template<typename XT, typename YT, typename ZT>
+typename std::enable_if<!std::is_pointer<YT>::value>::type
+InterpolatorBase<Derived,Real>::setData( const XT &x, const YT &y, const ZT &z, bool deep_copy )
 {
   this->setData( x.size(), x.data(), y.data(), z.data(), deep_copy );
 }

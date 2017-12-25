@@ -34,9 +34,9 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInter
     using MapType = typename BASE::MapType;
 
     // types used to view data as 2D coordinates
-    using MatrixType = typename Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic>;
-    using _2DVectorView = Eigen::Map<VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
-    using _2DMatrixView = Eigen::Map<MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
+    using MatrixType    = typename BASE::MatrixType;
+    using _2DVectorView = typename BASE::_2DVectorView;
+    using _2DMatrixView = typename BASE::_2DMatrixView;
 
     // types used for 2x2 matrix algebra
     using Matrix22 = Eigen::Matrix<Real,2,2 >;
@@ -44,9 +44,9 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInter
     using ColVector2 = Eigen::Matrix<Real,2,1 >;
     using RowVector2 = Eigen::Matrix<Real,1,2 >;
 
-    Real operator()( Real x, Real y ) const;
+    ThinPlateSplineInterpolator() = default;
+    ThinPlateSplineInterpolator(const ThinPlateSplineInterpolator& interp) = default;
 
-    ThinPlateSplineInterpolator(){}
     template<typename I>
     ThinPlateSplineInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
     {this->setData(n,x,y,z,deep_copy);}
@@ -54,13 +54,16 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInter
     ThinPlateSplineInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
     {this->setData(x,y,z,deep_copy);}
 
+    Real operator()( Real x, Real y ) const;
+
+
   protected:
     using BASE::xv;
     using BASE::yv;
     using BASE::zv;
-    // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
-    std::shared_ptr<_2DVectorView> X,Y;
-    std::shared_ptr<_2DMatrixView> Z;
+    using BASE::X;
+    using BASE::Y;
+    using BASE::Z;
     
     MatrixType a, b;
 

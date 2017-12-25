@@ -28,7 +28,9 @@ class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<
     Real derivative( Real x ) const;
     Real integral( Real a, Real b ) const;
 
-    CubicSplineInterpolator( ) {}
+    CubicSplineInterpolator( ) = default;
+    CubicSplineInterpolator( const CubicSplineInterpolator& interp ) = default;
+
     template<typename I>
     CubicSplineInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
     { this->setData(n,x,y,deep_copy); }

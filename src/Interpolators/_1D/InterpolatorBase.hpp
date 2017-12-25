@@ -8,6 +8,7 @@
   */
 
 #include <memory>
+#include <type_traits>
 #include <Eigen/Dense>
 #include "Utils/Indexing.hpp"
 
@@ -32,13 +33,19 @@ class InterpolatorBase
 {
 
   public:
-    typedef Eigen::Matrix<Real,Eigen::Dynamic,1> VectorType;
-    typedef Eigen::Map<VectorType> MapType;
+    using VectorType =  Eigen::Matrix<Real,Eigen::Dynamic,1>;
+    using MapType =  Eigen::Map<const VectorType>;
+
+    InterpolatorBase(const InterpolatorBase& interp) = default;
 
     template<typename I>
-    void setData( I n, Real *x, Real *y, bool deep_copy = true );
+    void setData( I n, const Real *x, const Real *y, bool deep_copy = true );
+
     template<typename X, typename Y>
-    void setData( X &x, Y &y, bool deep_copy = true );
+    // this template is ambiguous with the pointer template above,
+    // wo we want to disable it for pointers
+    typename std::enable_if<!std::is_pointer<Y>::value>::type
+    setData( const X &x, const Y &y, bool deep_copy = true );
 
     // methods to get the data
     std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
@@ -103,13 +110,13 @@ InterpolatorBase<Derived,Real>::checkData() const
 template<class Derived, typename Real>
 template<typename I>
 void
-InterpolatorBase<Derived,Real>::setData( I n, Real *x, Real *y, bool deep_copy )
+InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y, bool deep_copy )
 {
-  Real *xp, *yp;
+  const Real *xp, *yp;
   if( deep_copy )
   {
-    xd = Eigen::Map<VectorType>( x, n );
-    yd = Eigen::Map<VectorType>( y, n );
+    xd = MapType( x, n );
+    yd = MapType( y, n );
     xp = &xd(0);
     yp = &yd(0);
   }
@@ -118,16 +125,16 @@ InterpolatorBase<Derived,Real>::setData( I n, Real *x, Real *y, bool deep_copy )
     xp = x;
     yp = y;
   }
-  this->xv.reset( new Eigen::Map<VectorType>( xp, n ) );
-  this->yv.reset( new Eigen::Map<VectorType>( yp, n ) );
+  this->xv.reset( new MapType( xp, n ) );
+  this->yv.reset( new MapType( yp, n ) );
 
   this->callSetupInterpolator<Derived>();
 }
 
 template<class Derived, typename Real>
 template<typename X, typename Y>
-void
-InterpolatorBase<Derived,Real>::setData( X &x, Y &y, bool deep_copy )
+typename std::enable_if<!std::is_pointer<Y>::value>::type
+InterpolatorBase<Derived,Real>::setData( const X &x, const Y &y, bool deep_copy )
 {
   this->setData( x.size(), x.data(), y.data(), deep_copy );
 }

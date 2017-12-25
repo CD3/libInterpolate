@@ -5,7 +5,6 @@
 #include "Interpolators/_2D/BicubicInterpolator.hpp"
 #include "Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
 
-
 TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
   std::function<double(double,double)> interp;

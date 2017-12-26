@@ -39,7 +39,7 @@ Currently, `libInterp` is a header-only C++ library. To use it, simply include
 the headers you want/need in your source code. If you use `git subrepo`, you
 can clone the source into your externals directory and use it from there.
 
-`libInterp` depends on Boost and Eigen3, so you will need to include the directories
+`libInterp` depends on `Boost` and `Eigen3`, so you will need to include the directories
 containing their header files when compiling.
 
 This simplest way to use the library is to build your project using CMake. You can then
@@ -64,29 +64,41 @@ include_directories( ${libInterp_INCLUDE_DIRS} )
 
 ## Design
 
-`libInterp` aims to provides a simple, flexible, easy to use, interpolation library. 
-The library defines an interpolator interface (the `InterpolatorInterface` abstract base
-classes), and all interpolation algorithms are implemented as classes that
-inherit this interface.  The benefit of this approach is that interpolation
-methods can be easily interchanged, even at run-time. The potential downside is that
-it requires virtual methods and run-time polymorphism, which *could* have an impact
-on performance. In many applications, the flexibility to switch interpolation methods
-greatly outweighs any possible performance issues.
+`libInterp` uses inheritance for code reuse and implements the "Curiously Recurring Template Patter" (CRTP).
+CRTP allows the base class to implement functions that depend on parts that need to be implemented by the
+derived class. For example, `InterpolatorBase` implements a function named `setData` that reads the
+interpolated data into the interpolator. This way, derived classes do not need to implement functions to load the
+interpolated data. However, different interpolation methods may require some additional setup. For example, they
+may compute and store some coefficients that are used during interpolation. The `setData` function therefore calls a
+function named `setupInterpolator` that is implemented by the derived class, if needed. This is where the CRTP comes in.
 
-## Contributing
+If you write a new interpolation method and derive from the `InterpolatorBase` class, you need to pass the derived class
+to the base class as a template parameter.
+```C++
+class MyInterpolator : _1D::InterpolatorBase<MyInterpolator>
+{
+...
+};
+```
+If your interpolator needs additional setup *after* the interpolated data has been read in, then you should also
+implement the function `void setupInterpolator()`.
+```C++
+class MyInterpolator : _1D::InterpolatorBase<MyInterpolator>
+{
+  double operator()(double x); // implement the interpolation
+  void setupInterpolator();    // implement for additional setup
+};
+```
 
-To add an interpolation algorithm, simply create a class that inherits from the
-`InterpolationInterface` class. You should put your in a file named
-after the class name in the `src/Interpolators/_1D/` (or
-`src/Interpolators/_2D/` if it is a 2 dimensional interpolator). Your class must
-implement the following methods:
+CRTP does not allow runtime polymorphism, since each derived type derives from a different base class.
+If you need a way to bind the interpolation type at runtime, you should use `std::function` instead
 
-`setData(size_t n, Real* x, Real* y)` :
-    This function takes the data points that are to be interpolated and sets up the
-    interpolator.
+```C++
+// OK. now interp can be used like a function and it uses "value semantics".
+std::function<double(double)> interp = _1D::CubicSplineInterpolator<double>();
 
-`Real operator()(Real x)` :
-    Interpolates the data to the point x.
+...
 
-`void operator()(size_t n, Real *x, Real *y)` :
-    Interpolates the data to each of the points in `x`, writing the result to `y`.
+```
+
+If you need runtime polymorphism with access to more member functions, you can use type erasure.

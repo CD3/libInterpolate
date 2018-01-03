@@ -3,6 +3,7 @@
 #include<algorithm>
 #include<list>
 #include<stdexcept>
+#include<functional>
 
 #include<boost/program_options.hpp>
 
@@ -36,17 +37,16 @@ void print_documentation( )
       <<"\n";
 }
 
-_1D::InterpolatorInterface<double>* create(std::string type)
+std::function<double(double)> create(std::string type,int n, double *x, double *y )
 {
-  
   if( type == "linear" )
-    return new _1D::LinearInterpolator<double>();
+    return _1D::LinearInterpolator<double>(n,x,y);
 
   if( type == "spline" )
-    return new _1D::CubicSplineInterpolator<double>();
+    return _1D::CubicSplineInterpolator<double>(n,x,y);
 
   if( type == "monotonic" )
-    return new _1D::MonotonicInterpolator<double>();
+    return _1D::MonotonicInterpolator<double>(n,x,y);
 
   return nullptr;
 }
@@ -99,7 +99,7 @@ int main( int argc, char* argv[])
     in.close();
 
     std::function<double(double)> interp;
-    interp = create(vm["method"].as<string>());
+    interp = create(vm["method"].as<string>(),n,x,y);
     if( !interp )
     {
       delete[] x;
@@ -107,7 +107,6 @@ int main( int argc, char* argv[])
       cerr << "ERROR: Unrecognized interpolation method (" << vm["method"].as<string>()<< ")." << endl;
       return 0;
     }
-    interp->setData(n,x,y);
     delete[] x;
     delete[] y;
 
@@ -121,13 +120,12 @@ int main( int argc, char* argv[])
     ofstream out;
     out.open( vm["output-file"].as<string>().c_str() );
     for(int i = 0; i < n; i++)
-      out << x[i] << " " <<  (*interp)(x[i]) << "\n";
+      out << x[i] << " " <<  interp(x[i]) << "\n";
     out.close();
 
     
     delete[] x;
     delete[] y;
-    delete interp;
 
   
     return 0;

@@ -5,7 +5,6 @@
 #include "Interpolators/_1D/CubicSplineInterpolator.hpp"
 #include "Interpolators/_1D/MonotonicInterpolator.hpp"
 
-
 TEST_CASE( "Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
   std::function<double(double)> interp;

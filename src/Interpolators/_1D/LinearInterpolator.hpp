@@ -23,17 +23,21 @@ class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>>
     using VectorType = typename BASE::VectorType;
     using MapType = typename BASE::MapType;
 
+    template<typename I>
+    LinearInterpolator( I n, Real *x, Real *y ) { this->setData(n,x,y); }
+
+    template<typename X, typename Y>
+    LinearInterpolator( X &x, Y &y ) { this->setData(x,y); }
+
+    LinearInterpolator( ):BASE(){}
+
+    LinearInterpolator(const LinearInterpolator& rhs):BASE(rhs){}
+
+
     Real operator()( Real x ) const;
 
-    LinearInterpolator( ) = default;
-    LinearInterpolator( const LinearInterpolator& interp ) = default;
 
-    template<typename I>
-    LinearInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
-    { this->setData(n,x,y,deep_copy); }
-    template<typename X, typename Y>
-    LinearInterpolator( X &x, Y &y, bool deep_copy = true )
-    { this->setData(x,y,deep_copy); }
+
 
 
 };
@@ -44,8 +48,8 @@ LinearInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   // find the index that is just to the left of the x
   //int i = Utils::index__last_lt( x, X, X.size(), 0);

@@ -41,29 +41,50 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>>
     using ColVector4 = Eigen::Matrix<Real,4,1 >;
     using RowVector4 = Eigen::Matrix<Real,1,4 >;
 
-    BicubicInterpolator() = default;
-    BicubicInterpolator(const BicubicInterpolator& interp) = default;
-
-    template<typename I>
-    BicubicInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
-    {this->setData(n,x,y,z,deep_copy);}
-    template<typename X, typename Y, typename Z>
-    BicubicInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
-    {this->setData(x,y,z,deep_copy);}
-
-    // methods required by the interface
-    Real operator()( Real x, Real y ) const;
-
-
   protected:
-    using BASE::xv;
-    using BASE::yv;
-    using BASE::zv;
+    using BASE::xView;
+    using BASE::yView;
+    using BASE::zView;
     using BASE::X;
     using BASE::Y;
     using BASE::Z;
     
     Matrix44Array a; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bicubic_interpolation)
+
+  public:
+
+    template<typename I>
+    BicubicInterpolator( I n, Real *x, Real *y, Real *z ) {this->setData(n,x,y,z);}
+
+    template<typename X, typename Y, typename Z>
+    BicubicInterpolator( X &x, Y &y, Z &z ) {this->setData(x,y,z);}
+
+    BicubicInterpolator():BASE()
+    { }
+
+    BicubicInterpolator(const BicubicInterpolator& rhs)
+    :BASE(rhs)
+    ,a(rhs.a)
+    {}
+
+    // copy-swap idiom
+    friend void swap( BicubicInterpolator& lhs, BicubicInterpolator& rhs)
+    {
+      lhs.a.swap(rhs.a);
+      swap( static_cast<BASE&>(lhs), static_cast<BASE&>(rhs) );
+    }
+
+    BicubicInterpolator& operator=(BicubicInterpolator rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+
+    // methods required by the interface
+    Real operator()( Real x, Real y ) const;
+
+  protected:
 
     void setupInterpolator();
     friend BASE;
@@ -250,10 +271,10 @@ BicubicInterpolator<Real>::operator()( Real x, Real y ) const
   BASE::checkData();
   
   // no extrapolation...
-  if( x < this->xv->minCoeff()
-   || x > this->xv->maxCoeff()
-   || y < this->yv->minCoeff()
-   || y > this->yv->maxCoeff() )
+  if( x < this->xView->minCoeff()
+   || x > this->xView->maxCoeff()
+   || y < this->yView->minCoeff()
+   || y > this->yView->maxCoeff() )
   {
     return 0;
   }

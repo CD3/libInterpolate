@@ -14,8 +14,8 @@ class TestInterp : public InterpolatorBase<TestInterp>
       return x + 10;
     }
 
-    VectorType getX() { return *(this->xv); }
-    VectorType getY() { return *(this->yv); }
+    VectorType getX() { return *(this->xView); }
+    VectorType getY() { return *(this->yView); }
 
 };
 
@@ -60,23 +60,24 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       }
     }
 
-    SECTION("Shallow Copy")
-    {
-      interp.setData( xx, yy, false );
+    // No longer supported. Is "trickier" than one might think...
+    //SECTION("Shallow Copy")
+    //{
+      //interp.setData( xx, yy, false );
 
-      // clear the original data to check that shallow copy worked
-      for(int i = 0; i < N; i++)
-        xx(i) = yy(i) = 0;
+      //// clear the original data to check that shallow copy worked
+      //for(int i = 0; i < N; i++)
+        //xx(i) = yy(i) = 0;
 
-      auto x = interp.getX();
-      auto y = interp.getY();
+      //auto x = interp.getX();
+      //auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
-      {
-        REQUIRE( x(i) == Approx( 0.0 ) );
-        REQUIRE( y(i) == Approx( 0.0 ) );
-      }
-    }
+      //for( int i = 0; i < N; i++)
+      //{
+        //REQUIRE( x(i) == Approx( 0.0 ) );
+        //REQUIRE( y(i) == Approx( 0.0 ) );
+      //}
+    //}
 
   }
 
@@ -108,23 +109,23 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       }
     }
 
-    SECTION("Shallow Copy")
-    {
-      interp.setData( xx, yy, false );
+    //SECTION("Shallow Copy")
+    //{
+      //interp.setData( xx, yy, false );
 
-      // clear the original data to check that shallow copy worked
-      for(int i = 0; i < N; i++)
-        xx[i] = yy[i] = 0;
+      //// clear the original data to check that shallow copy worked
+      //for(int i = 0; i < N; i++)
+        //xx[i] = yy[i] = 0;
 
-      auto x = interp.getX();
-      auto y = interp.getY();
+      //auto x = interp.getX();
+      //auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
-      {
-        REQUIRE( x(i) == Approx( 0.0 ) );
-        REQUIRE( y(i) == Approx( 0.0 ) );
-      }
-    }
+      //for( int i = 0; i < N; i++)
+      //{
+        //REQUIRE( x(i) == Approx( 0.0 ) );
+        //REQUIRE( y(i) == Approx( 0.0 ) );
+      //}
+    //}
 
   }
 
@@ -159,24 +160,24 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       }
     }
 
-    SECTION("Shallow Copy")
-    {
-      interp.setData( N, xx, yy, false );
+    //SECTION("Shallow Copy")
+    //{
+      //interp.setData( N, xx, yy, false );
 
-      // clear the original data to check that shallow copy worked
-      for(int i = 0; i < N; i++)
-      for(int i = 0; i < N; i++)
-        xx[i] = yy[i] = 0;
+      //// clear the original data to check that shallow copy worked
+      //for(int i = 0; i < N; i++)
+      //for(int i = 0; i < N; i++)
+        //xx[i] = yy[i] = 0;
 
-      auto x = interp.getX();
-      auto y = interp.getY();
+      //auto x = interp.getX();
+      //auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
-      {
-        REQUIRE( x(i) == Approx( 0.0 ) );
-        REQUIRE( y(i) == Approx( 0.0 ) );
-      }
-    }
+      //for( int i = 0; i < N; i++)
+      //{
+        //REQUIRE( x(i) == Approx( 0.0 ) );
+        //REQUIRE( y(i) == Approx( 0.0 ) );
+      //}
+    //}
 
     delete[] xx;
     delete[] yy;

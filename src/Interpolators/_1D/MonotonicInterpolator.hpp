@@ -20,39 +20,65 @@ namespace _1D {
 template<class Real>
 class MonotonicInterpolator : public InterpolatorBase<MonotonicInterpolator<Real>>
 {
-
   public:
     using BASE = InterpolatorBase<MonotonicInterpolator<Real>>;
     using VectorType = typename BASE::VectorType;
     using MapType = typename BASE::MapType;
 
+  protected:
+    VectorType a,b,yplow,yphigh;
+
+  public:
+
     Real operator()( Real x ) const;
 
-    MonotonicInterpolator() = default;
-    MonotonicInterpolator( const MonotonicInterpolator& interp ) = default;
-
     template<typename I>
-    MonotonicInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
-    { this->setData(n,x,y,deep_copy); }
+    MonotonicInterpolator( I n, Real *x, Real *y ) { this->setData(n,x,y); }
+
     template<typename X, typename Y>
-    MonotonicInterpolator( X &x, Y &y, bool deep_copy = true )
-    { this->setData(x,y,deep_copy); }
+    MonotonicInterpolator( X &x, Y &y ) { this->setData(x,y); }
+
+    MonotonicInterpolator():BASE(){}
+    MonotonicInterpolator( const MonotonicInterpolator& rhs )
+    :BASE(rhs)
+    ,a(rhs.a)
+    ,b(rhs.b)
+    ,yplow(rhs.yplow)
+    ,yphigh(rhs.yphigh)
+    {
+    }
+
+    // copy-swap idiom
+    friend void swap( MonotonicInterpolator& lhs, MonotonicInterpolator& rhs)
+    {
+      lhs.a.swap(rhs.a);
+      lhs.b.swap(rhs.b);
+      lhs.yplow.swap(rhs.yplow);
+      lhs.yphigh.swap(rhs.yphigh);
+      swap( static_cast<BASE&>(lhs), static_cast<BASE&>(rhs) );
+    }
+
+    MonotonicInterpolator& operator=(MonotonicInterpolator rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+
 
   protected:
 
     void setupInterpolator();
     friend BASE;
 
-  protected:
-    VectorType a,b,yplow,yphigh;
 };
 
 template<class Real>
 void
 MonotonicInterpolator<Real>::setupInterpolator()
 {
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   a      = VectorType(X.size()-1);
   b      = VectorType(X.size()-1);
@@ -156,8 +182,8 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   // find the index that is just to the left of the x
   // this will correspond to the "interval index"

@@ -8,6 +8,7 @@
   */
 
 #include <memory>
+#include <algorithm>
 #include <type_traits>
 #include <Eigen/Dense>
 #include "Utils/Indexing.hpp"
@@ -25,7 +26,7 @@ namespace _1D {
 
 template<typename T>
 struct RealTypeOf { using type = double; };
-template<template<typename> typename T,typename R>
+template<template<typename> class T,typename R>
 struct RealTypeOf<T<R>> { using type = R; };
 
 template<class Derived, typename Real = typename RealTypeOf<Derived>::type>
@@ -36,40 +37,71 @@ class InterpolatorBase
     using VectorType =  Eigen::Matrix<Real,Eigen::Dynamic,1>;
     using MapType =  Eigen::Map<const VectorType>;
 
-    InterpolatorBase(const InterpolatorBase& interp) = default;
-
-    template<typename I>
-    void setData( I n, const Real *x, const Real *y, bool deep_copy = true );
-
-    template<typename X, typename Y>
-    // this template is ambiguous with the pointer template above,
-    // wo we want to disable it for pointers
-    typename std::enable_if<!std::is_pointer<Y>::value>::type
-    setData( const X &x, const Y &y, bool deep_copy = true );
-
-    // methods to get the data
-    std::vector<Real> getXData() const { return std::vector<Real>(&xd(0),&xd(0)+xd.size()); }
-    std::vector<Real> getYData() const { return std::vector<Real>(&yd(0),&yd(0)+yd.size()); }
-
-
   protected:
-    VectorType xd, yd;               // data
-    std::shared_ptr<MapType> xv, yv; // map view of the data
-    void checkData() const;         ///< Check that data has been initialized and throw exception if not.
+    // data members
+    std::vector<Real> xData, yData;        ///< storage for interpolated data
+    std::unique_ptr<MapType> xView, yView; ///< eigen matrix view of the data
 
   private:
-    // this helps to make sure that the derived class actually
+    // making constructors private and the derived class a friend
+    // helps to make sure that the derived class actually
     // passes itself as the template argument.
     friend Derived;
-    InterpolatorBase(){}
+
+    InterpolatorBase(){ }
+
+    // copy constructor
+    // we only want to initialize x and y views if the object
+    // we are copying from is initialized.
+    InterpolatorBase(const InterpolatorBase& rhs)
+    :xData(rhs.xData)
+    ,yData(rhs.yData)
+    ,xView( rhs.xView ? new MapType( xData.data(), xData.size() ) : nullptr )
+    ,yView( rhs.xView ? new MapType( yData.data(), yData.size() ) : nullptr )
+    { 
+    }
+
+    // we use the copy-swap idiom for copy assignment
+    friend void swap( InterpolatorBase& lhs, InterpolatorBase& rhs)
+    {
+      std::swap( lhs.xData, rhs.xData );
+      std::swap( lhs.yData, rhs.yData );
+      std::swap( lhs.xView, rhs.xView );
+      std::swap( lhs.yView, rhs.yView );
+    }
+
+    InterpolatorBase& operator=(InterpolatorBase rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+  public:
+
+    // methods to get the data
+    std::vector<Real> getXData() const { return xData; }
+    std::vector<Real> getYData() const { return yData; }
 
 
+    // methods to set data
+    // primary method. this is used by the others
+    template<typename I>
+    void setData( I n, const Real *x, const Real *y );
 
+    // this template is ambiguous with the pointer template above,
+    // so we want to disable it for pointers.
+    template<typename X, typename Y>
+    typename std::enable_if<!std::is_pointer<Y>::value>::type
+    setData( const X &x, const Y &y);
 
+  protected:
 
+    void checkData() const; ///< Check that data has been initialized and throw exception if not.
 
-    // below is some template magic to detect if the derived class has implemented a
-    // setupInterpolator function.
+  private:
+    // callSetupInterpolator will call a function named setupInterpolator in the derived class, if
+    // it exists. this is just some template magic to detect if the derived class has implemented a
+    // setupInterpolator function, and to call it if it does.
 
     template<typename T>
     struct has_setupInterpolator
@@ -97,36 +129,31 @@ class InterpolatorBase
 };
 
 
+// implementations
 
 
 template<class Derived, typename Real>
 void
 InterpolatorBase<Derived,Real>::checkData() const
 {
-  if(!this->xv || !this->yv)
+  if(!this->xView || !this->yView)
     throw std::logic_error("Interpolator data is not initialized. Did you call setData()?");
+  if(this->xView->size() == 0 || this->yView->size() == 0)
+    throw std::logic_error("Interpolator data is zero size. Did you call setData() with non-zero sized vectors?");
 }
 
 template<class Derived, typename Real>
 template<typename I>
 void
-InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y, bool deep_copy )
+InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y)
 {
-  const Real *xp, *yp;
-  if( deep_copy )
-  {
-    xd = MapType( x, n );
-    yd = MapType( y, n );
-    xp = &xd(0);
-    yp = &yd(0);
-  }
-  else
-  {
-    xp = x;
-    yp = y;
-  }
-  this->xv.reset( new MapType( xp, n ) );
-  this->yv.reset( new MapType( yp, n ) );
+  xData.clear();
+  yData.clear();
+  std::copy( x, x+n, std::back_inserter(xData) );
+  std::copy( y, y+n, std::back_inserter(yData) );
+    
+  this->xView.reset( new MapType( xData.data(), n ) );
+  this->yView.reset( new MapType( yData.data(), n ) );
 
   this->callSetupInterpolator<Derived>();
 }
@@ -134,9 +161,9 @@ InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y, bool
 template<class Derived, typename Real>
 template<typename X, typename Y>
 typename std::enable_if<!std::is_pointer<Y>::value>::type
-InterpolatorBase<Derived,Real>::setData( const X &x, const Y &y, bool deep_copy )
+InterpolatorBase<Derived,Real>::setData( const X &x, const Y &y)
 {
-  this->setData( x.size(), x.data(), y.data(), deep_copy );
+  this->setData( x.size(), x.data(), y.data() );
 }
 
 

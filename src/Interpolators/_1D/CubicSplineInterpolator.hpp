@@ -17,32 +17,56 @@ namespace _1D {
 template<class Real>
 class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<Real>>
 {
-
   public:
     using BASE = InterpolatorBase<CubicSplineInterpolator<Real>>;
     using VectorType = typename BASE::VectorType;
     using MapType = typename BASE::MapType;
+
+  protected:
+    // Interpolation coefficients
+    VectorType a,b;
+
+  public:
+
+    template<typename I>
+    CubicSplineInterpolator( I n, Real *x, Real *y ) { this->setData(n,x,y); }
+
+    template<typename X, typename Y>
+    CubicSplineInterpolator( X &x, Y &y ) { this->setData(x,y); }
+
+    CubicSplineInterpolator():BASE()
+    { }
+
+    // copy constructor
+    CubicSplineInterpolator( const CubicSplineInterpolator& rhs)
+    :BASE(rhs)
+    ,a(rhs.a)
+    ,b(rhs.b)
+    { }
+
+    // copy-swap idiom
+    friend void swap( CubicSplineInterpolator& lhs, CubicSplineInterpolator& rhs)
+    {
+      lhs.a.swap(rhs.a);
+      lhs.b.swap(rhs.b);
+      swap( static_cast<BASE&>(lhs), static_cast<BASE&>(rhs) );
+    }
+
+    CubicSplineInterpolator& operator=(CubicSplineInterpolator rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+
 
     Real operator()( Real x ) const;
 
     Real derivative( Real x ) const;
     Real integral( Real a, Real b ) const;
 
-    CubicSplineInterpolator( ) = default;
-    CubicSplineInterpolator( const CubicSplineInterpolator& interp ) = default;
-
-    template<typename I>
-    CubicSplineInterpolator( I n, Real *x, Real *y, bool deep_copy = true )
-    { this->setData(n,x,y,deep_copy); }
-    template<typename X, typename Y>
-    CubicSplineInterpolator( X &x, Y &y, bool deep_copy = true )
-    { this->setData(x,y,deep_copy); }
-
 
   protected:
-
-    // Interpolation coefficients
-    VectorType a,b;
 
     // this function will be called by the base class
     // after reading data in. it needs to be accessible
@@ -50,6 +74,7 @@ class CubicSplineInterpolator : public InterpolatorBase<CubicSplineInterpolator<
     // as a friend (otherwise we would have to make it public)
     void setupInterpolator();
     friend BASE;
+
 
 
 
@@ -63,8 +88,8 @@ CubicSplineInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   // find the index that is just to the right of the x
   //int i = Utils::index__first_ge( x, X, X.size(), 1);
@@ -72,7 +97,7 @@ CubicSplineInterpolator<Real>::operator()( Real x ) const
   int i = boost::lower_bound( rng, x ) - X.data();
 
   // don't extrapolate at all
-  if( i == 0 || i == X.size())
+  if( i <= 0 || i >= X.size())
     return 0;
 
   // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
@@ -87,8 +112,8 @@ template<typename Real>
 Real
 CubicSplineInterpolator<Real>::derivative( Real x ) const
 {
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   // find the index that is just to the right of the x
   //int i = Utils::index__first_gt( x, X, X.size(), 1);
@@ -96,7 +121,7 @@ CubicSplineInterpolator<Real>::derivative( Real x ) const
   int i = boost::upper_bound(rng,x) - X.data();
 
   // don't extrapolate at all
-  if( i == 0 || i == X.size())
+  if( i <= 0 || i >= X.size())
     return 0;
 
   //this should be the same t as in the regular interpolation case
@@ -112,11 +137,11 @@ template<class Real>
 Real
 CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
 {
-  if( this->xv->size() < 1 )
+  if( this->xView->size() < 1 )
     return 0;
 
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   // allow b to be less than a
   int sign = 1;
@@ -233,8 +258,8 @@ template<typename Real>
 void
 CubicSplineInterpolator<Real>::setupInterpolator()
 {
-  const VectorType &X = *(this->xv);
-  const VectorType &Y = *(this->yv);
+  const VectorType &X = *(this->xView);
+  const VectorType &Y = *(this->yView);
 
   this->a = VectorType(X.size()-1);
   this->b = VectorType(X.size()-1);

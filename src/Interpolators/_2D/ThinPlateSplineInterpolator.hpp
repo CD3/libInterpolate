@@ -44,28 +44,51 @@ class ThinPlateSplineInterpolator : public InterpolatorBase<ThinPlateSplineInter
     using ColVector2 = Eigen::Matrix<Real,2,1 >;
     using RowVector2 = Eigen::Matrix<Real,1,2 >;
 
-    ThinPlateSplineInterpolator() = default;
-    ThinPlateSplineInterpolator(const ThinPlateSplineInterpolator& interp) = default;
-
-    template<typename I>
-    ThinPlateSplineInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
-    {this->setData(n,x,y,z,deep_copy);}
-    template<typename X, typename Y, typename Z>
-    ThinPlateSplineInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
-    {this->setData(x,y,z,deep_copy);}
-
-    Real operator()( Real x, Real y ) const;
-
-
   protected:
-    using BASE::xv;
-    using BASE::yv;
-    using BASE::zv;
+    using BASE::xView;
+    using BASE::yView;
+    using BASE::zView;
     using BASE::X;
     using BASE::Y;
     using BASE::Z;
     
     MatrixType a, b;
+
+  public:
+
+    template<typename I>
+    ThinPlateSplineInterpolator( I n, Real *x, Real *y, Real *z ) {this->setData(n,x,y,z);}
+
+    template<typename X, typename Y, typename Z>
+    ThinPlateSplineInterpolator( X &x, Y &y, Z &z ) {this->setData(x,y,z);}
+
+    ThinPlateSplineInterpolator():BASE()
+    { }
+
+    ThinPlateSplineInterpolator(const ThinPlateSplineInterpolator& rhs)
+    :BASE(rhs)
+    ,a(rhs.a)
+    ,b(rhs.b)
+    {
+    }
+
+    // copy-swap idiom
+    friend void swap( ThinPlateSplineInterpolator& lhs, ThinPlateSplineInterpolator& rhs)
+    {
+      lhs.a.swap(rhs.a);
+      lhs.b.swap(rhs.b);
+      swap( static_cast<BASE&>(lhs), static_cast<BASE&>(rhs) );
+    }
+
+    ThinPlateSplineInterpolator& operator=(ThinPlateSplineInterpolator rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+    Real operator()( Real x, Real y ) const;
+
+  protected:
 
     Real G(Real x, Real y, Real xi, Real yi) const;
 
@@ -81,23 +104,23 @@ template<class Real>
 void
 ThinPlateSplineInterpolator<Real>::setupInterpolator()
 {
-  a = MatrixType(this->xv->rows(),1);
-  b = MatrixType(this->xv->rows(),3);
+  a = MatrixType(this->xView->rows(),1);
+  b = MatrixType(this->xView->rows(),3);
 
-  MatrixType M = MatrixType(this->xv->rows(),this->xv->rows());
-  MatrixType N = MatrixType(this->xv->rows(),3);
+  MatrixType M = MatrixType(this->xView->rows(),this->xView->rows());
+  MatrixType N = MatrixType(this->xView->rows(),3);
 
   // rows
-  for( int i = 0; i < this->xv->rows(); i++ )
+  for( int i = 0; i < this->xView->rows(); i++ )
   {
     // N
     N(i,0) = 1;
-    N(i,1) = this->xv->coeff(i);
-    N(i,2) = this->yv->coeff(i);
+    N(i,1) = this->xView->coeff(i);
+    N(i,2) = this->yView->coeff(i);
 
-    for( int j = 0; j < this->xv->rows(); j++ )
+    for( int j = 0; j < this->xView->rows(); j++ )
     {
-      M(i,j) = G(this->xv->coeff(i), this->yv->coeff(i), this->xv->coeff(j), this->yv->coeff(j) );
+      M(i,j) = G(this->xView->coeff(i), this->yView->coeff(i), this->xView->coeff(j), this->yView->coeff(j) );
     }
 
 
@@ -106,8 +129,8 @@ ThinPlateSplineInterpolator<Real>::setupInterpolator()
   MatrixType Minv = M.inverse();
   MatrixType Ntra = N.transpose();
 
-  b = (Ntra*Minv*N).inverse()*Ntra*Minv*this->zd;
-  a = Minv*(this->zd - N*b);
+  b = (Ntra*Minv*N).inverse()*Ntra*Minv*(*this->zView);
+  a = Minv*((*this->zView) - N*b);
 
   return;
 
@@ -133,17 +156,17 @@ ThinPlateSplineInterpolator<Real>::operator()( Real x, Real y ) const
   BASE::checkData();
   
   // no extrapolation...
-  if( x < this->xv->minCoeff()
-   || x > this->xv->maxCoeff()
-   || y < this->yv->minCoeff()
-   || y > this->yv->maxCoeff() )
+  if( x < this->xView->minCoeff()
+   || x > this->xView->maxCoeff()
+   || y < this->yView->minCoeff()
+   || y > this->yView->maxCoeff() )
   {
     return 0;
   }
   
-  MatrixType Gx( 1, this->xv->rows() );
-  for(int i = 0; i < this->xv->rows(); i++)
-    Gx(i) = G( x, y, this->xv->coeff(i), this->yv->coeff(i) );
+  MatrixType Gx( 1, this->xView->rows() );
+  for(int i = 0; i < this->xView->rows(); i++)
+    Gx(i) = G( x, y, this->xView->coeff(i), this->yView->coeff(i) );
 
   Real f = (Gx*a)(0,0) + b(0) + b(1)*x + b(2)*y;
 

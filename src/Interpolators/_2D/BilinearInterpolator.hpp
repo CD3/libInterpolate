@@ -37,28 +37,49 @@ class BilinearInterpolator : public InterpolatorBase<BilinearInterpolator<Real>>
     using ColVector2 = Eigen::Matrix<Real,2,1 >;
     using RowVector2 = Eigen::Matrix<Real,1,2 >;
 
-    BilinearInterpolator() = default;
-    BilinearInterpolator(const BilinearInterpolator& interp) = default;
-
-    template<typename I>
-    BilinearInterpolator( I n, Real *x, Real *y, Real *z, bool deep_copy = true )
-    {this->setData(n,x,y,z,deep_copy);}
-    template<typename X, typename Y, typename Z>
-    BilinearInterpolator( X &x, Y &y, Z &z, bool deep_copy = true )
-    {this->setData(x,y,z,deep_copy);}
-
-    Real operator()( Real x, Real y ) const;
-
-
   protected:
-    using BASE::xv;
-    using BASE::yv;
-    using BASE::zv;
+
+    using BASE::xView;
+    using BASE::yView;
+    using BASE::zView;
     using BASE::X;
     using BASE::Y;
     using BASE::Z;
     
     Matrix22Array Q; // naming convention used by wikipedia article (see Wikipedia https://en.wikipedia.org/wiki/Bilinear_interpolation)
+
+
+  public:
+
+    template<typename I>
+    BilinearInterpolator( I n, Real *x, Real *y, Real *z ) {this->setData(n,x,y,z);}
+
+    template<typename X, typename Y, typename Z>
+    BilinearInterpolator( X &x, Y &y, Z &z ) {this->setData(x,y,z);}
+
+    BilinearInterpolator():BASE(){}
+    BilinearInterpolator(const BilinearInterpolator& rhs)
+    :BASE(rhs)
+    ,Q(rhs.Q)
+    {}
+
+    // copy-swap idiom
+    friend void swap( BilinearInterpolator& lhs, BilinearInterpolator& rhs)
+    {
+      lhs.Q.swap(rhs.Q);
+      swap( static_cast<BASE&>(lhs), static_cast<BASE&>(rhs) );
+    }
+
+    BilinearInterpolator& operator=(BilinearInterpolator rhs)
+    {
+      swap(*this,rhs);
+      return *this;
+    }
+
+    Real operator()( Real x, Real y ) const;
+
+
+  private:
 
     void setupInterpolator();
     friend BASE;

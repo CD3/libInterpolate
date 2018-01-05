@@ -39,11 +39,11 @@ class InterpolatorBase
   protected:
 
     std::vector<Real> xData, yData, zData;        // data storage
-    std::shared_ptr<MapType> xView, yView, zView; // map view of the data
+    std::unique_ptr<MapType> xView, yView, zView; // map view of the data
 
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
-    std::shared_ptr<_2DVectorView> X,Y;
-    std::shared_ptr<_2DMatrixView> Z;
+    std::unique_ptr<_2DVectorView> X,Y;
+    std::unique_ptr<_2DMatrixView> Z;
 
   private:
     // making constructors private and the derived class a friend

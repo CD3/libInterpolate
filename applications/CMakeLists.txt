@@ -1,0 +1,9 @@
+cmake_minimum_required( VERSION 3.1 )
+
+find_package( Boost REQUIRED COMPONENTS program_options )
+
+add_executable( interp-cli interp-cli.cpp )
+target_link_libraries( interp-cli Interp Boost::program_options )
+set_property( TARGET interp-cli PROPERTY CXX_STANDARD 11 )
+
+add_subdirectory( .. libInterp )

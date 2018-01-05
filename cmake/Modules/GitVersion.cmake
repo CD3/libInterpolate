@@ -1,5 +1,5 @@
 # the code below uses git to extract information about the version being built
-function( GIT_VERSION )
+function( GIT_VERSION VAR )
 
 set( GIT_INFO ID AUTHOR DATE BRANCH DESC )
 
@@ -132,11 +132,11 @@ else()
 endif()
 
 # now set version information in the parent scope
-set( ${PROJECT_NAME}_VERSION_FULL   ${VERSION_FULL}  PARENT_SCOPE )
-set( ${PROJECT_NAME}_VERSION        ${VERSION}       PARENT_SCOPE )
-set( ${PROJECT_NAME}_VERSION_MAJOR  ${VERSION_MAJOR} PARENT_SCOPE )
-set( ${PROJECT_NAME}_VERSION_MINOR  ${VERSION_MINOR} PARENT_SCOPE )
-set( ${PROJECT_NAME}_VERSION_PATCH  ${VERSION_PATCH} PARENT_SCOPE )
+set( ${VAR}_VERSION_FULL   ${VERSION_FULL}  PARENT_SCOPE )
+set( ${VAR}_VERSION        ${VERSION}       PARENT_SCOPE )
+set( ${VAR}_VERSION_MAJOR  ${VERSION_MAJOR} PARENT_SCOPE )
+set( ${VAR}_VERSION_MINOR  ${VERSION_MINOR} PARENT_SCOPE )
+set( ${VAR}_VERSION_PATCH  ${VERSION_PATCH} PARENT_SCOPE )
 
 endfunction(GIT_VERSION)
 

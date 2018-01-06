@@ -48,6 +48,10 @@ LinearInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
+  // don't extrapolate at all
+  if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
+    return 0;
+
   const VectorType &X = *(this->xView);
   const VectorType &Y = *(this->yView);
 
@@ -56,9 +60,6 @@ LinearInterpolator<Real>::operator()( Real x ) const
   auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
   int i = boost::lower_bound( rng, x) - X.data() - 1;
 
-  // don't extrapolate at all
-  if( i == -1 || i == X.size() - 1 )
-    return 0;
      
   Real b  = Y(i);
   Real m  = Y(i+1)-Y(i);

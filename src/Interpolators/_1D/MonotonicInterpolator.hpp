@@ -182,6 +182,10 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
+  // don't extrapolate at all
+  if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
+    return 0;
+
   const VectorType &X = *(this->xView);
   const VectorType &Y = *(this->yView);
 
@@ -190,10 +194,6 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
   //int i = Utils::index__first_ge( x, X, X.size(), 1);
   auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
   int i = boost::lower_bound( rng, x ) - X.data();
-
-  // don't extrapolate at all
-  if( i == 0 || i == X.size())
-    return 0;
   i--; // we need the interval index, not the right point index.
 
 	// Deal with the degenerate case of xval = xlow = xhigh

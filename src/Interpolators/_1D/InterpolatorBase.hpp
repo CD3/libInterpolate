@@ -10,8 +10,8 @@
 #include <memory>
 #include <algorithm>
 #include <type_traits>
+#include <vector>
 #include <Eigen/Dense>
-#include "Utils/Indexing.hpp"
 
 
 namespace _1D {

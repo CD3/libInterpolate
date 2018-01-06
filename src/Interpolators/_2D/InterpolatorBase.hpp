@@ -7,8 +7,8 @@
   */
 
 #include <memory>
+#include <vector>
 #include <Eigen/Dense>
-#include "Utils/Indexing.hpp"
 
 
 namespace _2D {

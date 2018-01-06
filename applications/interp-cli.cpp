@@ -88,6 +88,15 @@ int main( int argc, char* argv[])
       return 1;
     }
 
+    if (vm.count("list"))
+    {
+      print_version();
+      cout<<"\tlinear\n";
+      cout<<"\tspline\n";
+      cout<<"\tmonotonic\n";
+      return 1;
+    }
+
 
     ifstream in;
     double *x, *y;

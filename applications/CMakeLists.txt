@@ -7,3 +7,4 @@ target_link_libraries( interp-cli Interp Boost::program_options )
 set_property( TARGET interp-cli PROPERTY CXX_STANDARD 11 )
 
 add_subdirectory( .. libInterp )
+configure_file( ../testing/CramTests/interp-cli.t ${CMAKE_CURRENT_BINARY_DIR}/interp-cli.t COPYONLY )

@@ -102,7 +102,6 @@ else()
 endif()
 # strip off the major number
 string( REGEX REPLACE "^${VERSION_MAJOR}" "" TMP ${TMP} )
-message(${TMP})
 # minor number will only be preceeded by a .
 # but may be followed by a . or -
 if( ${TMP} MATCHES "^[\\.]([0-9]+)[\\.\\-]" )

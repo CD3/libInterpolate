@@ -1,4 +1,4 @@
-#include "version.h"
+#include "libInterp_version.h"
 
 #include "./Interpolators/_1D/LinearInterpolator.hpp"
 #include "./Interpolators/_1D/CubicSplineInterpolator.hpp"

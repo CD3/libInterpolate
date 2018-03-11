@@ -1,5 +1,4 @@
 cmake_minimum_required( VERSION 3.1 )
-message( "Configuring unit test build." )
 
 OPTION( BUILD_UNIT_TESTS "Build unit tests for the library" ON )
 

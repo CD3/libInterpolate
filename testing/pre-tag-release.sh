@@ -12,6 +12,12 @@ function cleanup()
 }
 trap cleanup EXIT
 
+function copy_bindir()
+{
+  cp -r $bindir $bindir.error
+}
+trap copy_bindir ERR
+
 mkdir $bindir
 cd $bindir
 cmake .. -DCMAKE_INSTALL_PREFIX=$bindir/install
@@ -42,18 +48,26 @@ EOF
 cat << EOF > CMakeLists.txt
 cmake_minimum_required(VERSION 3.1)
 add_executable( main main.cpp )
-find_package( libInterp REQUIRED PATHS ${bindir}/install )
+find_package( libInterp REQUIRED )
 target_link_libraries(main libInterp::Interp )
 set_target_properties(main PROPERTIES CXX_STANDARD 11)
 EOF
 
 mkdir build1
 cd build1
-cmake .. -DlibInterp_DIR=${bindir}/install/cmake/libInegrate
+cmake .. -DlibInterp_DIR=${bindir}/install/cmake/
 cmake --build .
 ./main
 
 cd ..
+
+cat << EOF > CMakeLists.txt
+cmake_minimum_required(VERSION 3.1)
+add_executable( main main.cpp )
+find_package( libInterp REQUIRED PATHS ${bindir}/install )
+target_link_libraries(main libInterp::Interp )
+set_target_properties(main PROPERTIES CXX_STANDARD 11)
+EOF
 
 mkdir build2
 cd build2

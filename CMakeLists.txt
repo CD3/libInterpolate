@@ -36,7 +36,7 @@ add_library( ${LIB_NAME} INTERFACE )
 add_library( ${PROJECT_NAME}::${LIB_NAME} ALIAS ${LIB_NAME} )
 target_include_directories( ${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/src>
-  $<BUILD_INTERFACE:${${PROJECT_NAME}_BINARY_DIR}>
+  $<BUILD_INTERFACE:${${PROJECT_NAME}_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 target_sources(

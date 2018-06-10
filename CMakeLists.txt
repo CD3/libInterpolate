@@ -30,8 +30,6 @@ set( cxx_needed_features
 
 find_package( Boost REQUIRED )
 find_package( Eigen3 REQUIRED )
-add_library( Eigen3::eigen3 INTERFACE IMPORTED )
-set_property( TARGET Eigen3::eigen3 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${EIGEN3_INCLUDE_DIR})
 
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} INTERFACE )
@@ -57,7 +55,7 @@ target_sources(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Interpolators/_1D/MonotonicInterpolator.hpp>
 )
 
-target_link_libraries(${LIB_NAME} INTERFACE Boost::boost Eigen3::eigen3)
+target_link_libraries(${LIB_NAME} INTERFACE Boost::boost Eigen3::Eigen)
 
 if( STANDALONE )
 add_subdirectory( testing )
@@ -93,9 +91,6 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
 "include(CMakeFindDependencyMacro)
 find_dependency(Boost)
 find_dependency( Eigen3 )
-add_library( Eigen3::eigen3 INTERFACE IMPORTED )
-set_property( TARGET Eigen3::eigen3 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${EIGEN3_INCLUDE_DIR})
-include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake)
 "
   )
 include(CMakePackageConfigHelpers)

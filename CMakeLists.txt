@@ -39,6 +39,10 @@ target_include_directories( ${LIB_NAME} INTERFACE
   $<BUILD_INTERFACE:${${PROJECT_NAME}_BINARY_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
+target_compile_definitions( ${LIB_NAME}
+INTERFACE
+  $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>
+)
 target_sources(
   ${LIB_NAME}
   INTERFACE

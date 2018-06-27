@@ -29,7 +29,7 @@ set( cxx_needed_features
    )
 
 find_package( Boost REQUIRED )
-find_package( Eigen3 REQUIRED )
+find_package( Eigen3 3.3.1 REQUIRED ) # v3.3.1 adds support for cmake targets
 
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} INTERFACE )

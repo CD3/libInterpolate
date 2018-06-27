@@ -1,6 +1,17 @@
 #
-# Searches for a dependency.
-# 
+# Searches for a project dependency.
+#
+# This mocro tries to find an install or include directotry to satisfy a
+# project dependency. It uses find_package internally to detect installs.
+#
+# The locations that will be searched are determined my arguments to the macro
+#
+# - OVERRIDE_PATHS     : list of directories that will be searched for sub-directories to include. these directories are searched first. if the
+#                        dependency is found here, it will be used.
+# - PATHS              : list of directories that will be searched for installs, in addition to the normal system directories. the find_package command is used to detect the install.
+# - SUBDIRECTORY_PATHS : list of directories that will be searched for sub-directories to include if no override or installs are detected.
+#
+# Any additional arguments that are given to the macro will be passed directly to the find_package macro.
 #
 macro( find_project_dependency DEPENDENCY )
   message(STATUS "Searching for dependency: ${DEPENDENCY}")

@@ -166,6 +166,7 @@ If you need to select the interpolation method at runtime, you can use `std::fun
 
 ```C++
 #include <Interp.hpp>
+#include <functional>
 ...
 string method;
 vector<double> x,y;

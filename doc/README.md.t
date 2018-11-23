@@ -51,20 +51,44 @@ your `CMakeLists.txt` file with the `add_subdirectory` command
 add_subdirectory(externals/libInterp)
 ```
 
-The `libInterp` `CMakeLists.txt` will check for its dependencies and export the required include
-directories to a cache variable named `libInterp_INCLUDE_DIRS`, so you can just include them rather
-than needing to search yourself.
+The `libInterp` `CMakeLists.txt` will create a target named `libInterp::Interp` that can be linked
+against.
 
 ```CMake
 # add libInterp
 add_subdirectory(externals/libInterp)
-# add include dirs required by libInterp
-include_directories( ${libInterp_INCLUDE_DIRS} )
+# create your target
+add_executabe( myProgram myProgram.cpp )
+# add include dirs required for libInterp and its dependencies
+target_link_libraries( myProgram libInterp::Interp )
+```
+
+`libInterp` also supports being installed, and will install a `*Config.cmake` file that CMake can detect.
+To build and install `libInterp`:
+
+```bash
+$ git clone https://github.com/CD3/libInterpolate
+$ cd libInterpolate
+$ mkdir build
+$ cd build
+$ cmake ..
+$ cmake --build .
+$ cmake --build . --target install
+```
+
+Now you can use the `find_package` command in your CMakeLists.txt file to detect and configure `libInterp`.
+```CMake
+# find libInterp
+find_package(libInterp REQUIRED)
+# create your target
+add_executabe( myProgram myProgram.cpp )
+# add include dirs required for libInterp and its dependencies
+target_link_libraries( myProgram libInterp::Interp )
 ```
 
 ## Design
 
-`libInterp` uses inheritance for code reuse and implements the "Curiously Recurring Template Patter" (CRTP).
+`libInterp` uses inheritance for code reuse and implements the "Curiously Recurring Template Pattern" (CRTP).
 CRTP allows the base class to implement functions that depend on parts that need to be implemented by the
 derived class. For example, `InterpolatorBase` implements a function named `setData` that reads the
 interpolated data into the interpolator. This way, derived classes do not need to implement functions to load the

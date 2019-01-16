@@ -6,6 +6,8 @@
 
 TEST_CASE( "MonotonicInterpolator Tests", "[monotonic]" ) {
 
+  SECTION("Double Precision")
+  {
   _1D::MonotonicInterpolator<double> interp;
 
   int N = 100;
@@ -32,6 +34,39 @@ TEST_CASE( "MonotonicInterpolator Tests", "[monotonic]" ) {
     CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
+  }
+
+
+  //SECTION("Single Precision")
+  //{
+  //_1D::MonotonicInterpolator<float> interp;
+
+  //int N = 100;
+  //float xmin = 0, xmax = 2*M_PI;
+  //float dx = (xmax - xmin)/(N-1);
+
+  //_1D::MonotonicInterpolator<float>::VectorType xx(N), yy(N);
+
+  //CHECK_THROWS_AS( interp(1), std::logic_error );
+
+  //for( int i = 0; i < N; i++)
+  //{
+    //xx(i) = dx*i;
+    //yy(i) = sin(xx(i));
+  //}
+  //interp.setData( xx, yy );
+
+  //REQUIRE_NOTHROW( interp(1) );
+
+
+  //SECTION("Interpolation")
+  //{
+    //CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
+    //CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
+    //CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
+  //}
+
+  //}
 
 }
 

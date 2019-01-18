@@ -10,7 +10,7 @@
 
 #include "../../Utils/Concepts.hpp"
 
-namespace _1D {
+namespace _2D {
 
 template<typename T, typename Sig = void(int,T*,T*,T*)>
 using AnyInterpolator = boost::type_erasure::any< boost::mpl::vector<

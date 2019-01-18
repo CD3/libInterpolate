@@ -6,7 +6,7 @@
 #include <Interpolators/_1D/MonotonicInterpolator.hpp>
 #include <Interpolators/_1D/AnyInterpolator.hpp>
 
-TEST_CASE( "Runtime Binding w/ AnyInterpolator Tests", "[polymorphism]" )
+TEST_CASE( "Runtime Binding w/ _1D::AnyInterpolator Tests", "[polymorphism]" )
 {
   SECTION("AnyInterpolator can store a LinearInterpolator")
   {

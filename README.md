@@ -33,6 +33,15 @@ double val = interp(2.0); // val contains the value of the function y(x) interpo
 
 ```
 
+The `setData` method is a template that will accept any container that provides `size()` and `data()` methods. Here `std::vector` is used, but you
+could also use `Eigen::Matrix`. There is also a low-level `setData` method that takes an integer size and two data pointers, which you can use directly.
+This is actually what the `setData` method in the exmaple is calling under the hood.
+
+```C++
+interp.setData( x.size(), x,data(), y.data() )
+```
+
+
 ## Installing
 
 Currently, `libInterp` is a header-only C++ library. To use it, simply include
@@ -114,18 +123,54 @@ class MyInterpolator : _1D::InterpolatorBase<MyInterpolator>
 };
 ```
 
-CRTP does not allow runtime polymorphism, since each derived type derives from a different base class.
-If you need a way to bind the interpolation type at runtime, you should use `std::function` instead
+CRTP provides static polymorphism, but not runtime polymorphism, since each derived type derives from a different base class.
+`libInterp` now provides a type-erased `AnyInterpolator` class that can be used to store any of the interpolators, which allows
+runtime binding. The `AnyInterpolator` class uses Boost.TypeErasure, and is not included in the monolithic header, it must be included
+seprately.
+
 
 ```C++
-// OK. now interp can be used like a function and it uses "value semantics".
+#include <Interp.hpp>
+#include <AnyInterpolator.hpp>
+
+...
+
+_1D::AnyInterpolator<double> interp = _1D::CubicSplineInterpolator<double>();
+
+interp.setData( x.size(), x.data(), y.data() );
+
+...
+// do some interpolation
+...
+// now change the interpolator
+// you will need to reload the data though
+interp = _1D::LinearInterpolator<double>();
+
+interp.setData( x.size(), x.data(), y.data() );
+...
+// do some more inteprolation
+
+
+...
+
+Currenly, the `AnyInterpolator` only provides one `setData` method, which is the low-level version that takes a size an two data poiters. This can
+be changed by passing the desired signature as a second template arguments.
+```C++
+_1D::AnyInterpolator<double, void(std::vector<double>,std::vector<double>)> interp = _1D::CubicSplineInterpolator<double>();
+
+interp.setData( x, y );
+```
+
+You can also use `std::function`, but you will have to explicily cast the function object to the interpolator to call `setData`.
+
+```C++
 std::function<double(double)> interp = _1D::CubicSplineInterpolator<double>();
+interp.target<_1D::CubicSplineInterpolator<double>>()->setData(x,y)
 
 ...
 
 ```
 
-If you need runtime polymorphism with access to more member functions, you can use type erasure.
 
 ### Data Storage
 
@@ -182,22 +227,55 @@ if( method == "linear")
 {
   interp = _1D::LinearInterpolator<double>();
   // need to cast to the interpolation class to set data
-  interp.target<_1D::LinearInterpolator<double>>()->setData(x,y)
+  interp.target<_1D::LinearInterpolator<double>>()->setData(x,y);
 }
 if( method == "cubicspline")
 {
-  interp = _1D::CubicSplineInterpolator<double>()
-  interp.target<_1D::CubicSplineInterpolator<double>>()->setData(x,y)
+  interp = _1D::CubicSplineInterpolator<double>();
+  interp.target<_1D::CubicSplineInterpolator<double>>()->setData(x,y);
 }
 if( method == "monotonic")
 {
   interp = _1D::MonotonicInterpolator<double>();
-  interp.target<_1D::MonotonicInterpolator<double>>()->setData(x,y)
+  interp.target<_1D::MonotonicInterpolator<double>>()->setData(x,y);
 }
 
 // interpolation is done with the operator() method.
 double val = interp(2.0);
 ```
 
-Note that the interpolated data is copied by the interpolator, so it is safe to pass the `std::function` object
+or the new `AnyInterpolator` class, which doesn't require a cast when calling `setData`.
+
+```C++
+#include <Interp.hpp>
+#include <AnyInterpolator.hpp>
+...
+string method;
+vector<double> x,y;
+...
+fill x and y with data
+...
+
+// Create a std::function to store the interpolator
+std::function<double(double)> interp;
+
+// select the interpolation method on user input
+if( method == "linear")
+  interp = _1D::LinearInterpolator<double>();
+if( method == "cubicspline")
+  interp = _1D::CubicSplineInterpolator<double>();
+if( method == "monotonic")
+  interp = _1D::MonotonicInterpolator<double>();
+
+interp.setData(x.size(), x.data(), y.data());
+
+// interpolation is done with the operator() method.
+double val = interp(2.0);
+```
+
+
+Note that the interpolated data is copied by the interpolator, so it is safe to pass both the `std::function` and `AnyInterpolator` objects
 around. The interpolator it stores will be self-contained.
+
+Note that the interpolated data is copied by the interpolator, so it is safe to pass the `std::function` object
+around. The interpolator it stores will be self-contained. Just remember that all data will be copied when you pass by value.

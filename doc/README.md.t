@@ -12,7 +12,7 @@ Currently implemented methods are:
     - monotonic spline interpolation (http://adsabs.harvard.edu/full/1990A%26A...239..443S)
 - 2D Interpolation
     - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
-    - bilcubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
+    - bicubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
     - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
 
 ## Example
@@ -35,7 +35,7 @@ double val = interp(2.0); // val contains the value of the function y(x) interpo
 
 The `setData` method is a template that will accept any container that provides `size()` and `data()` methods. Here `std::vector` is used, but you
 could also use `Eigen::Matrix`. There is also a low-level `setData` method that takes an integer size and two data pointers, which you can use directly.
-This is actually what the `setData` method in the exmaple is calling under the hood.
+This is actually what the `setData` method in the example is calling under the hood.
 
 ```C++
 interp.setData( x.size(), x,data(), y.data() )
@@ -174,7 +174,7 @@ interp.target<_1D::CubicSplineInterpolator<double>>()->setData(x,y)
 
 ### Data Storage
 
-The interpolator classes copy the interpolation data and store them internally. This makes the type much more convienient
+The interpolator classes copy the interpolation data and store them internally. This makes the type much more convenient
 to work with since it is completely self contained and you don't have to worry about keeping that data that you are interpolating
 alive. However, it does mean that you need to be mindful of copies.
 

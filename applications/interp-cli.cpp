@@ -3,15 +3,16 @@
 #include<algorithm>
 #include<list>
 #include<stdexcept>
-#include<functional>
 
 #include<boost/program_options.hpp>
 
-#include "Interp.hpp"
-#include "Utils/ReadFunction.hpp"
+#include <Interp.hpp>
+#include <AnyInterpolator.hpp>
+#include <Utils/ReadFunction.hpp>
 
 using namespace std;
 namespace po = boost::program_options;
+
 
 void print_version()
 {
@@ -37,18 +38,18 @@ void print_documentation( )
       <<"\n";
 }
 
-std::function<double(double)> create(std::string type,int n, double *x, double *y )
+_1D::AnyInterpolator<double> create(std::string type)
 {
   if( type == "linear" )
-    return _1D::LinearInterpolator<double>(n,x,y);
+    return _1D::LinearInterpolator<double>();
 
   if( type == "spline" )
-    return _1D::CubicSplineInterpolator<double>(n,x,y);
+    return _1D::CubicSplineInterpolator<double>();
 
   if( type == "monotonic" )
-    return _1D::MonotonicInterpolator<double>(n,x,y);
+    return _1D::MonotonicInterpolator<double>();
 
-  return nullptr;
+  throw std::runtime_error("Interpolator type was not recognized: '"+type+"'");
 }
 
 
@@ -63,7 +64,7 @@ int main( int argc, char* argv[])
       ("list,l"      ,                                                   "list available interpolation methods.")
       ("interp-data" ,                                                   "file containing data to be interpolated from.")
       ("x-values"    ,                                                   "file containing x values to interpolate to.")
-      ("output-file" ,                                                   "file to write inteprolated data to.")
+      ("output-file" ,                                                   "file to write interpolated data to.")
       ;
 
     po::positional_options_description args;
@@ -107,15 +108,8 @@ int main( int argc, char* argv[])
     Utils::ReadFunction( in, x, y, n );
     in.close();
 
-    std::function<double(double)> interp;
-    interp = create(vm["method"].as<string>(),n,x,y);
-    if( !interp )
-    {
-      delete[] x;
-      delete[] y;
-      cerr << "ERROR: Unrecognized interpolation method (" << vm["method"].as<string>()<< ")." << endl;
-      return 0;
-    }
+    _1D::AnyInterpolator<double> interp = create(vm["method"].as<string>());
+    interp.setData(n,x,y);
     delete[] x;
     delete[] y;
 

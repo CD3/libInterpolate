@@ -1,0 +1,51 @@
+language : cpp
+matrix:
+  include:
+    - os : linux
+      dist: trusty
+      addons:
+        apt:
+          sources:
+            ubuntu-toolchain-r-test
+          packages:
+            g++-7
+      env:
+        MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - os : linux
+      dist: xenial
+      compiler: clang
+
+
+install:
+  - sudo apt-get install python3 python3-pip
+  - sudo pip3 install pytest pexpect
+  # download an install a newer version of cmake
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR}
+  - cd ${DEPS_DIR}
+  - travis_retry wget --no-check-certificate https://cmake.org/files/v3.10/cmake-3.10.3-Linux-x86_64.tar.gz
+  - tar -xf cmake-3.10.3-Linux-x86_64.tar.gz
+  - mv cmake-3.10.3-Linux-x86_64 cmake-install
+  - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
+
+  # now build boost
+  - cd ${DEPS_DIR}
+  - travis_retry wget --no-check-certificate https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.bz2
+  - tar -xjf boost_1_65_1.tar.bz2
+  - cd boost_1_65_1
+  - ./bootstrap.sh --with-libraries=program_options,filesystem,system,log > /dev/null
+  - ./b2 link=static threading=multi variant=release > /dev/null
+  - sudo ./b2 install > /dev/null
+
+  # don't forget to switch back to the main build directory once you are done
+  - cd ${TRAVIS_BUILD_DIR}
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+script:
+  - make
+  - make test

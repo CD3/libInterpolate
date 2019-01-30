@@ -150,8 +150,9 @@ interp.setData( x.size(), x.data(), y.data() );
 ...
 // do some more inteprolation
 
-
 ...
+
+```
 
 Currenly, the `AnyInterpolator` only provides one `setData` method, which is the low-level version that takes a size an two data poiters. This can
 be changed by passing the desired signature as a second template arguments.

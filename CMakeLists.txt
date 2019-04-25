@@ -12,10 +12,10 @@ enable_testing()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+project(libInterp)
 include(macro-git_version)
 GIT_VERSION(libInterp)
-message( STATUS "libInterp version: ${libInterp_VERSION}")
-project(libInterp VERSION ${libInterp_VERSION})
+message( STATUS "libInterp version: ${${PROJECT_NAME}_VERSION}")
 
 # need to run configure_file twice
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}_version.h.in"

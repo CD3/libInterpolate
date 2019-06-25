@@ -65,6 +65,7 @@ int main( int argc, char* argv[])
       ("interp-data" ,                                                   "file containing data to be interpolated from.")
       ("x-values"    ,                                                   "file containing x values to interpolate to.")
       ("output-file" ,                                                   "file to write interpolated data to.")
+      ("precision,p" , po::value<int>(),                                 "precision to use when writing output.")
       ;
 
     po::positional_options_description args;
@@ -121,6 +122,10 @@ int main( int argc, char* argv[])
 
     // write interpolated data
     ofstream out;
+    if(vm.count("precision"))
+    {
+      out.precision( vm["precision"].as<int>() );
+    }
     out.open( vm["output-file"].as<string>().c_str() );
     for(int i = 0; i < n; i++)
       out << x[i] << " " <<  interp(x[i]) << "\n";

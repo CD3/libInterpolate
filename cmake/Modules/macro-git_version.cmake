@@ -18,8 +18,11 @@ if( GIT_FOUND )
                    RESULT_VARIABLE IsGitRepo
                    OUTPUT_VARIABLE OutputTrash
                    ERROR_VARIABLE ErrorTrash)
+else()
+  message( FATAL_ERROR "Could not find git command" )
+endif()
 
-  if( ${IsGitRepo} EQUAL 0 )
+if( ${IsGitRepo} EQUAL 0 )
     if( "${GIT_COMMIT_ID}" STREQUAL "" )
       execute_process( COMMAND ${GIT_EXECUTABLE} rev-parse --sq HEAD 
                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -50,11 +53,27 @@ if( GIT_FOUND )
                        OUTPUT_VARIABLE GIT_COMMIT_DESC
                        ERROR_VARIABLE Trash)
     endif()
+else()
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/version.txt")
+    message( WARNING "Source directory is not a git repo, but 'version.txt' was found. Using version number there." )
+    if( "${GIT_COMMIT_ID}" STREQUAL "" )
+      set( GIT_COMMIT_ID "UNKNOWN" )
+    endif()
+    if( "${GIT_COMMIT_AUTHOR}" STREQUAL "" )
+      set( GIT_COMMIT_AUTHOR "UNKNOWN" )
+    endif()
+    if( "${GIT_COMMIT_DATE}" STREQUAL "" )
+      set( GIT_COMMIT_DATE "UNKNOWN" )
+    endif()
+    if( "${GIT_COMMIT_BRANCH}" STREQUAL "" )
+      set( GIT_COMMIT_BRANCH "UNKNOWN" )
+    endif()
+    if( "${GIT_COMMIT_DESC}" STREQUAL "" )
+      file( READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" GIT_COMMIT_DESC )
+    endif()
   else()
     message( FATAL_ERROR "Source directory is not a git repo." )
-  endif()
-else()
-  message( FATAL_ERROR "Could not find git command" )
+endif()
 endif()
 
 # set defaults for any items that were not found

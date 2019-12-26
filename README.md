@@ -44,33 +44,12 @@ interp.setData( x.size(), x,data(), y.data() )
 
 ## Installing
 
-Currently, `libInterp` is a header-only C++ library. To use it, simply include
+`libInterp` is a header-only C++ library, so you can simply include
 the headers you want/need in your source code. If you use `git subrepo`, you
 can clone the source into your externals directory and use it from there.
 
 `libInterp` depends on `Boost` and `Eigen3`, so you will need to include the directories
 containing their header files when compiling.
-
-This simplest way to use the library is to build your project using CMake. You can then
-put a copy of this project in a directory named `externals/libInterp` and include it in
-your `CMakeLists.txt` file with the `add_subdirectory` command
-
-```CMake
-# add libInterp
-add_subdirectory(externals/libInterp)
-```
-
-The `libInterp` `CMakeLists.txt` will create a target named `libInterp::Interp` that can be linked
-against.
-
-```CMake
-# add libInterp
-add_subdirectory(externals/libInterp)
-# create your target
-add_executabe( myProgram myProgram.cpp )
-# add include dirs required for libInterp and its dependencies
-target_link_libraries( myProgram libInterp::Interp )
-```
 
 `libInterp` also supports being installed, and will install a `*Config.cmake` file that CMake can detect.
 To build and install `libInterp`:
@@ -94,6 +73,16 @@ add_executabe( myProgram myProgram.cpp )
 # add include dirs required for libInterp and its dependencies
 target_link_libraries( myProgram libInterp::Interp )
 ```
+Again, `boost` and `Eigen3` need to be installed.
+
+### Conan
+
+You can also install `libInterp` with the [Conan package manager](https://docs.conan.io/en/latest/),
+which will automatically install its dependencies. Just add https://api.bintray.com/conan/cd3/conan-devel
+to your list of remotes and search for the latest release of `libInterpolate` (Sorry for the difference in
+naming convention).
+
+
 
 ## Design
 

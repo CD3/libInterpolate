@@ -6,9 +6,10 @@
 
 #include<boost/program_options.hpp>
 
-#include <Interp.hpp>
-#include <AnyInterpolator.hpp>
-#include <Utils/ReadFunction.hpp>
+#include <libInterpolate/libInterpolate_version.h>
+#include <libInterpolate/Interpolate.hpp>
+#include <libInterpolate/AnyInterpolator.hpp>
+#include <libInterpolate/Utils/ReadFunction.hpp>
 
 using namespace std;
 namespace po = boost::program_options;
@@ -16,7 +17,7 @@ namespace po = boost::program_options;
 
 void print_version()
 {
-  cout<<"interp-cli - linked against libInterp version "<< libInterp_VERSION_FULL << endl;
+  cout<<"interp-cli - linked against libInterp version "<< libInterpolate_VERSION_FULL << endl;
 }
 
 void print_usage(char prog_name[])

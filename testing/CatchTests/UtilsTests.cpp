@@ -1,8 +1,8 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Utils/Indexing.hpp"
-#include "Utils/Concepts.hpp"
+#include <libInterpolate/Utils/Indexing.hpp>
+#include <libInterpolate/Utils/Concepts.hpp>
 #include <Eigen/Dense>
 #include <boost/range/adaptor/strided.hpp>
 #include <boost/range/algorithm/upper_bound.hpp>

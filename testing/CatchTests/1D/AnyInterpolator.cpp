@@ -1,10 +1,10 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include <Interpolators/_1D/LinearInterpolator.hpp>
-#include <Interpolators/_1D/CubicSplineInterpolator.hpp>
-#include <Interpolators/_1D/MonotonicInterpolator.hpp>
-#include <Interpolators/_1D/AnyInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/LinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/MonotonicInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/AnyInterpolator.hpp>
 
 TEST_CASE( "Runtime Binding w/ _1D::AnyInterpolator Tests", "[polymorphism]" )
 {

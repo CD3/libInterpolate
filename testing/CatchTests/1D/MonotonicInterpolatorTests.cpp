@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_1D/MonotonicInterpolator.hpp"
+#include <libInterpolate/Interpolators/_1D/MonotonicInterpolator.hpp>
 
 
 TEST_CASE( "MonotonicInterpolator Tests", "[monotonic]" ) {

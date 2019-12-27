@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_1D/LinearInterpolator.hpp"
+#include <libInterpolate/Interpolators/_1D/LinearInterpolator.hpp>
 
 
 TEST_CASE( "LinearInterpolator Tests", "[spline]" ) {

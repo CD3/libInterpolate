@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_2D/InterpolatorBase.hpp"
+#include <libInterpolate/Interpolators/_2D/InterpolatorBase.hpp>
 
 
 namespace _2D {

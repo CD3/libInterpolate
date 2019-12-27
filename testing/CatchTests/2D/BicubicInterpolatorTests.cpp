@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "Interpolators/_2D/BicubicInterpolator.hpp"
+#include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
 
 namespace _2D {
   class TestBicubicInterp : public BicubicInterpolator<double>

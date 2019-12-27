@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_1D/CubicSplineInterpolator.hpp"
+#include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
 
 
 TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {

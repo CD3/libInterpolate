@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
+#include <libInterpolate/Interpolators/_2D/ThinPlateSplineInterpolator.hpp>
 
 namespace _2D {
   class TestThinPlateSplineInterp : public ThinPlateSplineInterpolator<double>

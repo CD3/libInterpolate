@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "Interpolators/_2D/BilinearInterpolator.hpp"
+#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 
 namespace _2D {
   class TestBilinearInterp : public BilinearInterpolator<double>

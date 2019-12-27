@@ -1,9 +1,9 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_2D/BilinearInterpolator.hpp"
-#include "Interpolators/_2D/BicubicInterpolator.hpp"
-#include "Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
+#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/ThinPlateSplineInterpolator.hpp>
 
 namespace {
   template<class T>

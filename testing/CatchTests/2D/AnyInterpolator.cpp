@@ -2,10 +2,10 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_2D/BilinearInterpolator.hpp"
-#include "Interpolators/_2D/BicubicInterpolator.hpp"
-#include "Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
-#include <Interpolators/_2D/AnyInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/ThinPlateSplineInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/AnyInterpolator.hpp>
 
 TEST_CASE( "Runtime Binding w/ _2D::AnyInterpolator Tests", "[polymorphism]" )
 {

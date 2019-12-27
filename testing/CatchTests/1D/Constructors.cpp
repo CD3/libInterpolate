@@ -2,9 +2,9 @@
 #include "catch.hpp"
 #include "fakeit.hpp"
 
-#include "Interpolators/_1D/LinearInterpolator.hpp"
-#include "Interpolators/_1D/CubicSplineInterpolator.hpp"
-#include "Interpolators/_1D/MonotonicInterpolator.hpp"
+#include <libInterpolate/Interpolators/_1D/LinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
+#include <libInterpolate/Interpolators/_1D/MonotonicInterpolator.hpp>
 
 
 TEST_CASE( "1D - Default construction with setData", "[construction]" )

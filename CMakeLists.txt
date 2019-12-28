@@ -183,5 +183,6 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/libInterpConfigVers
   )
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfigVersion.cmake
   DESTINATION cmake
   )

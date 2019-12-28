@@ -1,4 +1,4 @@
-#warning "Including 'libInterp_version.h' is depreciated. Please include 'libInterpolate/libInterpolate_version.hpp' instead"
+#warning "Including 'libInterp_version.h' is depreciated. Please include 'libInterpolate/libInterpolate_version.h' instead"
 #ifndef libInterp_version_h
 #include "libInterpolate/libInterpolate_version.h"
 #define libInterp_VERSION             libInterpolate_VERSION             

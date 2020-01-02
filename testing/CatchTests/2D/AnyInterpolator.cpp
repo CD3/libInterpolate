@@ -12,9 +12,8 @@ TEST_CASE( "Runtime Binding w/ _2D::AnyInterpolator Tests", "[polymorphism]" )
   _2D::AnyInterpolator<double> interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   SECTION("AnyInterpolator can store a BilinearInterpolator")
   {

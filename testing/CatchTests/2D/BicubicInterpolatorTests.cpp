@@ -21,9 +21,8 @@ TEST_CASE( "BicubicInterpolator Tests - Monotonic Data", "[bicubic]" ) {
   _2D::TestBicubicInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;
@@ -116,9 +115,8 @@ TEST_CASE( "BicubicInterpolator Tests - Oscillating Data", "[thin plate spline]"
   _2D::TestBicubicInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;

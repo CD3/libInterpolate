@@ -21,9 +21,8 @@ TEST_CASE( "BilinearInterpolator Tests - Monotonic Data", "[bilinear]" ) {
   _2D::TestBilinearInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;
@@ -117,9 +116,8 @@ TEST_CASE( "BilinearInterpolator Tests - Oscillating Data", "[thin plate spline]
   _2D::TestBilinearInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;

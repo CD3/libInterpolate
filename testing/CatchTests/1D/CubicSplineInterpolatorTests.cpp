@@ -58,7 +58,7 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
   _1D::CubicSplineInterpolator<float> interp;
 
   int N = 100;
-  float xmin = 0, xmax = 2*M_PI;
+  float xmin = 0, xmax = 2*static_cast<float>(M_PI);
   float dx = (xmax - xmin)/(N-1);
 
   _1D::CubicSplineInterpolator<float>::VectorType xx(N), yy(N);

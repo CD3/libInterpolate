@@ -17,9 +17,8 @@ TEST_CASE( "ThinPlateSplineInterpolator Tests - Monotonic Data", "[thin plate sp
   _2D::TestThinPlateSplineInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;
@@ -95,9 +94,8 @@ TEST_CASE( "ThinPlateSplineInterpolator Tests - Oscillating Data", "[thin plate 
   _2D::TestThinPlateSplineInterp interp;
 
   int nx, ny;
-  double xmin, xmax, dx, x;
-  double ymin, ymax, dy, y;
-  double z;
+  double xmin, xmax, dx;
+  double ymin, ymax, dy;
 
   nx = 10;
   ny = 5;

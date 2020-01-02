@@ -19,9 +19,8 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
 
     int nx, ny;
-    double xmin, xmax, dx, x;
-    double ymin, ymax, dy, y;
-    double z;
+    double xmin, xmax, dx;
+    double ymin, ymax, dy;
 
     nx = 10;
     ny = 5;
@@ -78,9 +77,8 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
   {
 
     int nx, ny;
-    double xmin, xmax, dx, x;
-    double ymin, ymax, dy, y;
-    double z;
+    double xmin, xmax, dx;
+    double ymin, ymax, dy;
 
     SECTION("Monotomic Data")
     {
@@ -183,9 +181,8 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
   {
 
     int nx, ny;
-    double xmin, xmax, dx, x;
-    double ymin, ymax, dy, y;
-    double z;
+    double xmin, xmax, dx;
+    double ymin, ymax, dy;
 
     SECTION("Monotomic Data")
     {

@@ -23,13 +23,13 @@ namespace Utils {
  * @param i the initial index to start searching from.
  */
 template<class Val, class Indexable>
-int index_first_gt( Val val, const Indexable& vals, size_t N, int i = 0, int stride = 1 )
+int index_first_gt( Val val, const Indexable& vals, size_t N, int i = 0, size_t stride = 1 )
 {
   if(i < 0) // don't let the user do harm...
     i = 0;
   // to find first element that is greater
   // we have to keep looking until element is not less
-  while( i < N && vals[i] <= val )
+  while( i < (int)N && vals[i] <= val )
   {
     i += stride;
   }
@@ -47,7 +47,7 @@ int index_first_gt( Val val, const Indexable& vals, size_t N, int i = 0, int str
  * @param i the initial index to start searching from.
  */
 template<class Val, class Indexable>
-int index_last_lt( Val val, const Indexable& vals, size_t N, int i = -1, int stride = 1 )
+int index_last_lt( Val val, const Indexable& vals, size_t N, int i = -1, size_t stride = 1 )
 {
   // optimization: if val is larger than largest value, just return N-1
   if( vals[N-1] < val )
@@ -56,7 +56,7 @@ int index_last_lt( Val val, const Indexable& vals, size_t N, int i = -1, int str
   // N is unsigned, so -1 < N will always be false
   // to find the last element that is less than val,
   // we keep looking until the next element is not less than val.
-  while( (i < 0 || i < N-1) && vals[i+1] < val )
+  while( (i < 0 || i < (int)(N-1)) && vals[i+1] < val )
   {
     i += stride;
   }
@@ -66,11 +66,11 @@ int index_last_lt( Val val, const Indexable& vals, size_t N, int i = -1, int str
 
 
 template<class Val, class Indexable>
-int index_first_ge( Val val, const Indexable& vals, size_t N, int i = 0, int stride = 1 )
+int index_first_ge( Val val, const Indexable& vals, size_t N, int i = 0, size_t stride = 1 )
 {
   if(i < 0)
     i = 0;
-  while( i < N && vals[i] < val )
+  while( i < (int)N && vals[i] < val )
   {
     i += stride;
   }
@@ -320,8 +320,8 @@ struct StridedIterator : public std::iterator<std::forward_iterator_tag, T> {
     }
 
   private:
-    unsigned stride;
     T *ptr;
+    unsigned stride;
 };
 
 

@@ -279,7 +279,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   //Ac is a vector of the upper diagonals of matrix A
   //
   //Since there is no upper diagonal on the last row, the last value must be zero.
-  for (size_t i = 0; i < X.size()-1; ++i)
+  for (int i = 0; i < X.size()-1; ++i)
   {
       Ac(i) = 1/(X(i+1) - X(i));
   }
@@ -289,7 +289,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
 
   //Ab is a vector of the diagnoals of matrix A
   Ab(0) = 2/(X(1) - X(0));
-  for (size_t i = 1; i < X.size()-1; ++i)
+  for (int i = 1; i < X.size()-1; ++i)
   {
       Ab(i) = 2 / (X(i)-X(i-1)) + 2 / (X(i+1) - X(i));
   }
@@ -300,7 +300,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   //
   //Since there is no upper diagonal on the first row, the first value must be zero.
   Aa(0) = 0.0;
-  for (size_t i = 1; i < X.size(); ++i)
+  for (int i = 1; i < X.size(); ++i)
   {
       Aa(i) = 1 / (X(i) - X(i-1));
   }
@@ -328,7 +328,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   VectorType c_star(X.size());
 
   c_star(0) = Ac(0)/Ab(0);
-  for (size_t i = 1; i < c_star.size(); ++i)
+  for (int i = 1; i < c_star.size(); ++i)
   {
      c_star(i) = Ac(i) / (Ab(i)-Aa(i)*c_star(i-1)); 
   }
@@ -336,7 +336,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   VectorType d_star(X.size());
   d_star(0) = b(0)/Ab(0);
 
-  for (size_t i = 1; i < X.size(); ++i)
+  for (int i = 1; i < X.size(); ++i)
   {
       d_star(i) = (b(i) - Aa(i)*d_star(i-1))/(Ab(i)-Aa(i)*c_star(i-1));
   }
@@ -344,7 +344,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   VectorType x(X.size());
   x( X.size() - 1 ) = d_star( X.size() - 1 );
 
-  for (size_t i = X.size() - 1; i-- > 0;)
+  for (int i = X.size() - 1; i-- > 0;)
   {
       x(i) = d_star(i) - c_star(i)*x(i+1);
   }

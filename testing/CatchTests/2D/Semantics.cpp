@@ -13,7 +13,7 @@ namespace {
     double dx = 20. / N;
     double dy = 40. / N;
     std::vector<double> xx(N*N), yy(N*N), zz(N*N);
-    for( int i = 0; i < N*N; i++)
+    for( size_t i = 0; i < N*N; i++)
     {
       xx[i] = dx*(i/N);
       yy[i] = dy*(i%N);
@@ -33,9 +33,9 @@ namespace {
       SECTION("Small")
       {
         auto interp1 = makeInterpolator<T>(10);
-        for( int i = 0; i < 10; i++)
+        for( size_t i = 0; i < 10; i++)
         {
-          for( int j = 0; j < 10; j++)
+          for( size_t j = 0; j < 10; j++)
           {
             CHECK( interp1(2*i,4*j) == Approx((2*i)*(4*j)) );
           }
@@ -44,9 +44,9 @@ namespace {
       SECTION("Large")
       {
         auto interp2 = makeInterpolator<T>(20);
-        for( int i = 0; i < 20; i++)
+        for( size_t i = 0; i < 20; i++)
         {
-          for( int j = 0; j < 20; j++)
+          for( size_t j = 0; j < 20; j++)
           {
             CHECK( interp2(0.2*i,0.4*j) == Approx((0.2*i)*(0.4*j)) );
           }

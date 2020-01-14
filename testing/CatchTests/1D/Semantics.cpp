@@ -14,7 +14,7 @@ namespace {
     std::vector<double> *xx, *yy;
     xx = new std::vector<double>(N);
     yy = new std::vector<double>(N);
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       (*xx)[i] = dx*i;
       (*yy)[i] = 2*(*xx)[i];

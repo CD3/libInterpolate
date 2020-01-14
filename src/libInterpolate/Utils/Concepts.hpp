@@ -11,7 +11,7 @@
 #include <boost/type_erasure/callable.hpp>
 #include <boost/mpl/vector.hpp>
 
-BOOST_TYPE_ERASURE_MEMBER( (has_setData), setData );
+BOOST_TYPE_ERASURE_MEMBER( (has_setData), setData )
 
 namespace _1D {
   template<typename T, typename Sig = void(int,T*,T*)>

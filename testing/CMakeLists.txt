@@ -24,6 +24,11 @@ target_link_libraries(${testName} Interpolate)
 target_include_directories( ${testName} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir})
 set_target_properties(${testName} PROPERTIES CXX_STANDARD 11)
+if(MSVC)
+  target_compile_options(${testName} PRIVATE /W4 /WX)
+else()
+  target_compile_options(${testName} PRIVATE -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-parameter -pedantic -Werror)
+endif()
 
 add_test(NAME ${testName} 
          WORKING_DIRECTORY ${buildDir}

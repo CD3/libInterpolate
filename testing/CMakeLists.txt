@@ -27,7 +27,7 @@ set_target_properties(${testName} PROPERTIES CXX_STANDARD 11)
 if(MSVC)
   target_compile_options(${testName} PRIVATE /W4 /WX)
 else()
-  target_compile_options(${testName} PRIVATE -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-parameter -pedantic -Werror)
+  target_compile_options(${testName} PRIVATE -Wall -Wextra -pedantic -Wno-unknown-pragmas -Wno-unused-parameter -Wno-gnu-zero-variadic-macro-arguments -Werror)
 endif()
 
 add_test(NAME ${testName} 

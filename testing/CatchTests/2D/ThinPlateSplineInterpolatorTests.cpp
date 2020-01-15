@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <fstream>
 
@@ -71,7 +70,7 @@ TEST_CASE( "ThinPlateSplineInterpolator Tests - Monotonic Data", "[thin plate sp
 
   SECTION("Interpolation")
   {
-    CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+    CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
     CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
     CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
     CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
@@ -146,7 +145,7 @@ TEST_CASE( "ThinPlateSplineInterpolator Tests - Oscillating Data", "[thin plate 
 
   SECTION("Interpolation")
   {
-    CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+    CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
     CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
     CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
     CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
@@ -155,7 +154,7 @@ TEST_CASE( "ThinPlateSplineInterpolator Tests - Oscillating Data", "[thin plate 
     CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
     CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
 
-    CHECK( interp(M_PI/2,M_PI/2)  == Approx(sin(M_PI/2)*sin(M_PI/2)).epsilon(0.01)) ;
+    CHECK( interp(M_PI/2,M_PI/2)  == Approx(sin(M_PI/2)*sin(M_PI/2)).epsilon(0.02)) ;
   }
 
 

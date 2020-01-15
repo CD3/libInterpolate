@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
@@ -213,7 +212,7 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
       interp = _2D::ThinPlateSplineInterpolator<double>();
       interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData( xx, yy, zz );
 
-      CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
       CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
       CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
       CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
@@ -224,7 +223,7 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
 
       SECTION("via copied std::function passed to func")
       {
-        REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+        REQUIRE( call( interp,0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
         REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
         REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
         REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
@@ -267,7 +266,7 @@ TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
       interp = _2D::ThinPlateSplineInterpolator<double>();
       interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData( xx, yy, zz );
 
-      CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
       CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
       CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
       CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;

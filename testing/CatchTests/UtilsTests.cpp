@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Utils/Indexing.hpp>
 #include <libInterpolate/Utils/Concepts.hpp>
@@ -424,8 +423,20 @@ TEST_CASE( "Index Search with Eigen Matricies", "[utils]" ) {
   CHECK( std::upper_bound( begin, end, 6.0 )-begin == 3 );
   CHECK( std::upper_bound( begin, end, 6.5 )-begin == 3 );
   CHECK( std::upper_bound( begin, end, 7.0 )-begin == 3 );
+  
+}
 
-  
-  
+#include <vector>
+#include <libInterpolate/Interpolators/_1D/InterpolatorBase.hpp>
+#include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
+#include <type_traits>
+TEST_CASE("RealTypeOf tests")
+{
+  CHECK( std::is_same<_1D::RealTypeOf<double>::type, double>::value );
+  CHECK( std::is_same<_1D::RealTypeOf<float>::type, double>::value );
+  CHECK( std::is_same<_1D::RealTypeOf<int>::type, double>::value );
+  CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<double>>::type, double>::value );
+  CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<float>>::type, float>::value );
+  CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<int>>::type, int>::value );
 }
 

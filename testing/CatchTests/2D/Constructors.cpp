@@ -1,7 +1,4 @@
-
-
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
@@ -17,9 +14,8 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
 {
 
     int nx, ny;
-    double xmin, xmax, dx, x;
-    double ymin, ymax, dy, y;
-    double z;
+    double xmin, xmax, dx;
+    double ymin, ymax, dy;
 
     nx = 10;
     ny = 5;
@@ -100,7 +96,7 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
     {
       _2D::ThinPlateSplineInterpolator<double> interp(xx, yy, zz);
 
-      REQUIRE( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
       REQUIRE( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
       REQUIRE( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
       REQUIRE( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
@@ -111,7 +107,7 @@ TEST_CASE( "2D - Construction with data", "[construction]" )
 
       _2D::ThinPlateSplineInterpolator<double> interp2(interp);
 
-      REQUIRE( interp2(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      REQUIRE( interp2(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
       REQUIRE( interp2(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
       REQUIRE( interp2(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
       REQUIRE( interp2(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;

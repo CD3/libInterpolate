@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Interpolators/_1D/LinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>

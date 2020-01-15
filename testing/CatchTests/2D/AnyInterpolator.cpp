@@ -1,6 +1,4 @@
-
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
@@ -130,7 +128,7 @@ TEST_CASE( "Runtime Binding w/ _2D::AnyInterpolator Tests", "[polymorphism]" )
       interp = _2D::ThinPlateSplineInterpolator<double>();
       interp.setData( xx.size(), xx.data(), yy.data(), zz.data() );
 
-      CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
+      CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
       CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
       CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
       CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;

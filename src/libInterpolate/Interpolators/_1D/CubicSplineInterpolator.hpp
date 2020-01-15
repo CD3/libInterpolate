@@ -273,7 +273,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
 
   //init the matrices that get solved
   VectorType Aa(X.size()), Ab(X.size()), Ac(X.size());
-  VectorType b(X.size());
+  VectorType bb(X.size());
 
 
   //Ac is a vector of the upper diagonals of matrix A
@@ -312,15 +312,15 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   {   
       if(i == 0)
       {   
-        b(i) = 3 * ( Y(i+1) - Y(i) )/pow(X(i+1)-X(i),2);
+        bb(i) = 3 * ( Y(i+1) - Y(i) )/pow(X(i+1)-X(i),2);
       }
       else if( i == X.size()-1 )
       {   
-        b(i) = 3 * (Y(i) - Y(i-1))/pow(X(i) - X(i-1),2);
+        bb(i) = 3 * (Y(i) - Y(i-1))/pow(X(i) - X(i-1),2);
       }
       else
       { 
-        b(i) = 3 * ( (Y(i) - Y(i-1))/(pow(X(i)-X(i-1),2)) + (Y(i+1) - Y(i))/pow(X(i+1) - X(i),2));     
+        bb(i) = 3 * ( (Y(i) - Y(i-1))/(pow(X(i)-X(i-1),2)) + (Y(i+1) - Y(i))/pow(X(i+1) - X(i),2));     
       }
   }
 
@@ -334,11 +334,11 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   }
 
   VectorType d_star(X.size());
-  d_star(0) = b(0)/Ab(0);
+  d_star(0) = bb(0)/Ab(0);
 
   for (int i = 1; i < X.size(); ++i)
   {
-      d_star(i) = (b(i) - Aa(i)*d_star(i-1))/(Ab(i)-Aa(i)*c_star(i-1));
+      d_star(i) = (bb(i) - Aa(i)*d_star(i-1))/(Ab(i)-Aa(i)*c_star(i-1));
   }
 
   VectorType x(X.size());

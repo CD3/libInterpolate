@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "fakeit.hpp"
 
 #include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
 
@@ -38,17 +37,17 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
 
   SECTION("Derivative")
   {
-    CHECK( interp.derivative( dx/2          ) == Approx( cos( dx/2          ) ) );
-    CHECK( interp.derivative( M_PI/2 - dx/2 ) == Approx( cos( M_PI/2 - dx/2 ) ) );
-    CHECK( interp.derivative( M_PI/4 - dx/4 ) == Approx( cos( M_PI/4 - dx/4 ) ) );
+    CHECK( interp.derivative( dx/2          ) == Approx( cos( dx/2          ) ).epsilon(0.01));
+    CHECK( interp.derivative( M_PI/2 - dx/2 ) == Approx( cos( M_PI/2 - dx/2 ) ).epsilon(0.01));
+    CHECK( interp.derivative( M_PI/4 - dx/4 ) == Approx( cos( M_PI/4 - dx/4 ) ).epsilon(0.01));
   }
 
 
   SECTION("Integral")
   {
-    CHECK( interp.integral( 0, dx/2          ) == Approx( -cos( dx/2          ) + cos(0) ) );
-    CHECK( interp.integral( 0, M_PI/2 - dx/2 ) == Approx( -cos( M_PI/2 - dx/2 ) + cos(0) ) );
-    CHECK( interp.integral( 0, M_PI/4 - dx/4 ) == Approx( -cos( M_PI/4 - dx/4 ) + cos(0) ) );
+    CHECK( interp.integral( 0, dx/2          ) == Approx( -cos( dx/2          ) + cos(0) ).epsilon(0.01));
+    CHECK( interp.integral( 0, M_PI/2 - dx/2 ) == Approx( -cos( M_PI/2 - dx/2 ) + cos(0) ).epsilon(0.01));
+    CHECK( interp.integral( 0, M_PI/4 - dx/4 ) == Approx( -cos( M_PI/4 - dx/4 ) + cos(0) ).epsilon(0.01));
   }
 
   }
@@ -77,25 +76,25 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
 
   SECTION("Interpolation")
   {
-    CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ) );
-    CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ) );
-    CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ) );
+    CHECK( interp( dx/2          )== Approx( sin( dx/2          ) ) );
+    CHECK( interp( static_cast<float>(M_PI)/2 - dx/2 )== Approx( sin( static_cast<float>(M_PI)/2 - dx/2 ) ) );
+    CHECK( interp( static_cast<float>(M_PI)/4 - dx/4 )== Approx( sin( static_cast<float>(M_PI)/4 - dx/4 ) ) );
   }
 
 
   SECTION("Derivative")
   {
     CHECK( interp.derivative( dx/2          ) == Approx( cos( dx/2          ) ) );
-    CHECK( interp.derivative( M_PI/2 - dx/2 ) == Approx( cos( M_PI/2 - dx/2 ) ) );
-    CHECK( interp.derivative( M_PI/4 - dx/4 ) == Approx( cos( M_PI/4 - dx/4 ) ) );
+    CHECK( interp.derivative( static_cast<float>(M_PI)/2 - dx/2 ) == Approx( cos( static_cast<float>(M_PI)/2 - dx/2 ) ).epsilon(0.01) );
+    CHECK( interp.derivative( static_cast<float>(M_PI)/4 - dx/4 ) == Approx( cos( static_cast<float>(M_PI)/4 - dx/4 ) ).epsilon(0.01) );
   }
 
 
   SECTION("Integral")
   {
-    CHECK( interp.integral( 0, dx/2          ) == Approx( -cos( dx/2          ) + cos(0) ) );
-    CHECK( interp.integral( 0, M_PI/2 - dx/2 ) == Approx( -cos( M_PI/2 - dx/2 ) + cos(0) ) );
-    CHECK( interp.integral( 0, M_PI/4 - dx/4 ) == Approx( -cos( M_PI/4 - dx/4 ) + cos(0) ) );
+    CHECK( interp.integral( 0, dx/2          ) == Approx( -cos( dx/2          ) + cos(0) ).epsilon(0.01) );
+    CHECK( interp.integral( 0, static_cast<float>(M_PI)/2 - dx/2 ) == Approx( -cos( static_cast<float>(M_PI)/2 - dx/2 ) + cos(0) ).epsilon(0.01));
+    CHECK( interp.integral( 0, static_cast<float>(M_PI)/4 - dx/4 ) == Approx( -cos( static_cast<float>(M_PI)/4 - dx/4 ) + cos(0) ).epsilon(0.01));
   }
   }
 

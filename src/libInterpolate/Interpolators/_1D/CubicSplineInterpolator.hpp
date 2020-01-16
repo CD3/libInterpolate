@@ -205,7 +205,7 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
     // X(bi) is to the RIGHT of _b, but i only goes up to bi-2 and
     // X(bi-1) is to the LEFT of _b
     // therefore, we are just handling interior elements in this loop.
-    sum += (x_2 - x_1)*( 0.5*(y_1 + y_2) + (1./12)*(a[i] + b[i]) );
+    sum += static_cast<Real>( (x_2 - x_1)*( 0.5*(y_1 + y_2) + (1./12)*(a[i] + b[i]) ) );
   }
 
 
@@ -224,7 +224,7 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
   t   = (_b - x_1)/(x_2 - x_1);
 
   // adding area between x_1 and _b
-  sum += (x_2 - x_1) * ( ( t - pow(t,2)/2 )*y_1 + pow(t,2)/2.*y_2 + a[bi-1]*(pow(t,2) - 2.*pow(t,3)/3. + pow(t,4)/4.) + b[bi-1]*(pow(t,3)/3. - pow(t,4)/4.) );
+  sum += static_cast<Real>( (x_2 - x_1) * ( ( t - pow(t,2)/2 )*y_1 + pow(t,2)/2.*y_2 + a[bi-1]*(pow(t,2) - 2.*pow(t,3)/3. + pow(t,4)/4.) + b[bi-1]*(pow(t,3)/3. - pow(t,4)/4.) ) );
 
   //
   // [_a,X(0)]
@@ -239,10 +239,10 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
   t   = (_a - x_1)/(x_2 - x_1);
 
   // subtracting area from x_1 to _a
-  sum -= (x_2 - x_1) * ( ( t - pow(t,2)/2 )*y_1 + pow(t,2)/2.*y_2 + a[ai-1]*(pow(t,2) - 2.*pow(t,3)/3. + pow(t,4)/4.) + b[ai-1]*(pow(t,3)/3. - pow(t,4)/4.) );
+  sum -= static_cast<Real>( (x_2 - x_1) * ( ( t - pow(t,2)/2 )*y_1 + pow(t,2)/2.*y_2 + a[ai-1]*(pow(t,2) - 2.*pow(t,3)/3. + pow(t,4)/4.) + b[ai-1]*(pow(t,3)/3. - pow(t,4)/4.) ) );
 
   if( ai != bi ) // _a and _b are not in the in the same element, need to add area of element containing _a
-    sum += (x_2 - x_1)*( 0.5*(y_1 + y_2) + (1./12)*(a[ai-1] + b[ai-1]) );
+    sum += static_cast<Real>( (x_2 - x_1)*( 0.5*(y_1 + y_2) + (1./12)*(a[ai-1] + b[ai-1]) ) );
 
   return sign*sum;
 

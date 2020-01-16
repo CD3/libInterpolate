@@ -30,13 +30,13 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
   REQUIRE( interp(1,1) == Approx(13) );
   REQUIRE( interp(10,20) == Approx(60) );
 
-  int N = 10;
+  size_t N = 10;
 
   SECTION("Eigen Vector Initialization")
   {
     _2D::InterpolatorBase<double>::VectorType xx(N), yy(N), zz(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx(i) = 0.1*i;
       yy(i) = 0.2*i;
@@ -48,14 +48,14 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( xx, yy, zz );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx(i) = yy(i) = 0;
 
       auto x = interp.getX();
       auto y = interp.getY();
       auto z = interp.getZ();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( 0.2*i ) );
@@ -89,7 +89,7 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
   {
     std::vector<double> xx(N), yy(N), zz(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx[i] = 0.1*i;
       yy[i] = 0.2*i;
@@ -101,14 +101,14 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( xx, yy, zz );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx[i] = yy[i] = zz[i] =  0;
 
       auto x = interp.getX();
       auto y = interp.getY();
       auto z = interp.getZ();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( 0.2*i ) );
@@ -146,7 +146,7 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
     zz = new double[N];
 
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx[i] = 0.1*i;
       yy[i] = 0.2*i;
@@ -158,14 +158,14 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( N, xx, yy, zz );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx[i] = yy[i] = zz[i] = 0;
 
       auto x = interp.getX();
       auto y = interp.getY();
       auto z = interp.getZ();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( 0.2*i ) );
@@ -203,7 +203,7 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
   {
     _2D::InterpolatorBase<double>::VectorType xx(N), yy(N), zz(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx(i) = 0.1*i;
       yy(i) = 0.2*i;

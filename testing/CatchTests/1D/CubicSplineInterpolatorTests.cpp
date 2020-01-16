@@ -56,7 +56,7 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
   {
   _1D::CubicSplineInterpolator<float> interp;
 
-  int N = 100;
+  size_t N = 100;
   float xmin = 0, xmax = 2*static_cast<float>(M_PI);
   float dx = (xmax - xmin)/(N-1);
 
@@ -64,7 +64,7 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
 
   CHECK_THROWS_AS( interp(1), std::logic_error );
 
-  for( int i = 0; i < N; i++)
+  for( size_t i = 0; i < N; i++)
   {
     xx(i) = dx*i;
     yy(i) = sin(xx(i));
@@ -76,7 +76,7 @@ TEST_CASE( "CubicSplineInterpolator Tests", "[spline]" ) {
 
   SECTION("Interpolation")
   {
-    CHECK( interp( dx/2          )== Approx( sin( dx/2          ) ) );
+    CHECK( interp( dx/2 ) == Approx( sin( dx/2          ) ) );
     CHECK( interp( static_cast<float>(M_PI)/2 - dx/2 )== Approx( sin( static_cast<float>(M_PI)/2 - dx/2 ) ) );
     CHECK( interp( static_cast<float>(M_PI)/4 - dx/4 )== Approx( sin( static_cast<float>(M_PI)/4 - dx/4 ) ) );
   }

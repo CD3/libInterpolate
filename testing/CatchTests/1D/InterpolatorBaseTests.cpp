@@ -29,13 +29,13 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
   REQUIRE( interp(1) == Approx(11) );
   REQUIRE( interp(10) == Approx(20) );
 
-  int N = 10;
+  size_t N = 10;
 
   SECTION("Eigen Vector Initialization")
   {
     Eigen::Matrix<double,Eigen::Dynamic,1> xx(N), yy(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx(i) = 0.1*i;
       yy(i) = xx(i)*xx(i);
@@ -46,13 +46,13 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( xx, yy );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx(i) = yy(i) = 0;
 
       auto x = interp.getX();
       auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( x(i)*x(i) ) );
@@ -84,7 +84,7 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
   {
     std::vector<double> xx(N), yy(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx[i] = 0.1*i;
       yy[i] = xx[i]*xx[i];
@@ -95,13 +95,13 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( xx, yy );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx[i] = yy[i] = 0;
 
       auto x = interp.getX();
       auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( x(i)*x(i) ) );
@@ -135,7 +135,7 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
     yy = new double[N];
 
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx[i] = 0.1*i;
       yy[i] = xx[i]*xx[i];
@@ -146,13 +146,13 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
       interp.setData( N, xx, yy );
 
       // clear the original data to make sure deep copy worked
-      for(int i = 0; i < N; i++)
+      for(size_t i = 0; i < N; i++)
         xx[i] = yy[i] = 0;
 
       auto x = interp.getX();
       auto y = interp.getY();
 
-      for( int i = 0; i < N; i++)
+      for( size_t i = 0; i < N; i++)
       {
         REQUIRE( x(i) == Approx( 0.1*i ) );
         REQUIRE( y(i) == Approx( x(i)*x(i) ) );
@@ -186,7 +186,7 @@ TEST_CASE( "InterpolatorBase Setup Tests", "[plumbing]" ) {
   {
     Eigen::Matrix<double,Eigen::Dynamic,1> xx(N), yy(N);
 
-    for( int i = 0; i < N; i++)
+    for( size_t i = 0; i < N; i++)
     {
       xx(i) = 0.1*i;
       yy(i) = xx(i)*xx(i);

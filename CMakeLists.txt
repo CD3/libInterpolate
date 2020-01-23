@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required( VERSION 3.14 )
 
 if( TARGET libInterpolate )
   return()
@@ -111,6 +111,7 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
   VERSION ${${PROJECT_NAME}_VERSION}
   COMPATIBILITY SameMajorVersion
+  ARCH_INDEPENDENT
   )
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
@@ -184,6 +185,7 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/libInterpConfigVersion.cmake
   VERSION ${${PROJECT_NAME}_VERSION}
   COMPATIBILITY SameMajorVersion
+  ARCH_INDEPENDENT
   )
 install(FILES
   ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfig.cmake

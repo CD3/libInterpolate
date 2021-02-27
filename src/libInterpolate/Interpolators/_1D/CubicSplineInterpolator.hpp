@@ -2,8 +2,6 @@
 #define Interpolators__1D_CubicSplineInterpolator_hpp
 
 #include "InterpolatorBase.hpp"
-#include <boost/range/algorithm/upper_bound.hpp>
-#include <boost/range/algorithm/lower_bound.hpp>
 
 namespace _1D {
 
@@ -90,13 +88,10 @@ CubicSplineInterpolator<Real>::operator()( Real x ) const
   // don't extrapolate at all
   if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
     return 0;
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
-  // find the index that is just to the right of the x
-  //int i = Utils::index__first_ge( x, X, X.size(), 1);
-  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
-  int i = boost::lower_bound( rng, x ) - X.data();
+  int i = this->get_index_to_right_of(x);
 
   // See the wikipedia page on "Spline interpolation" (https://en.wikipedia.org/wiki/Spline_interpolation)
   // for a derivation this interpolation.
@@ -110,13 +105,10 @@ template<typename Real>
 Real
 CubicSplineInterpolator<Real>::derivative( Real x ) const
 {
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
-  // find the index that is just to the right of the x
-  //int i = Utils::index__first_gt( x, X, X.size(), 1);
-  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
-  int i = boost::upper_bound(rng,x) - X.data();
+  int i = this->get_index_to_right_of(x);
 
   // don't extrapolate at all
   if( i <= 0 || i >= X.size())
@@ -138,8 +130,8 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
   if( this->xView->size() < 1 )
     return 0;
 
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
   // allow b to be less than a
   int sign = 1;
@@ -152,12 +144,8 @@ CubicSplineInterpolator<Real>::integral( Real _a, Real _b ) const
   _a = std::max( _a, X[0] );
   _b = std::min( _b, X[X.size()-1] );
 
-  // find the indexes that is just to the right of a and b
-  //int ai = Utils::index__first_gt( _a, X, X.size(), 1 );
-  //int bi = Utils::index__first_gt( _b, X, X.size(), 1 );
-  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
-  int ai = boost::upper_bound(rng,_a) - X.data();
-  int bi = boost::upper_bound(rng,_b) - X.data();
+  int ai = this->get_index_to_right_of(_a);
+  int bi = this->get_index_to_right_of(_b);
 
   /**
    *
@@ -256,8 +244,8 @@ template<typename Real>
 void
 CubicSplineInterpolator<Real>::setupInterpolator()
 {
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
   this->a = VectorType(X.size()-1);
   this->b = VectorType(X.size()-1);
@@ -287,7 +275,7 @@ CubicSplineInterpolator<Real>::setupInterpolator()
   //This is the line that was causing breakage for n=odd. It was Ac(X.size()) and should have been Ac(X.size()-1)
   Ac(X.size()-1) = 0.0;
 
-  //Ab is a vector of the diagnoals of matrix A
+  //Ab is a vector of the diagonals of matrix A
   Ab(0) = 2/(X(1) - X(0));
   for (int i = 1; i < X.size()-1; ++i)
   {

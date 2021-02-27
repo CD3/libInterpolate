@@ -8,7 +8,6 @@
   */
 
 #include "InterpolatorBase.hpp"
-#include <boost/range/algorithm/lower_bound.hpp>
 
 namespace _1D {
 
@@ -77,8 +76,8 @@ template<class Real>
 void
 MonotonicInterpolator<Real>::setupInterpolator()
 {
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
   a      = VectorType(X.size()-1);
   b      = VectorType(X.size()-1);
@@ -186,15 +185,11 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
   if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
     return 0;
 
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
-  // find the index that is just to the left of the x
-  // this will correspond to the "interval index"
-  //int i = Utils::index__first_ge( x, X, X.size(), 1);
-  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
-  int i = boost::lower_bound( rng, x ) - X.data();
-  i--; // we need the interval index, not the right point index.
+  // the index that is just to the left of x will correspond to the "interval index"
+  int i = this->get_index_to_left_of(x);
 
 	// Deal with the degenerate case of xval = xlow = xhigh
 	if (X(i+1) <= X(i))

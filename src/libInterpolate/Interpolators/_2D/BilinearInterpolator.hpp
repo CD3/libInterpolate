@@ -121,19 +121,12 @@ BilinearInterpolator<Real>::operator()( Real x, Real y ) const
   {
     return 0;
   }
-  // find the x index that is just to the LEFT of x
-  //int i  = Utils::index__last_lt( x, *X, X->size() );
-  // NOTE: X data is strided.
-  auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
-  int i = boost::lower_bound( xrng, x) - boost::begin(xrng) - 1;
+
+  int i = this->get_x_index_to_left_of(x);
+  int j = this->get_y_index_below(y);
+
   if(i < 0)
     i = 0;
-
-  // find the y index that is just BELOW y
-  //int j  = Utils::index__last_lt( y, *Y, Y->size() );
-  // NOTE: Y data is NOT strided
-  auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
-  int j = boost::lower_bound( yrng, y) - boost::begin(yrng) - 1;
   if(j < 0)
     j = 0;
   

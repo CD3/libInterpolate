@@ -3,8 +3,6 @@
 
 #include "InterpolatorBase.hpp"
 
-#include<boost/range/algorithm.hpp>
-
 namespace _1D {
 
 
@@ -31,7 +29,8 @@ class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>>
 
     LinearInterpolator( ):BASE(){}
 
-    LinearInterpolator(const LinearInterpolator& rhs):BASE(rhs){}
+    LinearInterpolator(const LinearInterpolator& rhs) = default;
+    LinearInterpolator& operator=(const LinearInterpolator& rhs) = default;
 
 
     Real operator()( Real x ) const;
@@ -52,14 +51,10 @@ LinearInterpolator<Real>::operator()( Real x ) const
   if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
     return 0;
 
-  const VectorType &X = *(this->xView);
-  const VectorType &Y = *(this->yView);
+  const MapType &X = *(this->xView);
+  const MapType &Y = *(this->yView);
 
-  // find the index that is just to the left of the x
-  //int i = Utils::index__last_lt( x, X, X.size(), 0);
-  auto rng = std::make_pair( X.data()+1, X.data()+X.size() );
-  int i = boost::lower_bound( rng, x) - X.data() - 1;
-
+  int i = this->get_index_to_left_of(x);
      
   Real b  = Y(i);
   Real m  = Y(i+1)-Y(i);

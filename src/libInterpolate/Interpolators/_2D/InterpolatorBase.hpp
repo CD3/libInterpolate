@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 #include <Eigen/Dense>
+#include<boost/range/algorithm.hpp>
+#include <boost/range/adaptor/strided.hpp>
 
 
 namespace _2D {
@@ -86,9 +88,12 @@ class InterpolatorBase
 
   public:
 
-    std::vector<Real> getXData() const { return xData; }
-    std::vector<Real> getYData() const { return yData; }
-    std::vector<Real> getZData() const { return zData; }
+    const std::vector<Real>& getXData() const { return xData; }
+    const std::vector<Real>& getYData() const { return yData; }
+    const std::vector<Real>& getZData() const { return zData; }
+    std::vector<Real> getXData() { return xData; }
+    std::vector<Real> getYData() { return yData; }
+    std::vector<Real> getZData() { return zData; }
 
     template<typename I>
     void setData( I n, const Real *x, const Real *y, const Real *z);
@@ -98,6 +103,50 @@ class InterpolatorBase
     template<typename XT, typename YT, typename ZT>
     typename std::enable_if<!std::is_pointer<YT>::value>::type
     setData( const XT &x, const YT &y, const ZT &z );
+
+
+
+    /**
+     * Given an x value, returns the index i of the stored x data X
+     * that is just to the "left" of x such that X[i] < x < X[i+1]
+     */
+    int
+    get_x_index_to_left_of(Real x) const
+    {
+      // NOTE: X data is strided.
+      auto xrng = std::make_pair( X->data(), X->data()+X->size()*X->innerStride() ) | boost::adaptors::strided(X->innerStride());
+      return boost::lower_bound( xrng, x) - boost::begin(xrng) - 1;
+    }
+    /**
+     * Given an x value, returns the index i of the stored x data X
+     * that is just to the "right" of x such that X[i-1] < x < X[i]
+     */
+    int
+    get_x_index_to_right_of(Real x) const
+    {
+      return this->get_x_index_to_right_of(x)+1;
+    }
+
+    /**
+     * Given an y value, returns the index i of the stored y data Y
+     * that is just "below" y such that Y[i] < y < Y[i+1]
+     */
+    int
+    get_y_index_below(Real y) const
+    {
+    // NOTE: Y data is NOT strided
+      auto yrng = std::make_pair( Y->data(), Y->data()+Y->size() );
+      return boost::lower_bound( yrng, y) - boost::begin(yrng) - 1;
+    }
+    /**
+     * Given an y value, returns the index i of the stored y data y
+     * that is just "above" y such that Y[i-1] < y < Y[i]
+     */
+    int
+    get_y_index_above(Real y) const
+    {
+      return this->get_y_index_below(y)+1;
+    }
 
   protected:
     void checkData() const; ///< Check that data has been initialized and throw exception if not.

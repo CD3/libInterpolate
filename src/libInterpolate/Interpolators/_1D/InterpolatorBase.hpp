@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <vector>
 #include <Eigen/Dense>
+#include<boost/range/algorithm.hpp>
 
 
 namespace _1D {
@@ -76,11 +77,13 @@ class InterpolatorBase
       return *this;
     }
 
-  public:
 
+  public:
     // methods to get the data
-    std::vector<Real> getXData() const { return xData; }
-    std::vector<Real> getYData() const { return yData; }
+    const std::vector<Real>& getXData() const { return xData; }
+    const std::vector<Real>& getYData() const { return yData; }
+    std::vector<Real> getXData() { return xData; }
+    std::vector<Real> getYData() { return yData; }
 
 
     // methods to set data
@@ -93,6 +96,30 @@ class InterpolatorBase
     template<typename X, typename Y>
     typename std::enable_if<!std::is_pointer<Y>::value>::type
     setData( const X &x, const Y &y);
+
+
+
+    /**
+     * Given an x value, returns the index of the stored x data
+     * that is just to the "left" of x such that X[i] < x < X[i+1]
+     */
+    int
+    get_index_to_left_of(Real x) const
+    {
+      auto rng = std::make_pair( xData.data()+1, xData.data()+xData.size() );
+      return boost::lower_bound( rng, x) - xData.data() - 1;
+    }
+    /**
+     * Given an x value, returns the index of the stored x data
+     * that is just to the "right" of x such that X[i-1] < x < X[i]
+     */
+    int
+    get_index_to_right_of(Real x) const
+    {
+      auto rng = std::make_pair( xData.data()+1, xData.data()+xData.size() );
+      return boost::lower_bound( rng, x) - xData.data();
+    }
+
 
   protected:
 

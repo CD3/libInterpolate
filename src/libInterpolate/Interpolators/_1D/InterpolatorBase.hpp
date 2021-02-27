@@ -26,7 +26,7 @@ namespace _1D {
   */
 
 template<typename T>
-struct RealTypeOf { using type = double; };
+struct RealTypeOf { };
 template<template<typename> class T,typename R>
 struct RealTypeOf<T<R>> { using type = R; };
 

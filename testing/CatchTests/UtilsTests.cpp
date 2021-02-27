@@ -432,9 +432,6 @@ TEST_CASE( "Index Search with Eigen Matricies", "[utils]" ) {
 #include <type_traits>
 TEST_CASE("RealTypeOf tests")
 {
-  CHECK( std::is_same<_1D::RealTypeOf<double>::type, double>::value );
-  CHECK( std::is_same<_1D::RealTypeOf<float>::type, double>::value );
-  CHECK( std::is_same<_1D::RealTypeOf<int>::type, double>::value );
   CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<double>>::type, double>::value );
   CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<float>>::type, float>::value );
   CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<int>>::type, int>::value );

@@ -122,11 +122,11 @@ MonotonicInterpolator<Real>::setupInterpolator()
         yplow[i] = ((slope_low*h) + (slope*hlow))/(hlow + h);
         if (yplow[i] >= 0.0)
         {
-          yplow[i] = (std::min)(yplow[i], 2.0*(std::min)(slope_low, slope));
+          yplow[i] = (std::min)(yplow[i], static_cast<Real>(2.0)*(std::min)(slope_low, slope));
         }
         else
         {
-          yplow[i] = (std::max)(yplow[i], 2.0*(std::max)(slope_low, slope));
+          yplow[i] = (std::max)(yplow[i], static_cast<Real>(2.0)*(std::max)(slope_low, slope));
         }
       }
     }
@@ -155,11 +155,11 @@ MonotonicInterpolator<Real>::setupInterpolator()
 			yphigh[i] = ((slope*hhigh) + (slope_high*h))/(h + hhigh);
 			if (yphigh[i] >= 0.0)
 			{
-				yphigh[i] = (std::min)(yphigh[i], 2.0*(std::min)(slope, slope_high));
+				yphigh[i] = (std::min)(yphigh[i], static_cast<Real>(2.0)*(std::min)(slope, slope_high));
 			}
 			else
 			{
-				yphigh[i] = (std::max)(yphigh[i], 2.0*(std::max)(slope, slope_high));
+				yphigh[i] = (std::max)(yphigh[i], static_cast<Real>(2.0)*(std::max)(slope, slope_high));
 			}
 		}
 	}

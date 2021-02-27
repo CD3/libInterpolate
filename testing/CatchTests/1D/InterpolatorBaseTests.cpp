@@ -5,7 +5,7 @@
 
 namespace _1D {
 
-class TestInterp : public InterpolatorBase<TestInterp>
+class TestInterp : public InterpolatorBase<TestInterp,double>
 {
   public:
     double operator()( double x ) const

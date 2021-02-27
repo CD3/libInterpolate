@@ -172,6 +172,15 @@ to work with since it is completely self contained and you don't have to worry a
 alive. However, it does mean that you need to be mindful of copies.
 
 
+#### 2D Data Format
+
+The two-dimensional interpolators take three vectors, one for the x, y, and z values. All three vectors must
+be the same length. For the Bilinear and Bicubic interpolators, this means that the vectors for the x and y values must
+be larger than necessary since these interpolators require a regular grid, and coordinate values need to be repeated. However,
+it makes the two-dimensional interpolator interface uniform (the thin plate interpolator does not require a regular grid, it can interpolate from a collection of arbitrary points)
+and it is also compatible with the standard gnuplot surface plot data format. So if you read three columns from a file that can be plotted
+with gnuplots `splot` command, these three columns can be passed into the interpolator directly.
+
 ## Interpolation Methods
 
 Each interpolation method is implemented as a class that is templated on the data type. All one-dimensional

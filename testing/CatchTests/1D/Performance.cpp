@@ -37,3 +37,87 @@ TEMPLATE_TEST_CASE("1D Interplation Benchmarks", "[.][benchmarks]", _1D::LinearI
   BENCHMARK("Interpolate near the 1/4 mark") { return interp(498); };
 }
 
+
+#ifdef HAVE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
+
+TEST_CASE("GSL Comparisons","[.][benchmarks]")
+{
+  int                 N = 200000;
+  std::vector<double> x(N), y(N);
+  for (size_t i = 0; i < x.size(); ++i) {
+    x[i] = i * (2000. - 0.)/(N-1);
+    y[i] = x[i] * x[i];
+  }
+
+  SECTION("Cubic Spline Interpolation")
+  {
+  _1D::CubicSplineInterpolator<double> interp;
+  interp.setData(x, y);
+
+  BENCHMARK("libInterpolate at 'front'")
+  {
+    return interp(0.1);
+  };
+
+  BENCHMARK("libInterpolate at 'front'")
+  {
+    return interp(1000);
+  };
+  BENCHMARK("libInterpolate at 'front' and 'back' consecutive")
+  {
+    return interp(1) + interp(1999);
+  };
+
+  SECTION("GSL Standard")
+  {
+    gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, N);
+    gsl_spline_init (spline, x.data(), y.data(), N);
+
+    BENCHMARK("Interpolation at 'front'")
+    {
+      return gsl_spline_eval(spline, 0.1, NULL );
+    };
+    BENCHMARK("Interpolation at 'middle'")
+    {
+      return gsl_spline_eval(spline, 1000, NULL );
+    };
+    BENCHMARK("Interpolation at 'front' and 'back' together")
+    {
+      return gsl_spline_eval (spline, 1, NULL)+gsl_spline_eval(spline,1999, NULL);
+    };
+
+
+    gsl_spline_free(spline);
+  }
+
+  SECTION("GSL Accelerated")
+  {
+    gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+    gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, N);
+    gsl_spline_init (spline, x.data(), y.data(), N);
+
+    BENCHMARK("Interpolation at 'front'")
+    {
+      return gsl_spline_eval (spline, 0.1, acc);
+    };
+    BENCHMARK("Interpolation at 'middle'")
+    {
+      return gsl_spline_eval (spline, 1000, acc);
+    };
+    BENCHMARK("Interpolation at 'front' and 'back' together")
+    {
+      return gsl_spline_eval (spline, 1, acc)+gsl_spline_eval(spline,1999,acc);
+    };
+
+
+    gsl_spline_free(spline);
+    gsl_interp_accel_free(acc);
+  }
+
+  }
+
+}
+
+#endif

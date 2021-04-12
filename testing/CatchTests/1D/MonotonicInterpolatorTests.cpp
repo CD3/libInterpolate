@@ -22,17 +22,29 @@ TEST_CASE( "MonotonicInterpolator Tests", "[monotonic]" ) {
     xx(i) = dx*i;
     yy(i) = sin(xx(i));
   }
-  interp.setData( xx, yy );
 
-  REQUIRE_NOTHROW( interp(1) );
-
-
-  SECTION("Interpolation")
+  SECTION("Interpolation w/ Copied Data")
   {
+    interp.setData( xx, yy );
+
+    REQUIRE_NOTHROW( interp(1) );
+
     CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
     CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
     CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
   }
+
+  SECTION("Interpolation w/ Referenced Data")
+  {
+    interp.setUnsafeDataReference( xx.size(), xx.data(), yy.data() );
+
+    REQUIRE_NOTHROW( interp(1) );
+
+    CHECK( interp( dx/2          ) == Approx( sin( dx/2          ) ).epsilon(0.001) );
+    CHECK( interp( M_PI/2 - dx/2 ) == Approx( sin( M_PI/2 - dx/2 ) ).epsilon(0.001) );
+    CHECK( interp( M_PI/4 - dx/4 ) == Approx( sin( M_PI/4 - dx/4 ) ).epsilon(0.001) );
+  }
+
   }
 
 

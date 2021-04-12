@@ -181,12 +181,13 @@ MonotonicInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
 
-  // don't extrapolate at all
-  if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
-    return 0;
-
   const MapType &X = *(this->xView);
   const MapType &Y = *(this->yView);
+
+  // don't extrapolate at all
+  if( x < X(0) || x > X(X.size()-1) )
+    return 0;
+
 
   // the index that is just to the left of x will correspond to the "interval index"
   int i = this->get_index_to_left_of(x);

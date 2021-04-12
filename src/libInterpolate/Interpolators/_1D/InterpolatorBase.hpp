@@ -38,9 +38,13 @@ class InterpolatorBase
     using VectorType =  Eigen::Matrix<Real,Eigen::Dynamic,1>;
     using MapType =  Eigen::Map<const VectorType>;
 
-  protected:
-    // data members
+
+  private:
+    // we don't want base classes accessing these directly,
+    // they should use xView and yView instead.
     std::vector<Real> xData, yData;        ///< storage for interpolated data
+
+  protected:
     std::unique_ptr<MapType> xView, yView; ///< eigen matrix view of the data
 
   private:
@@ -86,16 +90,65 @@ class InterpolatorBase
     std::vector<Real> getYData() { return yData; }
 
 
-    // methods to set data
-    // primary method. this is used by the others
-    template<typename I>
-    void setData( I n, const Real *x, const Real *y );
 
-    // this template is ambiguous with the pointer template above,
-    // so we want to disable it for pointers.
+    /**
+     * Set references to the interpolated data to memory outside the interpolator.
+     * This is potentially *unsafe*. The interpolator will not take ownership of the memory,
+     * the caller will still be required to free it when it is no longer needed. Freeing memory
+     * before calling the interpolator may cause uninitialized memory access and is undefined
+     * behavior.
+     *
+     * Modifying the data after setting the interpolator references is undefined behavior as some
+     * interpolators do some setup work that will be negated when the data has changed.
+     */
+    template<typename I>
+    void
+    setUnsafeDataReference( I n, const Real *x, const Real *y)
+    {
+      this->xView.reset( new MapType( x, n ) );
+      this->yView.reset( new MapType( y, n ) );
+
+      this->callSetupInterpolator<Derived>();
+    }
+
+
+    /**
+     * Set the data that will be interpolated from a pair of std::vectors.
+     */
     template<typename X, typename Y>
-    typename std::enable_if<!std::is_pointer<Y>::value>::type
-    setData( const X &x, const Y &y);
+    auto
+    setData( const X &x, const Y &y)
+    -> decltype(x.size(),x.data(),y.data(),void())
+    {
+      this->setData( x.size(), x.data(), y.data() );
+    }
+
+    /**
+     * Set the data that will be interpolated from raw data pointers.
+     *
+     * The data pointed at by x and y will be *copied* into the interpolator.
+     */
+    template<typename I, typename X, typename Y>
+    void
+    setData( I n, const X *x, const Y *y)
+    {
+      this->setData(x,x+n,y,y+n);
+    }
+
+    template<typename XIter, typename YIter>
+    auto
+    setData( const XIter &x_begin, const XIter &x_end, const YIter &y_begin, const YIter &y_end)
+    -> decltype(std::copy(x_begin,x_end,xData.begin()),std::copy(y_begin,y_end,yData.begin()),void())
+    {
+      xData.clear();
+      yData.clear();
+      xData.reserve(x_end-x_begin);
+      yData.reserve(y_end-y_begin);
+      std::copy( x_begin, x_end, std::back_inserter(xData) );
+      std::copy( y_begin, y_end, std::back_inserter(yData) );
+
+      this->setUnsafeDataReference( xData.size(), xData.data(), yData.data() );
+    }
 
 
 
@@ -106,8 +159,8 @@ class InterpolatorBase
     int
     get_index_to_left_of(Real x) const
     {
-      auto rng = std::make_pair( xData.data()+1, xData.data()+xData.size() );
-      return boost::lower_bound( rng, x) - xData.data() - 1;
+      auto rng = std::make_pair( xView->data()+1, xView->data()+xView->size() );
+      return boost::lower_bound( rng, x) - xView->data() - 1;
     }
     /**
      * Given an x value, returns the index of the stored x data
@@ -116,8 +169,8 @@ class InterpolatorBase
     int
     get_index_to_right_of(Real x) const
     {
-      auto rng = std::make_pair( xData.data()+1, xData.data()+xData.size() );
-      return boost::lower_bound( rng, x) - xData.data();
+      auto rng = std::make_pair( xView->data()+1, xView->data()+xView->size() );
+      return boost::lower_bound( rng, x) - xView->data();
     }
 
 
@@ -167,30 +220,6 @@ InterpolatorBase<Derived,Real>::checkData() const
     throw std::logic_error("Interpolator data is not initialized. Did you call setData()?");
   if(this->xView->size() == 0 || this->yView->size() == 0)
     throw std::logic_error("Interpolator data is zero size. Did you call setData() with non-zero sized vectors?");
-}
-
-template<class Derived, typename Real>
-template<typename I>
-void
-InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y)
-{
-  xData.clear();
-  yData.clear();
-  std::copy( x, x+n, std::back_inserter(xData) );
-  std::copy( y, y+n, std::back_inserter(yData) );
-    
-  this->xView.reset( new MapType( xData.data(), n ) );
-  this->yView.reset( new MapType( yData.data(), n ) );
-
-  this->callSetupInterpolator<Derived>();
-}
-
-template<class Derived, typename Real>
-template<typename X, typename Y>
-typename std::enable_if<!std::is_pointer<Y>::value>::type
-InterpolatorBase<Derived,Real>::setData( const X &x, const Y &y)
-{
-  this->setData( x.size(), x.data(), y.data() );
 }
 
 

@@ -38,9 +38,10 @@ class InterpolatorBase
     using _2DVectorView = Eigen::Map<const VectorType,Eigen::Unaligned,Eigen::InnerStride<Eigen::Dynamic>>;
     using _2DMatrixView = Eigen::Map<const MatrixType,Eigen::Unaligned,Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>>;
 
-  protected:
-
+  private:
     std::vector<Real> xData, yData, zData;        // data storage
+
+  protected:
     std::unique_ptr<MapType> xView, yView, zView; // map view of the data
 
     // these maps are used to view the x,y,z data as two coordinate vectors and a function matrix, instead of three vectors.
@@ -95,14 +96,77 @@ class InterpolatorBase
     std::vector<Real> getYData() { return yData; }
     std::vector<Real> getZData() { return zData; }
 
-    template<typename I>
-    void setData( I n, const Real *x, const Real *y, const Real *z);
 
-    // this template is ambiguous with the pointer template above,
-    // wo we want to disable it for pointers
+    /**
+     * Set references to the interpolated data to memory outside the interpolator.
+     * This is potentially *unsafe*. The interpolator will not take ownership of the memory,
+     * the caller will still be required to free it when it is no longer needed. Freeing memory
+     * before calling the interpolator may cause uninitialized memory access and is undefined
+     * behavior.
+     *
+     * Modifying the data after setting the interpolator references is undefined behavior as some
+     * interpolators do some setup work that will be negated when the data has changed.
+     */
+    template<typename I>
+    void
+    setUnsafeDataReference( I n, const Real *x, const Real *y, const Real *z)
+    {
+      this->xView.reset( new MapType( x, n ) );
+      this->yView.reset( new MapType( y, n ) );
+      this->zView.reset( new MapType( z, n ) );
+
+      this->setup2DDataViews();
+      this->callSetupInterpolator<Derived>();
+    }
+
+
+    /**
+     * Set the data taht will be interpolated from a set of iterators.
+     */
+    template<typename XIter, typename YIter, typename ZIter>
+    auto
+    setData( const XIter &x_begin, const XIter &x_end, const YIter &y_begin, const YIter &y_end, const ZIter &z_begin, const ZIter &z_end)
+    -> decltype(std::copy(x_begin,x_end,xData.begin()),std::copy(y_begin,y_end,yData.begin()),std::copy(z_begin,z_end,zData.begin()),void())
+    {
+      xData.clear();
+      yData.clear();
+      zData.clear();
+      xData.reserve(x_end-x_begin);
+      yData.reserve(y_end-y_begin);
+      zData.reserve(z_end-z_begin);
+      std::copy( x_begin, x_end, std::back_inserter(xData) );
+      std::copy( y_begin, y_end, std::back_inserter(yData) );
+      std::copy( z_begin, z_end, std::back_inserter(zData) );
+
+      this->setUnsafeDataReference( xData.size(), xData.data(), yData.data(), zData.data() );
+    }
+
+
+    /**
+     * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.
+     * Basically, x[i], y[i], and z[i] should correspond to the first, second, and third columns of a gnuplot file.
+     */
+    template<typename I, typename X, typename Y, typename Z>
+    void
+    setData( I n, const X *x, const Y *y, const Z *z )
+    {
+      this->setData(x,x+n,y,y+n,z,z+n);
+    }
+
+    /**
+     * Set the data to be interpolated from vector-like containers that provide a .data() and .size()
+     * methods.
+     */
     template<typename XT, typename YT, typename ZT>
-    typename std::enable_if<!std::is_pointer<YT>::value>::type
-    setData( const XT &x, const YT &y, const ZT &z );
+    auto
+    setData( const XT &x, const YT &y, const ZT &z )
+    -> decltype( x.size(), x.data(), y.data(), z.data(), void())
+    {
+      return this->setData( x.size(), x.data(), y.data(), z.data() );
+    }
+
+
+
 
 
 
@@ -224,42 +288,6 @@ InterpolatorBase<Derived,Real>::setup2DDataViews()
   Z.reset( new _2DMatrixView( zView->data(), Nx, Ny, Eigen::Stride<Eigen::Dynamic,Eigen::Dynamic>(1,Ny) ) );
 }
 
-
-
-
-
-
-/**
- * Reads data from x, y, and z arrays. Arrays should all be the same length with each element corresponding to a data point.
- * Basically, x[i], y[i], and z[i] should correspond to the first, second, and third columns of a gnuplot file.
- */
-template<class Derived, typename Real>
-template<typename I>
-void
-InterpolatorBase<Derived,Real>::setData( I n, const Real *x, const Real *y, const Real *z )
-{
-  xData.clear();
-  yData.clear();
-  zData.clear();
-  std::copy( x, x+n, std::back_inserter(xData) );
-  std::copy( y, y+n, std::back_inserter(yData) );
-  std::copy( z, z+n, std::back_inserter(zData) );
-
-  this->xView.reset( new MapType( xData.data(), n ) );
-  this->yView.reset( new MapType( yData.data(), n ) );
-  this->zView.reset( new MapType( zData.data(), n ) );
-
-  this->setup2DDataViews();
-  this->callSetupInterpolator<Derived>();
-}
-
-template<class Derived, typename Real>
-template<typename XT, typename YT, typename ZT>
-typename std::enable_if<!std::is_pointer<YT>::value>::type
-InterpolatorBase<Derived,Real>::setData( const XT &x, const YT &y, const ZT &z )
-{
-  this->setData( x.size(), x.data(), y.data(), z.data() );
-}
 
 }
 

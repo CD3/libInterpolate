@@ -3,7 +3,7 @@
 
 #include <libInterpolate/Interpolate.hpp>
 
-TEMPLATE_TEST_CASE("1D Interplation Benchmarks", "[.][benchmarks]", _1D::LinearInterpolator<double>, _1D::MonotonicInterpolator<double>, _1D::CubicSplineInterpolator<double>)
+TEMPLATE_TEST_CASE("1D Interpolation Benchmarks", "[.][benchmarks]", _1D::LinearInterpolator<double>, _1D::MonotonicInterpolator<double>, _1D::CubicSplineInterpolator<double>)
 {
   int                 N = 200000;
   std::vector<double> x(N), y(N);
@@ -35,7 +35,19 @@ TEMPLATE_TEST_CASE("1D Interplation Benchmarks", "[.][benchmarks]", _1D::LinearI
   BENCHMARK("Interpolate near 'middle'") { return interp(1000); };
   BENCHMARK("Interpolate near 'end'") { return interp(1999); };
   BENCHMARK("Interpolate near the 1/4 mark") { return interp(498); };
+
+  BENCHMARK("setData()")
+  {
+    TestType interp2;
+    interp2.setData(x,y);
+  };
+  BENCHMARK("setUnsafeDataReference()")
+  {
+    TestType interp2;
+    interp2.setUnsafeDataReference(x.size(),x.data(),y.data());
+  };
 }
+
 
 
 #ifdef HAVE_GSL

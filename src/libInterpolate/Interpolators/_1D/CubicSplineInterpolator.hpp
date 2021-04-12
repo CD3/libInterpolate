@@ -85,11 +85,13 @@ Real
 CubicSplineInterpolator<Real>::operator()( Real x ) const
 {
   BASE::checkData();
-  // don't extrapolate at all
-  if( x < this->xData[0] || x > this->xData[this->xData.size()-1] )
-    return 0;
+
   const MapType &X = *(this->xView);
   const MapType &Y = *(this->yView);
+
+  // don't extrapolate at all
+  if( x < X(0) || x > X(X.size()-1) )
+    return 0;
 
   int i = this->get_index_to_right_of(x);
 

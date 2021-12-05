@@ -32,6 +32,20 @@ TEST_CASE( "LinearInterpolator Tests", "[linear]" ) {
     REQUIRE( interp(  9 ) == Approx( 13 ) );
     REQUIRE( interp( 10 ) == Approx( 14 ) );
     //REQUIRE( interp( 11 ) == Approx(  0 ) );
+    
+    std::vector<double> xs = {0,1,2,3,4,5,6,7,8,9,10};
+    auto ys = interp.batch(xs);
+    REQUIRE( ys[  0 ] == Approx( -1 ) );
+    REQUIRE( ys[  1 ] == Approx(  1 ) );
+    REQUIRE( ys[  2 ] == Approx(  3 ) );
+    REQUIRE( ys[  3 ] == Approx(  5 ) );
+    REQUIRE( ys[  4 ] == Approx(  7 ) );
+    REQUIRE( ys[  5 ] == Approx(  9 ) );
+    REQUIRE( ys[  6 ] == Approx( 10 ) );
+    REQUIRE( ys[  7 ] == Approx( 11 ) );
+    REQUIRE( ys[  8 ] == Approx( 12 ) );
+    REQUIRE( ys[  9 ] == Approx( 13 ) );
+    REQUIRE( ys[ 10 ] == Approx( 14 ) );
   }
 
   SECTION("Interpolation w/ ReferencedData")

@@ -205,6 +205,29 @@ class InterpolatorBase
     typename std::enable_if<!has_setupInterpolator<T>::value>::type
     callSetupInterpolator(){ }
 
+  public:
+
+    std::vector<Real> batch( const std::vector<Real> &xs ) const
+    {
+      std::vector<Real> ys(xs.size());
+      this->batch(xs.begin(), xs.end(), ys.begin());
+      return ys;
+    }
+
+
+    template<typename XIter, typename YIter>
+    auto
+    batch( const XIter x_begin, XIter x_end, YIter y_begin) const
+    -> decltype( *(y_begin+1)=Real(), *(x_begin+1)void() )
+    {
+#pragma parallel for
+      size_t N = x_end-x_begin;
+      for( size_t i = 0; i < N; ++i)
+      {
+        *(y_begin+i) = static_cast<const Derived*>(this)->operator()(*(x_begin+i));
+      }
+    }
+
 
 };
 
@@ -221,6 +244,8 @@ InterpolatorBase<Derived,Real>::checkData() const
   if(this->xView->size() == 0 || this->yView->size() == 0)
     throw std::logic_error("Interpolator data is zero size. Did you call setData() with non-zero sized vectors?");
 }
+
+
 
 
 }

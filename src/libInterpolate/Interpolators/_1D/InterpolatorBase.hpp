@@ -218,7 +218,7 @@ class InterpolatorBase
     template<typename XIter, typename YIter>
     auto
     batch( const XIter x_begin, XIter x_end, YIter y_begin) const
-    -> decltype( *(y_begin+1)=Real(), *(x_begin+1)void() )
+    -> decltype( *(y_begin+1)=Real(), *(x_begin+1), void() )
     {
 #pragma parallel for
       size_t N = x_end-x_begin;

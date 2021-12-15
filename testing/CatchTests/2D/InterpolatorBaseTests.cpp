@@ -235,6 +235,89 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
 
   }
 
+  SECTION("Grid-formatted Data")
+  {
+    std::vector<int> x(3), y(4), z(12);
+    x[0] = 0; x[1] = 1; x[2] = 2;
+    y[0] = 2; y[1] = 3; y[2] = 4; y[3] = 5;
+
+    SECTION("Iterators")
+    {
+      interp.setData(x.begin(), x.end(), y.begin(), y.end(), z.begin(), z.end() );
+      auto X = interp.getX();
+      auto Y = interp.getY();
+      auto Z = interp.getZ();
+
+      CHECK( X.size() == 12 );
+      CHECK( X[0] == 0 );
+      CHECK( X[1] == 0 );
+      CHECK( X[2] == 0 );
+      CHECK( X[3] == 0 );
+
+      CHECK( X[4] == 1 );
+      CHECK( X[5] == 1 );
+      CHECK( X[6] == 1 );
+      CHECK( X[7] == 1 );
+
+      CHECK( X[8] == 2 );
+      CHECK( X[9] == 2 );
+      CHECK( X[10] == 2 );
+      CHECK( X[11] == 2 );
+
+      CHECK( Y[0] == 2 );
+      CHECK( Y[1] == 3 );
+      CHECK( Y[2] == 4 );
+      CHECK( Y[3] == 5 );
+      CHECK( Y[4] == 2 );
+      CHECK( Y[5] == 3 );
+      CHECK( Y[6] == 4 );
+      CHECK( Y[7] == 5 );
+      CHECK( Y[8] == 2 );
+      CHECK( Y[9] == 3 );
+      CHECK( Y[10] == 4 );
+      CHECK( Y[11] == 5 );
+    }
+    SECTION("std::vector")
+    {
+      interp.setData(x, y, z);
+      auto X = interp.getX();
+      auto Y = interp.getY();
+      auto Z = interp.getZ();
+
+      CHECK( X.size() == 12 );
+      CHECK( X[0] == 0 );
+      CHECK( X[1] == 0 );
+      CHECK( X[2] == 0 );
+      CHECK( X[3] == 0 );
+
+      CHECK( X[4] == 1 );
+      CHECK( X[5] == 1 );
+      CHECK( X[6] == 1 );
+      CHECK( X[7] == 1 );
+
+      CHECK( X[8] == 2 );
+      CHECK( X[9] == 2 );
+      CHECK( X[10] == 2 );
+      CHECK( X[11] == 2 );
+
+      CHECK( Y[0] == 2 );
+      CHECK( Y[1] == 3 );
+      CHECK( Y[2] == 4 );
+      CHECK( Y[3] == 5 );
+      CHECK( Y[4] == 2 );
+      CHECK( Y[5] == 3 );
+      CHECK( Y[6] == 4 );
+      CHECK( Y[7] == 5 );
+      CHECK( Y[8] == 2 );
+      CHECK( Y[9] == 3 );
+      CHECK( Y[10] == 4 );
+      CHECK( Y[11] == 5 );
+    }
+
+
+
+  }
+
 }
 
 

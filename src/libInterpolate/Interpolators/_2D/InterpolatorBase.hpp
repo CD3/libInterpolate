@@ -6,6 +6,7 @@
   * @date 12/24/16
   */
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -131,30 +132,20 @@ class InterpolatorBase
     yData.clear();
     zData.clear();
 
-    auto xrng = boost::make_iterator_range(x_begin, x_end);
-    auto yrng = boost::make_iterator_range(y_begin, y_end);
-    auto zrng = boost::make_iterator_range(z_begin, z_end);
+    xData.reserve(z_end - z_begin);
+    yData.reserve(z_end - z_begin);
+    zData.reserve(z_end - z_begin);
 
-    if(xrng.size() == zrng.size() && yrng.size() == zrng.size()) {
-      xData.resize(xrng.size());
-      yData.resize(yrng.size());
-      zData.resize(zrng.size());
-      boost::copy(xrng, xData.begin());
-      boost::copy(yrng, yData.begin());
-      boost::copy(zrng, zData.begin());
-    } else if((x_end - x_begin) * (y_end - y_begin) == z_end - z_begin) {
-      xData.reserve(zrng.size());
-      yData.reserve(zrng.size());
-      zData.reserve(zrng.size());
-
-      boost::push_back(zData, zrng);
-      boost::for_each(xrng, [&](decltype(*x_begin) x) {
-        boost::push_back(yData, yrng);
-        // should be able to do a fill here?
-        for(size_t i = 0; i < yrng.size(); ++i) {
-          xData.push_back(x);
-        }
-      });
+    if((x_end - x_begin) == (z_end - z_begin) && (y_end - y_begin) == (z_end - z_begin)) {
+      std::copy(x_begin, x_end, std::back_inserter(xData));
+      std::copy(y_begin, y_end, std::back_inserter(yData));
+      std::copy(z_begin, z_end, std::back_inserter(zData));
+    } else if((x_end - x_begin) * (y_end - y_begin) == (z_end - z_begin)) {
+      std::copy(z_begin, z_end, std::back_inserter(zData));
+      for(auto it = x_begin; it != x_end; it++) {
+        std::fill_n(std::back_inserter(xData), y_end - y_begin, *it);
+        std::copy(y_begin, y_end, std::back_inserter(yData));
+      }
 
     } else {
       throw std::runtime_error("Interpolator data format is not supported. The x, y, and z data containers should all be the same length, or the length of the z container should be equal to the product of the length of the x and y containers.");
@@ -235,7 +226,7 @@ class InterpolatorBase
   void checkData() const;   ///< Check that data has been initialized and throw exception if not.
   void setup2DDataViews();  ///< Setups up 2D views of 1D data arrays
 
- private:
+ protected:
   // callSetupInterpolator will call a function named setupInterpolator in the derived class, if
   // it exists. this is just some template magic to detect if the derived class has implemented a
   // setupInterpolator function, and to call it if it does.
@@ -259,7 +250,7 @@ class InterpolatorBase
   typename std::enable_if<has_setupInterpolator<T>::value>::type
   callSetupInterpolator()
   {
-    static_cast<Derived *>(this)->setupInterpolator();
+    static_cast<T *>(this)->setupInterpolator();
   }
 
   template<typename T>

@@ -1,34 +1,41 @@
 #include "catch.hpp"
 
-#include <libInterpolate/Interpolators/_2D/InterpolatorBase.hpp>
+#include <libInterpolate/Interpolators/_2D/TriangleInterpolatorBase.hpp>
 
 
 namespace _2D {
 
-class TestInterp : public InterpolatorBase<TestInterp>
+class TestTriangleInterp : public TriangleInterpolatorBase<TestTriangleInterp>
 {
+  protected:
+    double c = 0;
   public:
     virtual double operator()( double x, double y ) const
     {
-      return x + 2*y + 10;
+      return x + 2*y + this->c;
     }
 
     VectorType getX() { return *(this->xView); }
     VectorType getY() { return *(this->yView); }
     VectorType getZ() { return *(this->zView); }
 
+    void setupInterpolator()
+    {
+      this->c = 10;
+    }
+
 };
 
 }
 
 
-TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
+TEST_CASE( "2D TriangleInterpolatorBase Setup Tests", "[plumbing]" ) {
 
-  _2D::TestInterp interp;
+  _2D::TestTriangleInterp interp;
 
   // make sure interpolator works the way we expect
-  REQUIRE( interp(1,1) == Approx(13) );
-  REQUIRE( interp(10,20) == Approx(60) );
+  REQUIRE( interp(1,1) == Approx(3) );
+  REQUIRE( interp(10,20) == Approx(50) );
 
   size_t N = 10;
 
@@ -46,6 +53,9 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
     SECTION("Deep Copy")
     {
       interp.setData( xx, yy, zz );
+
+      REQUIRE( interp(1,1) == Approx(13) );
+      REQUIRE( interp(10,20) == Approx(60) );
 
       // clear the original data to make sure deep copy worked
       for(size_t i = 0; i < N; i++)
@@ -240,8 +250,6 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
     std::vector<int> x(3), y(4), z(12);
     x[0] = 0; x[1] = 1; x[2] = 2;
     y[0] = 2; y[1] = 3; y[2] = 4; y[3] = 5;
-    z[0] = 10; z[1] = 11; z[2] = 12; z[3] = 13; z[4] = 14; z[5] = 15;
-    z[6] = 16; z[7] = 17; z[8] = 18; z[9] = 19; z[10] = 20; z[11] = 21;
 
     SECTION("Iterators")
     {
@@ -278,20 +286,6 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
       CHECK( Y[9] == 3 );
       CHECK( Y[10] == 4 );
       CHECK( Y[11] == 5 );
-
-
-      CHECK( Z[0] == 10 );
-      CHECK( Z[1] == 11 );
-      CHECK( Z[2] == 12 );
-      CHECK( Z[3] == 13 );
-      CHECK( Z[4] == 14 );
-      CHECK( Z[5] == 15 );
-      CHECK( Z[6] == 16 );
-      CHECK( Z[7] == 17 );
-      CHECK( Z[8] == 18 );
-      CHECK( Z[9] == 19 );
-      CHECK( Z[10] == 20 );
-      CHECK( Z[11] == 21 );
     }
     SECTION("std::vector")
     {
@@ -328,20 +322,6 @@ TEST_CASE( "2D InterpolatorBase Setup Tests", "[plumbing]" ) {
       CHECK( Y[9] == 3 );
       CHECK( Y[10] == 4 );
       CHECK( Y[11] == 5 );
-
-
-      CHECK( Z[0] == 10 );
-      CHECK( Z[1] == 11 );
-      CHECK( Z[2] == 12 );
-      CHECK( Z[3] == 13 );
-      CHECK( Z[4] == 14 );
-      CHECK( Z[5] == 15 );
-      CHECK( Z[6] == 16 );
-      CHECK( Z[7] == 17 );
-      CHECK( Z[8] == 18 );
-      CHECK( Z[9] == 19 );
-      CHECK( Z[10] == 20 );
-      CHECK( Z[11] == 21 );
     }
 
 

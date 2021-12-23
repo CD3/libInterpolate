@@ -7,10 +7,13 @@
   */
 
 #include <iostream>
+#include <array>
 
 #include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/ring.hpp>
+#include <boost/geometry/geometries/adapted/std_array.hpp>
+// #include <boost/geometry/geometries/point_xy.hpp>
+BOOST_GEOMETRY_REGISTER_STD_ARRAY_CS(cs::cartesian)
 
 #include "../../Utils/Meshing/delaunator-cpp.hpp"
 #include "InterpolatorBase.hpp"
@@ -22,7 +25,7 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
 {
  public:
   using BASE       = InterpolatorBase<DelaunayTriangulationInterpolatorBase<Derived, Real>>;
-  using point_t    = boost::geometry::model::d2::point_xy<Real>;
+  using point_t    = std::array<Real,2>; // boost::geometry::model::d2::point_xy<Real>;
   using triangle_t = boost::geometry::model::ring<point_t>;
 
   std::vector<triangle_t> getTriangles() const { return triangles; }
@@ -32,6 +35,7 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
   friend Derived;  // this is necessary to allow derived class to call constructors
 
   std::vector<triangle_t> triangles;
+  std::vector<std::array<size_t,3>> triangle_points;
 
   void setupInterpolator()
   {
@@ -45,16 +49,21 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
     delaunator::Delaunator triangulation(coords);
 
     for(size_t i = 0; i < triangulation.triangles.size(); i += 3) {
-      point_t p1(triangulation.coords[2 * triangulation.triangles[i]], triangulation.coords[2 * triangulation.triangles[i] + 1]);
-      point_t p2(triangulation.coords[2 * triangulation.triangles[i + 1]], triangulation.coords[2 * triangulation.triangles[i + 1] + 1]);
-      point_t p3(triangulation.coords[2 * triangulation.triangles[i + 2]], triangulation.coords[2 * triangulation.triangles[i + 2] + 1]);
+      point_t p1 = {triangulation.coords[2 * triangulation.triangles[i]], triangulation.coords[2 * triangulation.triangles[i] + 1]};
+      point_t p2 = {triangulation.coords[2 * triangulation.triangles[i + 1]], triangulation.coords[2 * triangulation.triangles[i + 1] + 1]};
+      point_t p3 = {triangulation.coords[2 * triangulation.triangles[i + 2]], triangulation.coords[2 * triangulation.triangles[i + 2] + 1]};
 
       triangle_t t{p1, p2, p3, p1};
 
       triangles.push_back(t);
+
+      triangle_points.push_back( {triangulation.triangles[i], triangulation.triangles[i+1], triangulation.triangles[i+2]} );
     }
 
+
+
     this->template callSetupInterpolator<Derived>();
+
   }
 };
 }  // namespace _2D

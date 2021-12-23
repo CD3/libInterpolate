@@ -122,15 +122,15 @@ TEST_CASE("2D DelaunayTriangulationInterpolatorBase Setup Tests", "[plumbing]")
       using triangle_t = _2D::DelaunayTriangulationInterpolatorBase<_2D::TestTriangleInterp>::triangle_t;
       auto                                                                    triangles = interp.getTriangles();
       std::vector<int> covered_counts(triangles.size());
-      point_t p(2., 3.);
+      point_t p{2., 3.};
       std::transform(triangles.begin(),triangles.end(),covered_counts.begin(), [&p](const triangle_t& t){ return boost::geometry::covered_by(p,t); } );
       CHECK( std::accumulate(covered_counts.begin(), covered_counts.end(), 0, std::plus<int>()) == 3 );
 
-      p = point_t(2.-0.1, 3.);
+      p = point_t{2.-0.1, 3.};
       std::transform(triangles.begin(),triangles.end(),covered_counts.begin(), [&p](const triangle_t& t){ return boost::geometry::covered_by(p,t); } );
       CHECK( std::accumulate(covered_counts.begin(), covered_counts.end(), 0, std::plus<int>()) == 2 );
 
-      p = point_t(2.-0.1, 3.-0.1);
+      p = point_t{2.-0.1, 3.-0.1};
       std::transform(triangles.begin(),triangles.end(),covered_counts.begin(), [&p](const triangle_t& t){ return boost::geometry::covered_by(p,t); } );
       CHECK( std::accumulate(covered_counts.begin(), covered_counts.end(), 0, std::plus<int>()) == 1 );
     }

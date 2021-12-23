@@ -436,4 +436,3 @@ TEST_CASE("RealTypeOf tests")
   CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<float>>::type, float>::value );
   CHECK( std::is_same<_1D::RealTypeOf<_1D::CubicSplineInterpolator<int>>::type, int>::value );
 }
-

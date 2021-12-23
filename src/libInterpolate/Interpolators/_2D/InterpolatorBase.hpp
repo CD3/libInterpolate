@@ -233,18 +233,22 @@ class InterpolatorBase
 
   template<typename T>
   struct has_setupInterpolator {
-   private:
-    typedef std::true_type  yes;
-    typedef std::false_type no;
 
-    template<typename U>
-    static auto test(int) -> decltype(std::declval<U>().setupInterpolator(), yes());
-    template<typename>
-    static no test(...);
+    /*
+     * Note: This meta-fucntion detects if a given class (T) *defines* the method void setupInterpolator(),
+     *       as opposed to wether or not setupinterpolator() can be called. This is necessary so we can
+     *       call setupInterpolator() on specific classes in an inheritance tree.
+     *
+     *       We also have to define this class inside the InterpolatorBase class because setupInterpolator() may
+     *       be private/protected.
+     */
+    template<typename U, void (U::*)()> struct SFINAE {};
+    template<typename U> static char Test(SFINAE<U, &U::setupInterpolator>*);
+    template<typename U> static int Test(...);
+    static const bool value = sizeof(Test<T>(0)) == sizeof(char);
 
-   public:
-    static constexpr bool value = std::is_same<decltype(test<T>(0)), yes>::value;
   };
+
 
   template<typename T>
   typename std::enable_if<has_setupInterpolator<T>::value>::type

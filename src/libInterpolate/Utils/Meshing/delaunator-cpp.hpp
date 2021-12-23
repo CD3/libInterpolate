@@ -43,99 +43,105 @@ inline size_t fast_mod(const size_t i, const size_t c) {
 }
 
 // Kahan and Babuska summation, Neumaier variant; accumulates less FP error
-inline double sum(const std::vector<double>& x) {
-    double sum = x[0];
-    double err = 0.0;
+
+template<typename T>
+T sum(const std::vector<T>& x) {
+    T sum = x[0];
+    T err = 0.0;
 
     for (size_t i = 1; i < x.size(); i++) {
-        const double k = x[i];
-        const double m = sum + k;
+        const T k = x[i];
+        const T m = sum + k;
         err += std::fabs(sum) >= std::fabs(k) ? sum - m + k : k - m + sum;
         sum = m;
     }
     return sum + err;
 }
 
-inline double dist(
-    const double ax,
-    const double ay,
-    const double bx,
-    const double by) {
-    const double dx = ax - bx;
-    const double dy = ay - by;
+template<typename T>
+T dist(
+    const T ax,
+    const T ay,
+    const T bx,
+    const T by) {
+    const T dx = ax - bx;
+    const T dy = ay - by;
     return dx * dx + dy * dy;
 }
 
-inline double circumradius(
-    const double ax,
-    const double ay,
-    const double bx,
-    const double by,
-    const double cx,
-    const double cy) {
-    const double dx = bx - ax;
-    const double dy = by - ay;
-    const double ex = cx - ax;
-    const double ey = cy - ay;
+template<typename T>
+T circumradius(
+    const T ax,
+    const T ay,
+    const T bx,
+    const T by,
+    const T cx,
+    const T cy) {
+    const T dx = bx - ax;
+    const T dy = by - ay;
+    const T ex = cx - ax;
+    const T ey = cy - ay;
 
-    const double bl = dx * dx + dy * dy;
-    const double cl = ex * ex + ey * ey;
-    const double d = dx * ey - dy * ex;
+    const T bl = dx * dx + dy * dy;
+    const T cl = ex * ex + ey * ey;
+    const T d = dx * ey - dy * ex;
 
-    const double x = (ey * bl - dy * cl) * 0.5 / d;
-    const double y = (dx * cl - ex * bl) * 0.5 / d;
+    const T x = (ey * bl - dy * cl) * 0.5 / d;
+    const T y = (dx * cl - ex * bl) * 0.5 / d;
 
     if ((bl > 0.0 || bl < 0.0) && (cl > 0.0 || cl < 0.0) && (d > 0.0 || d < 0.0)) {
         return x * x + y * y;
     } else {
-        return std::numeric_limits<double>::max();
+        return std::numeric_limits<T>::max();
     }
 }
 
-inline bool orient(
-    const double px,
-    const double py,
-    const double qx,
-    const double qy,
-    const double rx,
-    const double ry) {
+template<typename T>
+bool orient(
+    const T px,
+    const T py,
+    const T qx,
+    const T qy,
+    const T rx,
+    const T ry) {
     return (qy - py) * (rx - qx) - (qx - px) * (ry - qy) < 0.0;
 }
+template<typename T>
+std::pair<T, T> circumcenter(
+    const T ax,
+    const T ay,
+    const T bx,
+    const T by,
+    const T cx,
+    const T cy) {
+    const T dx = bx - ax;
+    const T dy = by - ay;
+    const T ex = cx - ax;
+    const T ey = cy - ay;
 
-inline std::pair<double, double> circumcenter(
-    const double ax,
-    const double ay,
-    const double bx,
-    const double by,
-    const double cx,
-    const double cy) {
-    const double dx = bx - ax;
-    const double dy = by - ay;
-    const double ex = cx - ax;
-    const double ey = cy - ay;
+    const T bl = dx * dx + dy * dy;
+    const T cl = ex * ex + ey * ey;
+    const T d = dx * ey - dy * ex;
 
-    const double bl = dx * dx + dy * dy;
-    const double cl = ex * ex + ey * ey;
-    const double d = dx * ey - dy * ex;
-
-    const double x = ax + (ey * bl - dy * cl) * 0.5 / d;
-    const double y = ay + (dx * cl - ex * bl) * 0.5 / d;
+    const T x = ax + (ey * bl - dy * cl) * 0.5 / d;
+    const T y = ay + (dx * cl - ex * bl) * 0.5 / d;
 
     return std::make_pair(x, y);
 }
 
+template<typename T>
 struct compare {
 
-    std::vector<double> const& coords;
-    double cx;
-    double cy;
+    std::vector<T> const& coords;
+    T cx;
+    T cy;
 
     bool operator()(std::size_t i, std::size_t j) {
-        const double d1 = dist(coords[2 * i], coords[2 * i + 1], cx, cy);
-        const double d2 = dist(coords[2 * j], coords[2 * j + 1], cx, cy);
-        const double diff1 = d1 - d2;
-        const double diff2 = coords[2 * i] - coords[2 * j];
-        const double diff3 = coords[2 * i + 1] - coords[2 * j + 1];
+        const T d1 = dist(coords[2 * i], coords[2 * i + 1], cx, cy);
+        const T d2 = dist(coords[2 * j], coords[2 * j + 1], cx, cy);
+        const T diff1 = d1 - d2;
+        const T diff2 = coords[2 * i] - coords[2 * j];
+        const T diff3 = coords[2 * i + 1] - coords[2 * j + 1];
 
         if (diff1 > 0.0 || diff1 < 0.0) {
             return diff1 < 0;
@@ -147,49 +153,52 @@ struct compare {
     }
 };
 
-inline bool in_circle(
-    const double ax,
-    const double ay,
-    const double bx,
-    const double by,
-    const double cx,
-    const double cy,
-    const double px,
-    const double py) {
-    const double dx = ax - px;
-    const double dy = ay - py;
-    const double ex = bx - px;
-    const double ey = by - py;
-    const double fx = cx - px;
-    const double fy = cy - py;
+template<typename T>
+bool in_circle(
+    const T ax,
+    const T ay,
+    const T bx,
+    const T by,
+    const T cx,
+    const T cy,
+    const T px,
+    const T py) {
+    const T dx = ax - px;
+    const T dy = ay - py;
+    const T ex = bx - px;
+    const T ey = by - py;
+    const T fx = cx - px;
+    const T fy = cy - py;
 
-    const double ap = dx * dx + dy * dy;
-    const double bp = ex * ex + ey * ey;
-    const double cp = fx * fx + fy * fy;
+    const T ap = dx * dx + dy * dy;
+    const T bp = ex * ex + ey * ey;
+    const T cp = fx * fx + fy * fy;
 
     return (dx * (ey * cp - bp * fy) -
             dy * (ex * cp - bp * fx) +
             ap * (ex * fy - ey * fx)) < 0.0;
 }
 
-constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 constexpr std::size_t INVALID_INDEX = std::numeric_limits<std::size_t>::max();
 
-inline bool check_pts_equal(double x1, double y1, double x2, double y2) {
-    return std::fabs(x1 - x2) <= EPSILON &&
-           std::fabs(y1 - y2) <= EPSILON;
+template<typename T>
+bool check_pts_equal(T x1, T y1, T x2, T y2) {
+    return std::fabs(x1 - x2) <= std::numeric_limits<T>::epsilon() &&
+           std::fabs(y1 - y2) <= std::numeric_limits<T>::epsilon();
 }
 
 // monotonically increases with real angle, but doesn't need expensive trigonometry
-inline double pseudo_angle(const double dx, const double dy) {
-    const double p = dx / (std::abs(dx) + std::abs(dy));
+template<typename T>
+T pseudo_angle(const T dx, const T dy) {
+    const T p = dx / (std::abs(dx) + std::abs(dy));
     return (dy > 0.0 ? 3.0 - p : 1.0 + p) / 4.0; // [0..1)
 }
 
+template<typename T>
 struct DelaunatorPoint {
     std::size_t i;
-    double x;
-    double y;
+    T x;
+    T y;
     std::size_t t;
     std::size_t prev;
     std::size_t next;
@@ -230,7 +239,7 @@ private:
     void link(std::size_t a, std::size_t b);
 };
 
-Delaunator::Delaunator(std::vector<double> const& in_coords)
+inline Delaunator::Delaunator(std::vector<double> const& in_coords)
     : coords(in_coords),
       triangles(),
       halfedges(),
@@ -329,7 +338,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     std::tie(m_center_x, m_center_y) = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
 
     // sort the points by distance from the seed triangle circumcenter
-    std::sort(ids.begin(), ids.end(), compare{ coords, m_center_x, m_center_y });
+    std::sort(ids.begin(), ids.end(), compare<double>{ coords, m_center_x, m_center_y });
 
     // initialize a hash table for storing edges of the advancing convex hull
     m_hash_size = static_cast<std::size_t>(std::llround(std::ceil(std::sqrt(n))));
@@ -453,7 +462,7 @@ Delaunator::Delaunator(std::vector<double> const& in_coords)
     }
 }
 
-double Delaunator::get_hull_area() {
+inline double Delaunator::get_hull_area() {
     std::vector<double> hull_area;
     size_t e = hull_start;
     do {
@@ -463,7 +472,7 @@ double Delaunator::get_hull_area() {
     return sum(hull_area);
 }
 
-std::size_t Delaunator::legalize(std::size_t a) {
+inline std::size_t Delaunator::legalize(std::size_t a) {
     std::size_t i = 0;
     std::size_t ar = 0;
     m_edge_stack.clear();
@@ -570,7 +579,7 @@ inline std::size_t Delaunator::hash_key(const double x, const double y) const {
         m_hash_size);
 }
 
-std::size_t Delaunator::add_triangle(
+inline std::size_t Delaunator::add_triangle(
     std::size_t i0,
     std::size_t i1,
     std::size_t i2,
@@ -587,7 +596,7 @@ std::size_t Delaunator::add_triangle(
     return t;
 }
 
-void Delaunator::link(const std::size_t a, const std::size_t b) {
+inline void Delaunator::link(const std::size_t a, const std::size_t b) {
     std::size_t s = halfedges.size();
     if (a == s) {
         halfedges.push_back(b);

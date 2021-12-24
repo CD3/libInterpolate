@@ -28,14 +28,14 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
   using point_t    = std::array<Real,2>; // boost::geometry::model::d2::point_xy<Real>;
   using triangle_t = boost::geometry::model::ring<point_t>;
 
-  std::vector<triangle_t> getTriangles() const { return triangles; }
+  std::vector<triangle_t> getTriangles() const { return m_xy_triangles; }
 
  private:
   friend BASE;     // this is necessary to allow base class to call setupInterpolator()
   friend Derived;  // this is necessary to allow derived class to call constructors
 
-  std::vector<triangle_t> triangles;
-  std::vector<std::array<size_t,3>> triangle_points;
+  std::vector<triangle_t> m_xy_triangles;
+  std::vector<std::array<size_t,3>> m_triangle_datapoints;
 
   void setupInterpolator()
   {
@@ -55,11 +55,9 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
 
       triangle_t t{p1, p2, p3, p1};
 
-      triangles.push_back(t);
-
-      triangle_points.push_back( {triangulation.triangles[i], triangulation.triangles[i+1], triangulation.triangles[i+2]} );
+      m_xy_triangles.push_back(t);
+      m_triangle_datapoints.push_back( {triangulation.triangles[i], triangulation.triangles[i+1], triangulation.triangles[i+2]} );
     }
-
 
 
     this->template callSetupInterpolator<Derived>();

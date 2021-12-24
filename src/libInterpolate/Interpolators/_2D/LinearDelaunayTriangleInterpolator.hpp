@@ -30,24 +30,39 @@ class LinearDelaunayTriangleInterpolator : public DelaunayTriangulationInterpola
     {
 
       point_t p{x,y};
-      for( auto& t: this->triangles )
+      size_t i = 0;
+      for( auto& t: this->m_xy_triangles )
       {
         if( boost::geometry::covered_by(p,t) )
         {
-          // std::array<std::array<Real,3>,4> points;
-          // int i = 0;
-          // boost::geometry::for_each_point(t,[&i,&points](const point_t& pp){
-          //     points[i++] = pp;
-          //     });
-          // std::cout << boost::geometry::wkt( points[0] ) << std::endl;
-          // std::cout << boost::geometry::wkt( points[1] ) << std::endl;
-          // boost::geometry::subtract_point(points[0],points[1]);
-          // boost::geometry::subtract_point(points[1],points[2]);
-          // std::cout << boost::geometry::wkt( points[0] ) << std::endl;
-          // std::cout << boost::geometry::wkt( points[1] ) << std::endl;
-          // std::cout << boost::geometry::wkt( boost::geometry::cross_product(points[0],points[1]) ) << std::endl;
-          // return 1;
+          std::array<std::array<Real,3>,3> points;
+          size_t j = 0;
+          boost::geometry::for_each_point(t,[&i,&j,&points,this](const point_t& pp){
+              if( j > 2 )
+                return;
+              points[j][0] = pp[0];
+              points[j][1] = pp[1];
+              points[j][2] = this->getZData()[this->m_triangle_datapoints[i][j]];
+              j++;
+              });
+
+          boost::geometry::subtract_point(points[1],points[0]);
+          boost::geometry::subtract_point(points[2],points[0]);
+          auto surface_normal = boost::geometry::cross_product(points[2],points[1]);
+
+          // equation for a plane:
+          // (\vec{r} - \vec{r}_0) \cdot \vec{n} = 0 = \vec{r} \cdot \vec{n} - \vec{r}_0 \cdot \vec{n} = nx*(rx-r0x) + ny*(ry-r0y) + nz*(rz-r0z)
+          // nx*rx + ny*ry + nz*rz = \vec{n} \cdot \vec{r}_0
+          //
+          // we want to compute rz
+          //
+          // nz*rz = \vec{n} \cdot \vec{r}_0 - nx*rx - ny*ry
+          // rz = (\vec{n} \cdot \vec{r}_0 - nx*rx - ny*ry)/nz
+          Real z = (boost::geometry::dot_product( surface_normal, points[0] ) - p[0]*surface_normal[0] - p[1]*surface_normal[1])/surface_normal[2];
+
+          return z;
         }
+        i++;
       }
 
       // do not extrapolate
@@ -55,7 +70,7 @@ class LinearDelaunayTriangleInterpolator : public DelaunayTriangulationInterpola
     }
 
   protected:
-    using BASE::triangles;
+    using BASE::m_xy_triangles;
 
   private:
     friend BASE;

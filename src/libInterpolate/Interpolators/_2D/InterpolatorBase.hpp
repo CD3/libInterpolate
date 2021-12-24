@@ -62,7 +62,7 @@ class InterpolatorBase
   // passes itself as the template argument.
   friend Derived;
 
-  InterpolatorBase() {}
+  InterpolatorBase() = default;
 
   InterpolatorBase(const InterpolatorBase &rhs)
       : xData(rhs.xData), yData(rhs.yData), zData(rhs.zData), xView(rhs.xView ? new MapType(xData.data(), xData.size()) : nullptr), yView(rhs.xView ? new MapType(yData.data(), yData.size()) : nullptr), zView(rhs.zView ? new MapType(zData.data(), zData.size()) : nullptr)

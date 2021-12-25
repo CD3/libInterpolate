@@ -28,7 +28,6 @@ class LinearDelaunayTriangleInterpolator : public DelaunayTriangulationInterpola
 
     Real operator()( Real x, Real y) const
     {
-
       point_t p{x,y};
       size_t i = 0;
       for( auto& t: this->m_xy_triangles )

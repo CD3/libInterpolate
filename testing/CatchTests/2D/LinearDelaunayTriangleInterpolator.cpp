@@ -1,14 +1,16 @@
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include "catch.hpp"
 
 #include <libInterpolate/Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 
-TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]",double,float)
+TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]", double, float)
 {
   _2D::LinearDelaunayTriangleInterpolator<TestType> interp;
 
   SECTION("Single Triangle")
   {
-  std::vector<TestType> x(3), y(3), z(3);
+    std::vector<TestType> x(3), y(3), z(3);
 
     SECTION("Level")
     {
@@ -45,7 +47,6 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]",do
       CHECK(interp(0.5, 0.1) == Approx(0.5));
       CHECK(interp(0.5, 1) == Approx(0));
       CHECK(interp(1, 0) == Approx(1));
-
     }
   }
   SECTION("Multiple Triangles")
@@ -60,15 +61,13 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]",do
       x[3] =  1; y[3] =  1; z[3] = 3.14;
       x[4] =  0; y[4] =  0; z[4] = 3.14;
       // clang-format on
-      
-      interp.setData(x,y,z);
 
+      interp.setData(x, y, z);
 
-      CHECK( interp(0,0) == Approx(3.14) );
-      CHECK( interp(2,0) == Approx(0).scale(1) );
-      CHECK( interp(0,2) == Approx(0).scale(1) );
-      CHECK( interp(0.5,0.5) == Approx(3.14) );
-
+      CHECK(interp(0, 0) == Approx(3.14));
+      CHECK(interp(2, 0) == Approx(0).scale(1));
+      CHECK(interp(0, 2) == Approx(0).scale(1));
+      CHECK(interp(0.5, 0.5) == Approx(3.14));
     }
 
     SECTION("Pyramid")
@@ -81,18 +80,68 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]",do
       x[4] =  0; y[4] =  0; z[4] = 2;
       // clang-format on
 
-      interp.setData(x,y,z);
+      interp.setData(x, y, z);
 
-      CHECK( interp(0,0) == Approx(2) );
-      CHECK( interp(-1,0) == Approx(0).scale(1) );
-      CHECK( interp(0,1) == Approx(0).scale(1) );
+      CHECK(interp(0, 0) == Approx(2));
+      CHECK(interp(-1, 0) == Approx(0).scale(1));
+      CHECK(interp(0, 1) == Approx(0).scale(1));
 
-      CHECK( interp(0,0.5) == Approx(1) );
-      CHECK( interp(0.5,0) == Approx(1) );
-      CHECK( interp(0,-0.5) == Approx(1) );
-      CHECK( interp(-0.5,0) == Approx(1) );
-      CHECK( interp(0.5,0.5) == Approx(1) );
+      CHECK(interp(0, 0.5) == Approx(1));
+      CHECK(interp(0.5, 0) == Approx(1));
+      CHECK(interp(0, -0.5) == Approx(1));
+      CHECK(interp(-0.5, 0) == Approx(1));
+      CHECK(interp(0.5, 0.5) == Approx(1));
+    }
+  }
 
+  SECTION("Benchmarks", "[.][benchmarks]")
+  {
+    _2D::BilinearInterpolator<TestType> bilin_interp;
+    SECTION("Setup Interpolator")
+    {
+      size_t                Nx = 100;
+      size_t                Ny = 100;
+      size_t                N  = Nx * Ny;
+      std::vector<TestType> x(N), y(N), z(N);
+
+      for(size_t i = 0; i < Nx; ++i) {
+        for(size_t j = 0; j < Ny; ++j) {
+          x[i * Ny + j] = i * 0.2;
+          y[i * Ny + j] = j * 0.4;
+          z[i * Ny + j] = i * j * 0.4;
+        }
+      }
+
+      BENCHMARK("setData(...)")
+      {
+        interp.setData(x, y, z);
+      };
+    }
+    SECTION("Interpolating")
+    {
+      size_t                Nx = 1000;
+      size_t                Ny = 1000;
+      size_t                N  = Nx * Ny;
+      std::vector<TestType> x(N), y(N), z(N);
+
+      for(size_t i = 0; i < Nx; ++i) {
+        for(size_t j = 0; j < Ny; ++j) {
+          x[i * Ny + j] = i * 0.2;
+          y[i * Ny + j] = j * 0.4;
+          z[i * Ny + j] = i * j * 0.4;
+        }
+      }
+      interp.setData(x, y, z);
+      bilin_interp.setData(x, y, z);
+
+      BENCHMARK("interp(30.3,55.3)")
+      {
+        return interp(30.3,55.5);
+      };
+      BENCHMARK("Bilinear::setData(30.3,55.3)")
+      {
+        return bilin_interp(30.3,55.5);
+      };
     }
   }
 }

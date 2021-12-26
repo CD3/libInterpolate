@@ -205,10 +205,11 @@ struct DelaunatorPoint {
     bool removed;
 };
 
+template<typename T>
 class Delaunator {
 
 public:
-    std::vector<double> const& coords;
+    std::vector<T> const& coords;
     std::vector<std::size_t> triangles;
     std::vector<std::size_t> halfedges;
     std::vector<std::size_t> hull_prev;
@@ -216,19 +217,19 @@ public:
     std::vector<std::size_t> hull_tri;
     std::size_t hull_start;
 
-    Delaunator(std::vector<double> const& in_coords);
+    Delaunator(std::vector<T> const& in_coords);
 
-    double get_hull_area();
+    T get_hull_area();
 
 private:
     std::vector<std::size_t> m_hash;
-    double m_center_x;
-    double m_center_y;
+    T m_center_x;
+    T m_center_y;
     std::size_t m_hash_size;
     std::vector<std::size_t> m_edge_stack;
 
     std::size_t legalize(std::size_t a);
-    std::size_t hash_key(double x, double y) const;
+    std::size_t hash_key(T x, T y) const;
     std::size_t add_triangle(
         std::size_t i0,
         std::size_t i1,
@@ -239,7 +240,8 @@ private:
     void link(std::size_t a, std::size_t b);
 };
 
-inline Delaunator::Delaunator(std::vector<double> const& in_coords)
+template<typename T>
+Delaunator<T>::Delaunator(std::vector<T> const& in_coords)
     : coords(in_coords),
       triangles(),
       halfedges(),
@@ -254,16 +256,16 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
       m_edge_stack() {
     std::size_t n = coords.size() >> 1;
 
-    double max_x = std::numeric_limits<double>::min();
-    double max_y = std::numeric_limits<double>::min();
-    double min_x = std::numeric_limits<double>::max();
-    double min_y = std::numeric_limits<double>::max();
+    T max_x = std::numeric_limits<T>::min();
+    T max_y = std::numeric_limits<T>::min();
+    T min_x = std::numeric_limits<T>::max();
+    T min_y = std::numeric_limits<T>::max();
     std::vector<std::size_t> ids;
     ids.reserve(n);
 
     for (std::size_t i = 0; i < n; i++) {
-        const double x = coords[2 * i];
-        const double y = coords[2 * i + 1];
+        const T x = coords[2 * i];
+        const T y = coords[2 * i + 1];
 
         if (x < min_x) min_x = x;
         if (y < min_y) min_y = y;
@@ -272,9 +274,9 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
 
         ids.push_back(i);
     }
-    const double cx = (min_x + max_x) / 2;
-    const double cy = (min_y + max_y) / 2;
-    double min_dist = std::numeric_limits<double>::max();
+    const T cx = (min_x + max_x) / 2;
+    const T cy = (min_y + max_y) / 2;
+    T min_dist = std::numeric_limits<T>::max();
 
     std::size_t i0 = INVALID_INDEX;
     std::size_t i1 = INVALID_INDEX;
@@ -282,38 +284,38 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
 
     // pick a seed point close to the centroid
     for (std::size_t i = 0; i < n; i++) {
-        const double d = dist(cx, cy, coords[2 * i], coords[2 * i + 1]);
+        const T d = dist(cx, cy, coords[2 * i], coords[2 * i + 1]);
         if (d < min_dist) {
             i0 = i;
             min_dist = d;
         }
     }
 
-    const double i0x = coords[2 * i0];
-    const double i0y = coords[2 * i0 + 1];
+    const T i0x = coords[2 * i0];
+    const T i0y = coords[2 * i0 + 1];
 
-    min_dist = std::numeric_limits<double>::max();
+    min_dist = std::numeric_limits<T>::max();
 
     // find the point closest to the seed
     for (std::size_t i = 0; i < n; i++) {
         if (i == i0) continue;
-        const double d = dist(i0x, i0y, coords[2 * i], coords[2 * i + 1]);
+        const T d = dist(i0x, i0y, coords[2 * i], coords[2 * i + 1]);
         if (d < min_dist && d > 0.0) {
             i1 = i;
             min_dist = d;
         }
     }
 
-    double i1x = coords[2 * i1];
-    double i1y = coords[2 * i1 + 1];
+    T i1x = coords[2 * i1];
+    T i1y = coords[2 * i1 + 1];
 
-    double min_radius = std::numeric_limits<double>::max();
+    T min_radius = std::numeric_limits<T>::max();
 
     // find the third point which forms the smallest circumcircle with the first two
     for (std::size_t i = 0; i < n; i++) {
         if (i == i0 || i == i1) continue;
 
-        const double r = circumradius(
+        const T r = circumradius(
             i0x, i0y, i1x, i1y, coords[2 * i], coords[2 * i + 1]);
 
         if (r < min_radius) {
@@ -322,12 +324,12 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
         }
     }
 
-    if (!(min_radius < std::numeric_limits<double>::max())) {
+    if (!(min_radius < std::numeric_limits<T>::max())) {
         throw std::runtime_error("not triangulation");
     }
 
-    double i2x = coords[2 * i2];
-    double i2y = coords[2 * i2 + 1];
+    T i2x = coords[2 * i2];
+    T i2y = coords[2 * i2 + 1];
 
     if (orient(i0x, i0y, i1x, i1y, i2x, i2y)) {
         std::swap(i1, i2);
@@ -338,7 +340,7 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
     std::tie(m_center_x, m_center_y) = circumcenter(i0x, i0y, i1x, i1y, i2x, i2y);
 
     // sort the points by distance from the seed triangle circumcenter
-    std::sort(ids.begin(), ids.end(), compare<double>{ coords, m_center_x, m_center_y });
+    std::sort(ids.begin(), ids.end(), compare<T>{ coords, m_center_x, m_center_y });
 
     // initialize a hash table for storing edges of the advancing convex hull
     m_hash_size = static_cast<std::size_t>(std::llround(std::ceil(std::sqrt(n))));
@@ -370,12 +372,12 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
     triangles.reserve(max_triangles * 3);
     halfedges.reserve(max_triangles * 3);
     add_triangle(i0, i1, i2, INVALID_INDEX, INVALID_INDEX, INVALID_INDEX);
-    double xp = std::numeric_limits<double>::quiet_NaN();
-    double yp = std::numeric_limits<double>::quiet_NaN();
+    T xp = std::numeric_limits<T>::quiet_NaN();
+    T yp = std::numeric_limits<T>::quiet_NaN();
     for (std::size_t k = 0; k < n; k++) {
         const std::size_t i = ids[k];
-        const double x = coords[2 * i];
-        const double y = coords[2 * i + 1];
+        const T x = coords[2 * i];
+        const T y = coords[2 * i + 1];
 
         // skip near-duplicate points
         if (k > 0 && check_pts_equal(x, y, xp, yp)) continue;
@@ -462,8 +464,9 @@ inline Delaunator::Delaunator(std::vector<double> const& in_coords)
     }
 }
 
-inline double Delaunator::get_hull_area() {
-    std::vector<double> hull_area;
+template<typename T>
+T Delaunator<T>::get_hull_area() {
+    std::vector<T> hull_area;
     size_t e = hull_start;
     do {
         hull_area.push_back((coords[2 * e] - coords[2 * hull_prev[e]]) * (coords[2 * e + 1] + coords[2 * hull_prev[e] + 1]));
@@ -472,7 +475,8 @@ inline double Delaunator::get_hull_area() {
     return sum(hull_area);
 }
 
-inline std::size_t Delaunator::legalize(std::size_t a) {
+template<typename T>
+std::size_t Delaunator<T>::legalize(std::size_t a) {
     std::size_t i = 0;
     std::size_t ar = 0;
     m_edge_stack.clear();
@@ -571,15 +575,17 @@ inline std::size_t Delaunator::legalize(std::size_t a) {
     return ar;
 }
 
-inline std::size_t Delaunator::hash_key(const double x, const double y) const {
-    const double dx = x - m_center_x;
-    const double dy = y - m_center_y;
+template<typename T>
+std::size_t Delaunator<T>::hash_key(const T x, const T y) const {
+    const T dx = x - m_center_x;
+    const T dy = y - m_center_y;
     return fast_mod(
-        static_cast<std::size_t>(std::llround(std::floor(pseudo_angle(dx, dy) * static_cast<double>(m_hash_size)))),
+        static_cast<std::size_t>(std::llround(std::floor(pseudo_angle(dx, dy) * static_cast<T>(m_hash_size)))),
         m_hash_size);
 }
 
-inline std::size_t Delaunator::add_triangle(
+template<typename T>
+std::size_t Delaunator<T>::add_triangle(
     std::size_t i0,
     std::size_t i1,
     std::size_t i2,
@@ -596,7 +602,8 @@ inline std::size_t Delaunator::add_triangle(
     return t;
 }
 
-inline void Delaunator::link(const std::size_t a, const std::size_t b) {
+template<typename T>
+void Delaunator<T>::link(const std::size_t a, const std::size_t b) {
     std::size_t s = halfedges.size();
     if (a == s) {
         halfedges.push_back(b);

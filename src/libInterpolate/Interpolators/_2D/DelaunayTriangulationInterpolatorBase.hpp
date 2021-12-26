@@ -46,7 +46,7 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
       coords.push_back(this->yData[i]);
     }
 
-    delaunator::Delaunator triangulation(coords);
+    delaunator::Delaunator<Real> triangulation(coords);
 
     for(size_t i = 0; i < triangulation.triangles.size(); i += 3) {
       point_t p1 = {triangulation.coords[2 * triangulation.triangles[i]], triangulation.coords[2 * triangulation.triangles[i] + 1]};

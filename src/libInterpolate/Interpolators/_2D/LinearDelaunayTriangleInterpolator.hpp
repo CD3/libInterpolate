@@ -26,12 +26,18 @@ class LinearDelaunayTriangleInterpolator : public DelaunayTriangulationInterpola
     using ColVector2 = Eigen::Matrix<Real,3,1 >;
     using RowVector2 = Eigen::Matrix<Real,1,3 >;
 
+    using rtree_value_t = typename BASE::rtree_value_t;
+
     Real operator()( Real x, Real y) const
     {
       point_t p{x,y};
-      size_t i = 0;
-      for( auto& t: this->m_xy_triangles )
+      // search optimization: find all boxes that envelope a triangle and cover the point first
+      std::vector<rtree_value_t> candidates;
+      this->m_triangles_index.query(boost::geometry::index::covers(p), std::back_inserter(candidates) );
+      for( auto& v: candidates)
       {
+        size_t i = v.second;
+        auto &t = this->m_xy_triangles[i];
         if( boost::geometry::covered_by(p,t) )
         {
           std::array<std::array<Real,3>,3> points;
@@ -61,7 +67,6 @@ class LinearDelaunayTriangleInterpolator : public DelaunayTriangulationInterpola
 
           return z;
         }
-        i++;
       }
 
       // do not extrapolate

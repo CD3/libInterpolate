@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include "catch.hpp"
 
-#include <libInterpolate/Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp>
 
 TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]", double, float)
 {
@@ -93,7 +93,11 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]", d
       CHECK(interp(0.5, 0.5) == Approx(1));
     }
   }
+}
 
+TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Benchmarks", "[.][benchmarks][current]", double, float)
+{
+  _2D::LinearDelaunayTriangleInterpolator<TestType> interp;
   SECTION("Benchmarks", "[.][benchmarks]")
   {
     _2D::BilinearInterpolator<TestType> bilin_interp;
@@ -112,10 +116,10 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]", d
         }
       }
 
-      BENCHMARK("setData(...)")
-      {
-        interp.setData(x, y, z);
-      };
+      // BENCHMARK("setData(...)")
+      // {
+      //   interp.setData(x, y, z);
+      // };
     }
     SECTION("Interpolating")
     {
@@ -134,13 +138,13 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Tests", "[current]", d
       interp.setData(x, y, z);
       bilin_interp.setData(x, y, z);
 
-      BENCHMARK("interp(30.3,55.3)")
+      BENCHMARK("LinearDelaunayTriangleInterpolator::operator()(30.3,55.3)")
       {
-        return interp(30.3,55.5);
+        return interp(30.3, 55.5);
       };
-      BENCHMARK("Bilinear::setData(30.3,55.3)")
+      BENCHMARK("Bilinear::operator()(30.3,55.3)")
       {
-        return bilin_interp(30.3,55.5);
+        return bilin_interp(30.3, 55.5);
       };
     }
   }

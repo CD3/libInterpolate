@@ -27,6 +27,8 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
   using BASE       = InterpolatorBase<DelaunayTriangulationInterpolatorBase<Derived, Real>>;
   using point_t    = std::array<Real,2>; // boost::geometry::model::d2::point_xy<Real>;
   using triangle_t = boost::geometry::model::ring<point_t>;
+  using box_t = boost::geometry::model::box<point_t>;
+  using rtree_value_t = std::pair<box_t,size_t>;
 
   std::vector<triangle_t> getTriangles() const { return m_xy_triangles; }
 
@@ -36,6 +38,8 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
 
   std::vector<triangle_t> m_xy_triangles;
   std::vector<std::array<size_t,3>> m_triangle_datapoints;
+  boost::geometry::index::rtree<rtree_value_t,boost::geometry::index::quadratic<16> > m_triangles_index;
+
 
   void setupInterpolator()
   {
@@ -57,6 +61,9 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
 
       m_xy_triangles.push_back(t);
       m_triangle_datapoints.push_back( {triangulation.triangles[i], triangulation.triangles[i+1], triangulation.triangles[i+2]} );
+
+      box_t b = boost::geometry::return_envelope<box_t>(t);
+      m_triangles_index.insert( std::make_pair(b, m_xy_triangles.size()-1 ) );
     }
 
 

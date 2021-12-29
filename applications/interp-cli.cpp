@@ -107,9 +107,14 @@ int main(int argc, char* argv[])
 
   if(vm.count("list")) {
     print_version();
-    cout << "\tlinear\n";
-    cout << "\tspline\n";
-    cout << "\tmonotonic\n";
+    cout << "\t1D Methods\n";
+    cout << "\t\tlinear\n";
+    cout << "\t\tspline\n";
+    cout << "\t\tmonotonic\n";
+    cout << "\t2D Methods\n";
+    cout << "\t\tlinear\n";
+    cout << "\t\tspline\n";
+    cout << "\t\tlinear-triangle\n";
     return 1;
   }
 

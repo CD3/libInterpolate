@@ -1,0 +1,77 @@
+sexpect -sock preview-gnuplot.sock spawn gnuplot
+zenity --info --no-markup --text="Click 'OK' when you are done to close the preview."
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+
+	G N U P L O T
+	Version 5.2 patchlevel 8    last modified 2019-12-01 
+
+	Copyright (C) 1986-1993, 1998, 2004, 2007-2019
+	Thomas Williams, Colin Kelley and many others
+
+	gnuplot home:     http://www.gnuplot.info
+	faq, bugs, etc:   type "help FAQ"
+	immediate help:   type "help"  (plot window: hit 'h')
+
+Terminal type is now 'qt'
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+gnuplot> sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+gnuplot> sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+gnuplot> sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+gnuplot> sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+gnuplot> sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'exit' -cr
+sexpect -sock preview-gnuplot.sock wait
+gnuplot> 
+gnuplot> 
+gnuplot> exit
+sexpect -sock preview-gnuplot.sock spawn gnuplot
+zenity --info --no-markup --text="Click 'OK' when you are done to close the preview."
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+
+	G N U P L O T
+	Version 5.2 patchlevel 8    last modified 2019-12-01 
+
+	Copyright (C) 1986-1993, 1998, 2004, 2007-2019
+	Thomas Williams, Colin Kelley and many others
+
+	gnuplot home:     http://www.gnuplot.info
+	faq, bugs, etc:   type "help FAQ"
+	immediate help:   type "help"  (plot window: hit 'h')
+
+Terminal type is now 'qt'
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+gnuplot> 
+gnuplot> 
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+gnuplot> Closing example.png
+
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"' -cr
+sexpect -sock preview-gnuplot.sock expect
+gnuplot> 
+gnuplot> 
+gnuplot> load "/home/cclark/Code/sync/projects/libInterpolate/doc/figures/dalaunay-triangle-method/example.gp"
+sexpect -sock preview-gnuplot.sock send 'exit' -cr
+sexpect -sock preview-gnuplot.sock wait
+gnuplot> 
+gnuplot> 
+gnuplot> exit

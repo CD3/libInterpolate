@@ -4,6 +4,12 @@ A C++ interpolation library.
 
 This library provides classes to perform various types of function interpolation (linear, spline, etc).
 
+Features:
+  - Simple, consistent interface for all interpolator. This makes it easy to swap interpolators.
+  - Type erased `AnyInterpolator` container can hold each of the implemented interpolators. This can be used to select the interpolation method at runtime.
+  - 2D Irregular Grid methods can be used to "fill in" missing data on a 2D grid.
+
+
 Currently implemented methods are:
 
 - 1D Interpolation
@@ -11,9 +17,20 @@ Currently implemented methods are:
     - cubic spline (https://en.wikipedia.org/wiki/Spline_interpolation)
     - monotonic spline interpolation (http://adsabs.harvard.edu/full/1990A%26A...239..443S)
 - 2D Interpolation
-    - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
-    - bicubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
-    - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
+    - [Regular Grid Methods](https://en.wikipedia.org/wiki/Regular_grid)
+      - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
+      - bicubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
+    - Irregular Grid Methods
+      - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
+      - linear Delaunay triangles (https://en.wikipedia.org/wiki/Delaunay_triangulation)
+
+Most of these are pretty standard methods. The linear Delaunay triangles method uses Delaunay triangulation (using delfrrr's [`delanator-cpp`](https://github.com/delfrrr/delaunator-cpp) ) to generate a set of triangles
+connecting the interplated data. In the example below, there are four interpolation points, four set in the xy plane an form a square. The fifth
+point sits above the center of the square. The resulting interpolation forms a pyramid.
+
+![](./doc/figures/dalaunay-triangle-method/example.png)
+
+This is basically a 2D version of the [Delaunay Interp](http://rncarpio.github.io/delaunay_linterp/) library.
 
 ## Example
 
@@ -79,11 +96,13 @@ target_link_libraries( myProgram libInterpolate::Interpolate )
 ```
 Again, `boost` and `Eigen3` need to be installed.
 
+<!--
 ### Conan
 
 You can also install `libInterpolate` with the [Conan package manager](https://docs.conan.io/en/latest/),
 which will automatically install its dependencies. Just add `https://cdc3.jfrog.io/artifactory/api/conan/default-conan`
 to your list of remotes and search for the latest release of `libInterpolate`.
+--->
 
 
 

@@ -82,7 +82,7 @@ Again, `boost` and `Eigen3` need to be installed.
 ### Conan
 
 You can also install `libInterpolate` with the [Conan package manager](https://docs.conan.io/en/latest/),
-which will automatically install its dependencies. Just add https://api.bintray.com/conan/cd3/conan-devel
+which will automatically install its dependencies. Just add `https://cdc3.jfrog.io/artifactory/api/conan/default-conan`
 to your list of remotes and search for the latest release of `libInterpolate`.
 
 

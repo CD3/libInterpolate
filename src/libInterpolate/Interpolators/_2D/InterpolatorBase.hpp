@@ -28,6 +28,10 @@ struct RealTypeOf<T<R>> {
   using type = R;
 };
 
+template<template<typename, typename> class T, typename B, typename R>
+struct RealTypeOf<T<B,R>> {
+  using type = R;
+};
 /** @class 
   * @brief A base class for 2D interpolators that provides default implementations of the interface.
   * @author C.D. Clark III

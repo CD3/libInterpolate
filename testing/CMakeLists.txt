@@ -9,6 +9,7 @@ set( binDir ${CMAKE_BINARY_DIR}/testBin )
 set( buildDir ${CMAKE_BINARY_DIR} )
 
 find_package( GSL )
+find_package(OpenMP REQUIRED)
 # Find all sources.
 file( GLOB_RECURSE unitTest_SOURCES
       RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -21,7 +22,7 @@ endforeach()
 set( testName ${PROJECT_NAME}_CatchTests )
 add_executable(${testName} ${unitTest_SOURCES})
 target_compile_definitions( ${testName} PRIVATE TESTING $<$<TARGET_EXISTS:GSL::gsl>:HAVE_GSL>)
-target_link_libraries(${testName} Interpolate $<$<TARGET_EXISTS:GSL::gsl>:GSL::gsl> )
+target_link_libraries(${testName} Interpolate $<$<TARGET_EXISTS:GSL::gsl>:GSL::gsl> OpenMP::OpenMP_CXX)
 target_include_directories( ${testName} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir})
 set_target_properties(${testName} PROPERTIES CXX_STANDARD 11)

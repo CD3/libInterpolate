@@ -2,6 +2,8 @@
 
 #include <libInterpolate/Interpolators/_2D/DelaunayTriangulationInterpolatorBase.hpp>
 
+#include <numeric>
+
 namespace _2D
 {
 class TestTriangleInterp : public DelaunayTriangulationInterpolatorBase<TestTriangleInterp>

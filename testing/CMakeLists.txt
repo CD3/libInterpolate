@@ -25,7 +25,7 @@ target_compile_definitions( ${testName} PRIVATE TESTING $<$<TARGET_EXISTS:GSL::g
 target_link_libraries(${testName} Interpolate $<$<TARGET_EXISTS:GSL::gsl>:GSL::gsl> OpenMP::OpenMP_CXX)
 target_include_directories( ${testName} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${binDir})
-set_target_properties(${testName} PROPERTIES CXX_STANDARD 11)
+set_target_properties(${testName} PROPERTIES CXX_STANDARD 17)
 if(MSVC)
   target_compile_options(${testName} PRIVATE /W4 /WX -wd4996)
 else()

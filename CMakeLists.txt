@@ -33,7 +33,7 @@ set( cxx_needed_features
    )
 
 find_package( Boost REQUIRED )
-find_package( Eigen3 3.3.1 REQUIRED CONFIG ) # v3.3.1 adds support for cmake targets
+find_package( Eigen3 3.3.7 REQUIRED) # v3.3.7 adds support for cmake targets
 
 string( REGEX REPLACE "^lib" "" LIB_NAME ${PROJECT_NAME} )
 add_library( ${LIB_NAME} INTERFACE )
@@ -103,7 +103,7 @@ install(EXPORT ${PROJECT_NAME}Targets
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
 "include(CMakeFindDependencyMacro)
 find_dependency(Boost)
-find_dependency(Eigen3 3.3.1 CONFIG)
+find_dependency(Eigen3 3.3.7 REQUIRED)
 include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake)
 "
   )
@@ -177,7 +177,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfig.cmake
 "message(WARNING \"libInterp has been renamed libInterpolate. Please use find_package(libInterpolate) and the libInterpolate::Interpolate target.\")
 include(CMakeFindDependencyMacro)
 find_dependency(Boost)
-find_dependency(Eigen3 3.3.1 CONFIG)
+find_dependency(Eigen3 3.3.7 REQUIRED)
 include(\${CMAKE_CURRENT_LIST_DIR}/libInterpTargets.cmake)
 "
   )

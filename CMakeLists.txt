@@ -9,6 +9,8 @@ if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 endif( )
 
 option( BUILD_TESTS "Build unit tests" ON )
+option( INSTALL_SYSTEM_LIBRARIES "Install system libraries" ON )
+
 if( ${BUILD_TESTS} )
 enable_testing()
 endif()
@@ -120,9 +122,9 @@ install(FILES
   )
 
 
-
-
-INCLUDE(InstallRequiredSystemLibraries)
+if( ${INSTALL_SYSTEM_LIBRARIES} )
+  INCLUDE(InstallRequiredSystemLibraries)
+endif()
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A C++ library for numerical interpolation.")
 SET(CPACK_PACKAGE_VENDOR "C.D. Clark III")

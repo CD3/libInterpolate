@@ -73,7 +73,9 @@ target_sources(
 target_link_libraries(${LIB_NAME} INTERFACE Boost::boost Eigen3::Eigen)
 
 if( STANDALONE )
+if( ${BUILD_TESTS} )
 add_subdirectory( testing )
+endif()
 endif()
 
 

@@ -25,7 +25,7 @@ Currently implemented methods are:
       - linear Delaunay triangles (https://en.wikipedia.org/wiki/Delaunay_triangulation)
 
 Most of these are pretty standard methods. The linear Delaunay triangles method uses Delaunay triangulation (using delfrrr's [`delanator-cpp`](https://github.com/delfrrr/delaunator-cpp) ) to generate a set of triangles
-connecting the interplated data. In the example below, there are four interpolation points, four set in the xy plane an form a square. The fifth
+connecting the interplated data. In the example below, there are four interpolation points, four set in the xy plane and form a square. The fifth
 point sits above the center of the square. The resulting interpolation forms a pyramid.
 
 ![](./doc/figures/dalaunay-triangle-method/example.png)

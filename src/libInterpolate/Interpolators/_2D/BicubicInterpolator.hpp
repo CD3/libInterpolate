@@ -139,17 +139,29 @@ BicubicInterpolator<Real>::setupInterpolator()
       //
       // note: interpolation algorithm is derived for the unit square.
       // so we need to take the derivatives assuming X(i+1) - X(i) = Y(j+1) - Y(j) = 1
+      //
+      // using finite-difference approximation. central-difference on the interior,
+      // forwared and backward difference on the ends.
       
-      Real xL = (*X)(i+1) - (*X)(i);
-      Real yL = (*Y)(j+1) - (*Y)(j);
+      Real xL = (*X)(i+1) - (*X)(i); // actual side length in x direction
+      Real yL = (*Y)(j+1) - (*Y)(j); // actual side length in y direction
       Real dx, dy;
 
       // x derivatives
+      //  
+      //   (i,j+1)     (i+1,j+1)
+      //
+      //   +        +
+      // 
+      // 
+      //   +        +
+      // 
+      //  (i,j)     (i+1,j)
+  
+      im = std::max(i-1,0);    // get index to the "left" of current i
+      ip = std::min(i+1,iN-1); // get index to the "right" of current i
 
-      im = std::max(i-1,0);
-      ip = std::min(i+1,iN-1);
-
-      dx = ((*X)(ip) - (*X)(im))/xL;
+      dx = ((*X)(ip) - (*X)(im))/xL; // relative distance between "right" and "left" neighbors
 
       fp = (*Z)(ip,j);
       fm = (*Z)(im,j);
@@ -197,11 +209,11 @@ BicubicInterpolator<Real>::setupInterpolator()
 
       fp = (*Z)(i,jp);
       fm = (*Z)(i,jm);
-      fy01 = (fp - fm) / yL; // <<<<<<
+      fy01 = (fp - fm) / dx; // <<<<<<
 
       fp = (*Z)(i+1,jp);
       fm = (*Z)(i+1,jm);
-      fy11 = (fp - fm) / yL; // <<<<<<
+      fy11 = (fp - fm) / dx; // <<<<<<
 
       // xy derivatives
 

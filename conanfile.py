@@ -1,9 +1,11 @@
 from conans import ConanFile, CMake, tools
+from conan.tools.cmake  import CMakeToolchain,CMakeDeps,CMake
 import os
 
 class ConanBuild(ConanFile):
-    generators = "cmake", "virtualenv"
-    requires = 'boost/1.69.0', 'eigen/3.3.7@cd3/devel'
+    settings = 'build_type'
+    generators = "CMakeDeps", "CMakeToolchain"
+    requires = 'boost/1.76.0', 'eigen/3.3.7'
 
 
     def build(self):

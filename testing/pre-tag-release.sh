@@ -21,8 +21,8 @@ trap copy_bindir ERR
 echo "Checking that project can be installed."
 mkdir $bindir
 cd $bindir
-conan install .. -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake -DCMAKE_INSTALL_PREFIX=$bindir/install
+conan install ..
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_INSTALL_PREFIX=$bindir/install
 cmake --build .
 cmake --build . --target test
 
@@ -63,8 +63,8 @@ EOF
 
 mkdir build1
 cd build1
-conan install ${root} -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake -DlibInterpolate_DIR=${bindir}/install/cmake/
+conan install ${root}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DlibInterpolate_DIR=${bindir}/install/cmake/
 cmake --build .
 ./main
 
@@ -80,8 +80,8 @@ EOF
 
 mkdir build2
 cd build2
-conan install ${root} -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake
+conan install ${root}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
 cmake --build .
 ./main
 
@@ -126,8 +126,8 @@ EOF
 
 mkdir build1
 cd build1
-conan install ${root} -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake -DlibInterp_DIR=${bindir}/install/cmake/
+conan install ${root}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DlibInterp_DIR=${bindir}/install/cmake/
 cmake --build .
 ./main
 
@@ -143,8 +143,8 @@ EOF
 
 mkdir build2
 cd build2
-conan install ${root} -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake
+conan install ${root}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
 cmake --build .
 ./main
 
@@ -162,8 +162,8 @@ EOF
 
 mkdir build3
 cd build3
-conan install ${root} -g cmake_paths
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake
+conan install ${root}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
 cmake --build .
 ./main
 

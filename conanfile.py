@@ -5,7 +5,7 @@ import os
 class ConanBuild(ConanFile):
     settings = 'build_type'
     generators = "CMakeDeps", "CMakeToolchain"
-    requires = 'boost/1.76.0', 'eigen/3.3.7'
+    requires = 'boost/1.72.0', 'eigen/3.3.7'
 
 
     def build(self):

@@ -29,11 +29,6 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}/${PROJECT_NAME}
 configure_file( "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/${PROJECT_NAME}_version.h"
                 "${CMAKE_CURRENT_BINARY_DIR}/include/${PROJECT_NAME}/${PROJECT_NAME}_version.h")
 
-
-set( cxx_needed_features
-     cxx_auto_type
-   )
-
 find_package( Boost REQUIRED )
 find_package( Eigen3 3.3.7 REQUIRED) # v3.3.7 adds support for cmake targets
 
@@ -49,6 +44,7 @@ target_compile_definitions( ${LIB_NAME}
 INTERFACE
   $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>
 )
+set_target_properties(${LIB_NAME} PROPERTIES CXX_STANDARD 17)
 target_sources(
   ${LIB_NAME}
   INTERFACE

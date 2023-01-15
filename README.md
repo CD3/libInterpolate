@@ -32,6 +32,27 @@ point sits above the center of the square. The resulting interpolation forms a p
 
 This is basically a 2D version of the [Delaunay Interp](http://rncarpio.github.io/delaunay_linterp/) library.
 
+
+Table of Contents
+=================
+
+* [libInterpolate](#libinterpolate)
+   * [Example](#example)
+   * [Installing](#installing)
+      * [No build system](#no-build-system)
+      * [Conan (Recommanded)](#conan-recommanded)
+      * [CMake](#cmake)
+   * [Design](#design)
+      * [Data Storage](#data-storage)
+         * [2D Data Format](#2d-data-format)
+   * [Interpolation Methods](#interpolation-methods)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+
+
+
+
+
 ## Example
 
 **Note: `libInterpolate` has been renamed from `libInterp`.** There were a few naming inconsistencies, so I decided
@@ -65,12 +86,35 @@ interp.setData( x.size(), x,data(), y.data() )
 
 ## Installing
 
+### No build system
+
 `libInterpolate` is a header-only C++ library, so you can simply include
 the headers you want/need in your source code. If you use `git subrepo`, you
 can clone the source into your externals directory and use it from there.
 
 `libInterpolate` depends on `Boost` and `Eigen3`, so you will need to include the directories
 containing their header files when compiling.
+
+### Conan (Recommanded)
+
+Add `libinterpolate/2.6.2` to yoru `conanfile.txt` or `conanfile.py` requires. If you are using CMake, add the `CMakeDeps` and `CMakeToolchain` generators.
+```
+[requires]
+libinterpolate/2.6.2
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+Then, in your `CMakeLists.txt` file, call `find_package(libInterpolate)` and link against the `libInterpolate::Interpolate` target.
+```cmake
+find_package(libInterpolate REQUIRED)
+...
+target_link_libraries( MyTarget PUBLIC libInterpolate::Interpolate )
+```
+
+### CMake
 
 `libInterpolate` also supports being installed, and will install a `*Config.cmake` file that CMake can detect.
 To build and install `libInterpolate`:

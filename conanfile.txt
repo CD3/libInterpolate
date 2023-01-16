@@ -1,0 +1,7 @@
+[requires]
+boost/1.80.0
+eigen/3.3.7
+
+[generators]
+CMakeDeps
+CMakeToolchain

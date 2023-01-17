@@ -7,6 +7,9 @@ include(CMakePrintHelpers)
 
 option(BUILD_TESTS "Build unit tests" ON)
 
+set(libInterpolate_VERSION "UNKNOWN" CACHE STRING "Library version number")
+set(libInterpolate_VERSION $CACHE{libInterpolate_VERSION} )
+
 if(${BUILD_TESTS})
   enable_testing()
 endif()
@@ -15,22 +18,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if( "${libInterpolate_VERSION}" STREQUAL "UNKNOWN" )
+message( STATUS "Detecting version number using git..." )
 include(macro-git_version)
 git_version(libInterpolate)
-message(STATUS "libInterpolate version: ${libInterpolate_VERSION}")
+message( STATUS "Version: ${libInterpolate_VERSION}" )
+message( STATUS "Version (Full): ${libInterpolate_VERSION_FULL}" )
+endif()
 
 find_package(Boost REQUIRED)
 find_package(Eigen3 3.3.7 REQUIRED) # v3.3.7 adds support for cmake targets
 
-# need to run configure_file twice
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/libInterpolate_version.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/libInterpolate/libInterpolate_version.h")
-configure_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/include/libInterpolate/libInterpolate_version.h"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/libInterpolate/libInterpolate_version.h")
 
-string(REGEX REPLACE "^lib" "" LIB_NAME libInterpolate)
 add_library(Interpolate INTERFACE)
 add_library(libInterpolate::Interpolate ALIAS Interpolate)
 target_include_directories(
@@ -45,7 +44,6 @@ set_target_properties(Interpolate PROPERTIES CXX_STANDARD 17)
 target_sources(
   Interpolate
   INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interp.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolate.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/AnyInterpolator.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_2D/InterpolatorBase.hpp>
@@ -126,46 +124,3 @@ if(libInterpolate_VERSION_PATCH)
 endif()
 include(CPack)
 
-# vvvvDEPRECATEDvvvv
-
-# the code below is provided for backwards compatibility for when the library
-# was named libInterp instead of libInterpolate
-
-add_library(Interp INTERFACE)
-add_library(libInterp::Interp ALIAS Interp)
-target_include_directories(
-  Interp
-  INTERFACE
-    $<BUILD_INTERFACE:${libInterpolate_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${libInterpolate_BINARY_DIR}/include>
-    $<BUILD_INTERFACE:${libInterpolate_SOURCE_DIR}/src/libInterpolate>
-    $<BUILD_INTERFACE:${libInterpolate_BINARY_DIR}/include/libInterpolate>
-    $<INSTALL_INTERFACE:include/libInterpolate>
-    $<INSTALL_INTERFACE:include>)
-target_compile_definitions(Interp
-                           INTERFACE $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>)
-target_link_libraries(Interp INTERFACE Boost::boost Eigen3::Eigen)
-
-install(TARGETS Interp EXPORT libInterpTargets)
-install(
-  EXPORT libInterpTargets
-  FILE libInterpTargets.cmake
-  NAMESPACE libInterp::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
-file(
-  WRITE ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfig.cmake
-  "message(WARNING \"libInterp has been renamed libInterpolate. Please use find_package(libInterpolate) and the libInterpolate::Interpolate target.\")
-include(CMakeFindDependencyMacro)
-find_dependency(Boost)
-find_dependency(Eigen3 3.3.7 REQUIRED)
-include(\${CMAKE_CURRENT_LIST_DIR}/libInterpTargets.cmake)
-")
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfigVersion.cmake
-  VERSION ${libInterpolate_VERSION}
-  COMPATIBILITY SameMajorVersion ARCH_INDEPENDENT)
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/libInterpConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)

@@ -19,7 +19,7 @@ if( GIT_FOUND )
                    OUTPUT_VARIABLE OutputTrash
                    ERROR_VARIABLE ErrorTrash)
 else()
-  message( FATAL_ERROR "Could not find `git` command, cannot determine version number. Please set the `libInterpolate_VERSION` cache variable." )
+  message( FATAL_ERROR "Could not find `git` command, cannot determine version number. Please set the `${VAR_PREFIX}_VERSION` cache variable." )
 endif()
 
 if( ${IsGitRepo} EQUAL 0 )

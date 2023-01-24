@@ -43,6 +43,9 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
 
   void setupInterpolator()
   {
+
+    clearTriangleBuffers();  // Clear triangle buffers before initialization
+
     std::vector<Real> coords;
     coords.reserve(2 * this->xData.size());
     for(size_t i = 0; i < this->xData.size(); ++i) {
@@ -70,5 +73,13 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
     this->template callSetupInterpolator<Derived>();
 
   }
+
+  void clearTriangleBuffers()
+  {
+      m_xy_triangles.clear();
+      m_triangle_datapoints.clear();
+      m_triangles_index.clear();
+  }
+
 };
 }  // namespace _2D

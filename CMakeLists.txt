@@ -7,8 +7,10 @@ include(CMakePrintHelpers)
 
 option(BUILD_TESTS "Build unit tests" ON)
 
-set(libInterpolate_VERSION "UNKNOWN" CACHE STRING "Library version number")
-set(libInterpolate_VERSION $CACHE{libInterpolate_VERSION} )
+set(libInterpolate_VERSION
+    "UNKNOWN"
+    CACHE STRING "Library version number")
+set(libInterpolate_VERSION $CACHE{libInterpolate_VERSION})
 
 if(${BUILD_TESTS})
   enable_testing()
@@ -18,17 +20,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if( "${libInterpolate_VERSION}" STREQUAL "UNKNOWN" )
-message( STATUS "Detecting version number using git..." )
-include(macro-git_version)
-git_version(libInterpolate)
-message( STATUS "Version: ${libInterpolate_VERSION}" )
-message( STATUS "Version (Full): ${libInterpolate_VERSION_FULL}" )
+if("${libInterpolate_VERSION}" STREQUAL "UNKNOWN")
+  message(STATUS "Detecting version number using git...")
+  include(macro-git_version)
+  git_version(libInterpolate)
+  message(STATUS "Version: ${libInterpolate_VERSION}")
+  message(STATUS "Version (Full): ${libInterpolate_VERSION_FULL}")
 endif()
 
 find_package(Boost REQUIRED)
 find_package(Eigen3 3.3.7 REQUIRED) # v3.3.7 adds support for cmake targets
-
 
 add_library(Interpolate INTERFACE)
 add_library(libInterpolate::Interpolate ALIAS Interpolate)
@@ -40,7 +41,7 @@ target_include_directories(
     $<INSTALL_INTERFACE:include>)
 target_compile_definitions(Interpolate
                            INTERFACE $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>)
-set_target_properties(Interpolate PROPERTIES CXX_STANDARD 17)
+target_compile_features(Interpolate INTERFACE cxx_std_17)
 target_sources(
   Interpolate
   INTERFACE
@@ -123,4 +124,3 @@ if(libInterpolate_VERSION_PATCH)
   set(CPACK_PACKAGE_VERSION_PATCH ${libInterpolate_VERSION_PATCH})
 endif()
 include(CPack)
-

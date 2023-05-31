@@ -141,7 +141,7 @@ MonotonicInterpolator<Real>::setupInterpolator()
 	else
 	{
 		// Determine the upper slope value
-		Real hhigh = Y(i+2) - xhigh;
+		Real hhigh = X(i+2) - xhigh;
 		Real slope_high = 0.0;
 		if (hhigh > 0.0)
 			slope_high = (Y(i+2) - yhigh)/hhigh;

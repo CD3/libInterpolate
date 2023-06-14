@@ -22,7 +22,10 @@ jobs:
     - uses: turtlebrowser/get-conan@main
       with:
         version: 1.59.0
-    
+        
+    - name: Make Build Directory
+      run: mkdir ${{github.workspace}}/build
+      
     - name: Install Dependencies
       working-directory: ${{github.workspace}}/build
       run: conan install .. --build missing

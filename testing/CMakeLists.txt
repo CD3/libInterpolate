@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-enable_testing()
-
 find_package(GSL)
 find_package(OpenMP REQUIRED)
 # Find all sources.

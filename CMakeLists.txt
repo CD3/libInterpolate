@@ -12,10 +12,6 @@ set(libInterpolate_VERSION
     CACHE STRING "Library version number")
 set(libInterpolate_VERSION $CACHE{libInterpolate_VERSION})
 
-if(${BUILD_TESTS})
-  enable_testing()
-endif()
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -65,6 +61,7 @@ target_sources(
 target_link_libraries(Interpolate INTERFACE Boost::boost Eigen3::Eigen)
 
 if(${BUILD_TESTS})
+  enable_testing()
   add_subdirectory(testing)
 endif()
 

@@ -5,3 +5,6 @@ eigen/3.3.7
 [generators]
 CMakeDeps
 CMakeToolchain
+
+[options]
+boost:header_only=True

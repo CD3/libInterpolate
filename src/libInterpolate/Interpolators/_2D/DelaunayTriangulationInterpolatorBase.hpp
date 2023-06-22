@@ -36,9 +36,11 @@ class DelaunayTriangulationInterpolatorBase : public InterpolatorBase<DelaunayTr
   friend BASE;     // this is necessary to allow base class to call setupInterpolator()
   friend Derived;  // this is necessary to allow derived class to call constructors
 
-  std::vector<triangle_t>                                                             m_xy_triangles;
   std::vector<std::array<size_t, 3>>                                                  m_triangle_datapoints;
   boost::geometry::index::rtree<rtree_value_t, boost::geometry::index::quadratic<16>> m_triangles_index;
+
+ protected:
+  std::vector<triangle_t> m_xy_triangles;  // WORKAROUND: MSVC does not let derived class access this if it is private
 
   void setupInterpolator()
   {

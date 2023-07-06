@@ -2,7 +2,7 @@
 
 A C++ interpolation library.
 
-This library provides classes to perform various types of function interpolation (linear, spline, etc).
+This library provides classes to perform various types of function interpolation (linear, spline, etc.).
 
 Features:
   - Simple, consistent interface for all interpolator. This makes it easy to swap interpolators.
@@ -40,7 +40,7 @@ Table of Contents
    * [Example](#example)
    * [Installing](#installing)
       * [No build system](#no-build-system)
-      * [Conan (Recommanded)](#conan-recommanded)
+      * [Conan (Recommended)](#conan-recommanded)
       * [CMake](#cmake)
    * [Design](#design)
       * [Data Storage](#data-storage)
@@ -95,9 +95,9 @@ can clone the source into your externals directory and use it from there.
 `libInterpolate` depends on `Boost` and `Eigen3`, so you will need to include the directories
 containing their header files when compiling.
 
-### Conan (Recommanded)
+### Conan (Recommended)
 
-Add `libinterpolate/2.6.2` to yoru `conanfile.txt` or `conanfile.py` requires. If you are using CMake, add the `CMakeDeps` and `CMakeToolchain` generators.
+Add `libinterpolate/2.6.2` to your `conanfile.txt` or `conanfile.py` requires. If you are using CMake, add the `CMakeDeps` and `CMakeToolchain` generators.
 ```
 [requires]
 libinterpolate/2.6.2
@@ -181,7 +181,7 @@ class MyInterpolator : _1D::InterpolatorBase<MyInterpolator>
 CRTP provides static polymorphism, but not runtime polymorphism, since each derived type derives from a different base class.
 `libInterpolate` now provides a type-erased `AnyInterpolator` class that can be used to store any of the interpolators, which allows
 runtime binding. The `AnyInterpolator` class uses Boost.TypeErasure, and is not included in the monolithic header, it must be included
-seprately.
+separately.
 
 
 ```C++
@@ -209,7 +209,8 @@ interp.setData( x.size(), x.data(), y.data() );
 
 ```
 
-Currently, the `AnyInterpolator` only provides one `setData` method, which is the low-level version that takes a size an two data pointers. This can
+Currently, the `AnyInterpolator` only provides one `setData` method,
+which is the low-level version that takes a size and two data pointers. This can
 be changed by passing the desired signature as a second template arguments.
 ```C++
 _1D::AnyInterpolator<double, void(std::vector<double>,std::vector<double>)> interp = _1D::CubicSplineInterpolator<double>();
@@ -231,7 +232,7 @@ interp.target<_1D::CubicSplineInterpolator<double>>()->setData(x,y)
 ### Data Storage
 
 The interpolator classes copy the interpolation data and store them internally. This makes the type much more convenient
-to work with since it is completely self contained and you don't have to worry about keeping that data that you are interpolating
+to work with since it is completely self-contained, and you don't have to worry about keeping that data that you are interpolating
 alive. However, it does mean that you need to be mindful of copies.
 
 
@@ -242,7 +243,7 @@ be the same length. For the Bilinear and Bicubic interpolators, this means that 
 be larger than necessary since these interpolators require a regular grid, and coordinate values need to be repeated. However,
 it makes the two-dimensional interpolator interface uniform (the thin plate interpolator does not require a regular grid, it can interpolate from a collection of arbitrary points)
 and it is also compatible with the standard gnuplot surface plot data format. So if you read three columns from a file that can be plotted
-with gnuplots `splot` command, these three columns can be passed into the interpolator directly.
+with gnuplot's `splot` command, these three columns can be passed into the interpolator directly.
 
 ## Interpolation Methods
 

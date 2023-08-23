@@ -5,7 +5,7 @@ A C++ interpolation library.
 This library provides classes to perform various types of function interpolation (linear, spline, etc.).
 
 Features:
-  - Simple, consistent interface for all interpolator. This makes it easy to swap interpolators.
+  - Simple, consistent interface for all interpolators. This makes it easy to swap interpolators.
   - Type erased `AnyInterpolator` container can hold each of the implemented interpolators. This can be used to select the interpolation method at runtime.
   - 2D Irregular Grid methods can be used to "fill in" missing data on a 2D grid.
 
@@ -342,6 +342,3 @@ double val = interp(2.0);
 
 Note that the interpolated data is copied by the interpolator, so it is safe to pass both the `std::function` and `AnyInterpolator` objects
 around. The interpolator it stores will be self-contained.
-
-Note that the interpolated data is copied by the interpolator, so it is safe to pass the `std::function` object
-around. The interpolator it stores will be self-contained. Just remember that all data will be copied when you pass by value.

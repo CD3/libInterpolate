@@ -10,7 +10,7 @@ function cleanup()
 {
   rm -r $bindir
 }
-trap cleanup EXIT
+# trap cleanup EXIT
 
 function copy_bindir()
 {
@@ -51,7 +51,7 @@ int main()
 EOF
 
 cat << EOF > CMakeLists.txt
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.23)
 project(demo)
 add_executable( main main.cpp )
 find_package( libInterpolate REQUIRED )
@@ -61,9 +61,20 @@ EOF
 mkdir build1
 cd build1
 conan install ${root} -s build_type=Release --build missing
-cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DlibInterpolate_DIR=${bindir}/install/lib/cmake/ -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_PREFIX_PATH=${bindir}/install/lib/cmake/ -DCMAKE_BUILD_TYPE=Release -G "Ninja"
 cmake --build .
 ./main
+
+cd ..
+
+mkdir build2
+cd build2
+conan install ${root} -s build_type=Release --build missing
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DlibInterpolate_DIR=${bindir}/install/lib/cmake/libInterpolate -DCMAKE_BUILD_TYPE=Release -G "Ninja"
+cmake --build .
+./main
+
+cd ..
 
 cd ..
 

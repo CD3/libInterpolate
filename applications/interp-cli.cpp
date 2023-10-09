@@ -11,15 +11,9 @@
 #include <libInterpolate/AnyInterpolator.hpp>
 #include <libInterpolate/Interpolate.hpp>
 #include <libInterpolate/Utils/ReadFunction.hpp>
-#include <libInterpolate/libInterpolate_version.h>
 
 using namespace std;
 namespace po = boost::program_options;
-
-void print_version()
-{
-  cout << "interp-cli - linked against libInterp version " << libInterpolate_VERSION_FULL << endl;
-}
 
 void print_usage(char prog_name[])
 {
@@ -95,7 +89,6 @@ int main(int argc, char* argv[])
   po::notify(vm);
 
   if(argc == 1 || vm.count("help")) {
-    print_version();
     print_usage(argv[0]);
     cout << "\n";
     cout << opts << "\n";
@@ -106,7 +99,6 @@ int main(int argc, char* argv[])
   }
 
   if(vm.count("list")) {
-    print_version();
     cout << "\t1D Methods\n";
     cout << "\t\tlinear\n";
     cout << "\t\tspline\n";
@@ -164,13 +156,13 @@ int main(int argc, char* argv[])
     Utils::ReadFunction(in, x, z, nn, 2, 1);
     in.close();
 
-    y = new double[2*nn[0]];
+    y = new double[2 * nn[0]];
 
-    boost::copy( boost::make_iterator_range(x,x+2*nn[0]) | boost::adaptors::strided(2), y );
-    boost::copy( boost::make_iterator_range(x+1,x+2*nn[0]) | boost::adaptors::strided(2), y+nn[0] );
+    boost::copy(boost::make_iterator_range(x, x + 2 * nn[0]) | boost::adaptors::strided(2), y);
+    boost::copy(boost::make_iterator_range(x + 1, x + 2 * nn[0]) | boost::adaptors::strided(2), y + nn[0]);
 
     _2D::AnyInterpolator<double> interp = create2d(vm["method"].as<string>());
-    interp.setData(nn[0],y,y+nn[0],z);
+    interp.setData(nn[0], y, y + nn[0], z);
     delete[] x;
     delete[] y;
     delete[] z;
@@ -183,7 +175,7 @@ int main(int argc, char* argv[])
     z = new double[n];
 
     for(int i = 0; i < n; i++)
-      z[i] = interp(x[i],y[i]);
+      z[i] = interp(x[i], y[i]);
 
     // write interpolated data
     ofstream out;
@@ -199,7 +191,6 @@ int main(int argc, char* argv[])
     delete[] y;
     delete[] z;
   }
-
 
   return 0;
 }

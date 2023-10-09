@@ -89,7 +89,7 @@ install(
   EXPORT libInterpolateTargets
   FILE libInterpolateTargets.cmake
   NAMESPACE libInterpolate::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libInterpolate)
 file(
   WRITE ${CMAKE_CURRENT_BINARY_DIR}/libInterpolateConfig.cmake
   "include(CMakeFindDependencyMacro)
@@ -104,7 +104,7 @@ write_basic_package_version_file(
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/libInterpolateConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/libInterpolateConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libInterpolate)
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "A C++ library for numerical interpolation.")

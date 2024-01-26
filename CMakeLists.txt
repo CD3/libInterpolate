@@ -48,6 +48,7 @@ target_sources(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_2D/AnyInterpolator.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_2D/NearestInterpolator.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_1D/InterpolatorBase.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Interpolators/_1D/AnyInterpolator.hpp>

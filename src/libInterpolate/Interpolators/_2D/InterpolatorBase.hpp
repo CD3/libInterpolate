@@ -204,7 +204,7 @@ class InterpolatorBase
      */
   int get_x_index_to_right_of(Real x) const
   {
-    return this->get_x_index_to_right_of(x) + 1;
+    return this->get_x_index_to_left_of(x) + 1;
   }
 
   /**
@@ -225,7 +225,40 @@ class InterpolatorBase
   {
     return this->get_y_index_below(y) + 1;
   }
-
+  /**
+     * Given an x value, returns the index i of the stored x data X
+     * that is closest to x
+     */
+  int get_x_index_closest_to(Real x) const
+  {
+    // NOTE: X data is strided.
+    auto xrng = std::make_pair(X->data(), X->data() + X->size() * X->innerStride()) | boost::adaptors::strided(X->innerStride());
+    auto iter_lower = boost::lower_bound(xrng, x) - 1;
+    auto iter_upper = iter_lower + 1;
+    Real lower = *(iter_lower);
+    Real upper = *(iter_upper);
+    if (abs(x - lower) < abs(x - upper)) {
+        return iter_lower - boost::begin(xrng);
+    }
+    return iter_upper - boost::begin(xrng);
+  }
+   /**
+     * Given an y value, returns the index i of the stored y data Y
+     * that is closest to x
+     */
+  int get_y_index_closest_to(Real y) const
+  {
+    // NOTE: X data is strided.
+    auto yrng = std::make_pair(Y->data(), Y->data() + Y->size());
+    auto iter_lower = boost::lower_bound(yrng, y) - 1;
+    auto iter_upper = iter_lower + 1;
+    Real lower = *(iter_lower);
+    Real upper = *(iter_upper);
+    if (abs(y - lower) < abs(y - upper)) {
+        return iter_lower - boost::begin(yrng);
+    }
+    return iter_upper - boost::begin(yrng);
+  }
  protected:
   void checkData() const;   ///< Check that data has been initialized and throw exception if not.
   void setup2DDataViews();  ///< Setups up 2D views of 1D data arrays

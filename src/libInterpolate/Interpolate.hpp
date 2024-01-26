@@ -6,3 +6,5 @@
 #include "./Interpolators/_2D/BicubicInterpolator.hpp"
 #include "./Interpolators/_2D/ThinPlateSplineInterpolator.hpp"
 #include "./Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp"
+#include "./Interpolators/_2D/NearestInterpolator.hpp"
+

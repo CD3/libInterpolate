@@ -7,4 +7,7 @@ CMakeDeps
 CMakeToolchain
 
 [options]
-boost:header_only=True
+boost/*:header_only=True
+
+[layout]
+cmake_layout

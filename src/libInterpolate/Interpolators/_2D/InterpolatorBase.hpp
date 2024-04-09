@@ -272,7 +272,7 @@ class InterpolatorBase
   struct has_setupInterpolator {
 
     /*
-     * Note: This meta-fucntion detects if a given class (T) *defines* the method void setupInterpolator(),
+     * Note: This meta-function detects if a given class (T) *defines* the method void setupInterpolator(),
      *       as opposed to wether or not setupinterpolator() can be called. This is necessary so we can
      *       call setupInterpolator() on specific classes in an inheritance tree.
      *

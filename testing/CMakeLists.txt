@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(GSL)
 find_package(OpenMP REQUIRED)
+find_package(Catch2 REQUIRED)
 # Find all sources.
 file(
   GLOB_RECURSE unitTest_SOURCES
@@ -17,9 +18,7 @@ add_executable(${testName} ${unitTest_SOURCES})
 target_compile_definitions(
   ${testName} PRIVATE TESTING $<$<TARGET_EXISTS:GSL::gsl>:HAVE_GSL>)
 target_link_libraries(${testName} Interpolate
-                      $<$<TARGET_EXISTS:GSL::gsl>:GSL::gsl> OpenMP::OpenMP_CXX)
-target_include_directories(${testName}
-                           PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  $<$<TARGET_EXISTS:GSL::gsl>:GSL::gsl> OpenMP::OpenMP_CXX Catch2::Catch2WithMain)
 set_target_properties(${testName} PROPERTIES CXX_STANDARD 17)
 if(MSVC)
   target_compile_options(${testName} PRIVATE /W4 -wd4996)

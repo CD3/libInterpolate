@@ -1,6 +1,7 @@
 [requires]
 boost/1.80.0
 eigen/3.3.7
+catch2/3.3.1
 
 [generators]
 CMakeDeps

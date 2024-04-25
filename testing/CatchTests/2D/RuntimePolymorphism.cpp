@@ -1,285 +1,262 @@
-#include "catch.hpp"
-
-#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/ThinPlateSplineInterpolator.hpp>
-
+using namespace Catch;
 namespace {
-  double call( std::function<double(double,double)> f, double x, double y)
-  { return f(x,y); }
+double call(std::function<double(double, double)> f, double x, double y) {
+    return f(x, y);
 }
+}  // namespace
 
-TEST_CASE( "2D Runtime Binding w/ std::function Tests", "[polymorphism]" ) {
+TEST_CASE("2D Runtime Binding w/ std::function Tests", "[polymorphism]") {
+    std::function<double(double, double)> interp;
 
-  std::function<double(double,double)> interp;
+    SECTION("Bilinear Interpolation") {
+        int nx, ny;
+        double xmin, xmax, dx;
+        double ymin, ymax, dy;
 
-  SECTION("Bilinear Interpolation")
-  {
+        nx = 10;
+        ny = 5;
 
+        xmin = -1;
+        xmax = 8;
 
-    int nx, ny;
-    double xmin, xmax, dx;
-    double ymin, ymax, dy;
+        ymin = -1;
+        ymax = 3;
 
-    nx = 10;
-    ny = 5;
+        dx = (xmax - xmin) / (nx - 1);
+        dy = (ymax - ymin) / (ny - 1);
 
-    xmin = -1;
-    xmax = 8;
+        Eigen::Matrix<double, Eigen::Dynamic, 1> xx(nx * ny), yy(nx * ny),
+            zz(nx * ny);
 
-    ymin = -1;
-    ymax = 3;
+        auto f = [](double x, double y) { return x * y + 2 * x + 3 * y; };
 
-    dx = (xmax - xmin)/(nx - 1);
-    dy = (ymax - ymin)/(ny - 1);
+        for (int i = 0; i < nx * ny; i++) {
+            // gnuplot format is essentially row-major
+            xx(i) = xmin + dx * (i / ny);
+            yy(i) = ymin + dy * (i % ny);
+            zz(i) = f(xx(i), yy(i));
+        }
 
+        interp = _2D::BilinearInterpolator<double>();
+        interp.target<_2D::BilinearInterpolator<double>>()->setData(xx, yy, zz);
 
-    Eigen::Matrix<double,Eigen::Dynamic,1> xx(nx*ny), yy(nx*ny), zz(nx*ny);
+        REQUIRE(interp(0, 0) == Approx(f(0, 0)).epsilon(0.00002));
+        REQUIRE(interp(1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+        REQUIRE(interp(2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+        REQUIRE(interp(2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+        REQUIRE(interp(8, 3) == Approx(f(8, 3)).epsilon(0.00002));
 
-    auto f  = [](double x, double y){return x*y + 2*x + 3*y;};
+        REQUIRE(interp(-2, -1) == Approx(0).epsilon(0.00002));
+        REQUIRE(interp(10, 3) == Approx(0).epsilon(0.00002));
 
-    for( int i = 0; i < nx*ny; i++)
-    {
-      // gnuplot format is essentially row-major
-      xx(i) = xmin+dx*(i/ny);
-      yy(i) = ymin+dy*(i%ny);
-      zz(i) = f(xx(i),yy(i));
+        SECTION("via copied std::function passed to func") {
+            REQUIRE(call(interp, 0, 0) == Approx(f(0, 0)).epsilon(0.00002));
+            REQUIRE(call(interp, 1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+            REQUIRE(call(interp, 2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+            REQUIRE(call(interp, 2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+            REQUIRE(call(interp, 8, 3) == Approx(f(8, 3)).epsilon(0.00002));
+
+            REQUIRE(call(interp, -2, -1) == Approx(0).epsilon(0.00002));
+            REQUIRE(call(interp, 10, 3) == Approx(0).epsilon(0.00002));
+        }
     }
 
-    interp = _2D::BilinearInterpolator<double>();
-    interp.target<_2D::BilinearInterpolator<double>>()->setData( xx, yy, zz );
+    SECTION("Bicubic Interpolation") {
+        int nx, ny;
+        double xmin, xmax, dx;
+        double ymin, ymax, dy;
 
-    REQUIRE( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
-    REQUIRE( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-    REQUIRE( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-    REQUIRE( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-    REQUIRE( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+        SECTION("Monotomic Data") {
+            nx = 10;
+            ny = 5;
 
-    REQUIRE( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-    REQUIRE( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+            xmin = -1;
+            xmax = 8;
 
-    SECTION("via copied std::function passed to func")
-    {
-      REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
-      REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-      REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-      REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-      REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+            ymin = -1;
+            ymax = 3;
 
-      REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
-      REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
+            dx = (xmax - xmin) / (nx - 1);
+            dy = (ymax - ymin) / (ny - 1);
+
+            Eigen::Matrix<double, Eigen::Dynamic, 1> xx(nx * ny), yy(nx * ny),
+                zz(nx * ny);
+
+            auto f = [](double x, double y) { return x * y + 2 * x + 3 * y; };
+
+            for (int i = 0; i < nx * ny; i++) {
+                // gnuplot format is essentially row-major
+                xx(i) = xmin + dx * (i / ny);
+                yy(i) = ymin + dy * (i % ny);
+                zz(i) = f(xx(i), yy(i));
+            }
+
+            interp = _2D::BicubicInterpolator<double>();
+            interp.target<_2D::BicubicInterpolator<double>>()->setData(xx, yy,
+                                                                       zz);
+
+            CHECK(interp(0, 0) == Approx(f(0, 0)).epsilon(0.00002));
+            CHECK(interp(1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+            CHECK(interp(2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+            CHECK(interp(2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+            CHECK(interp(8, 3) == Approx(f(8, 3)).epsilon(0.00002));
+
+            CHECK(interp(-2, -1) == Approx(0).epsilon(0.00002));
+            CHECK(interp(10, 3) == Approx(0).epsilon(0.00002));
+
+            SECTION("via copied std::function passed to func") {
+                REQUIRE(call(interp, 0, 0) == Approx(f(0, 0)).epsilon(0.00002));
+                REQUIRE(call(interp, 1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+                REQUIRE(call(interp, 2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+                REQUIRE(call(interp, 2, -1) ==
+                        Approx(f(2, -1)).epsilon(0.00002));
+                REQUIRE(call(interp, 8, 3) == Approx(f(8, 3)).epsilon(0.00002));
+
+                REQUIRE(call(interp, -2, -1) == Approx(0).epsilon(0.00002));
+                REQUIRE(call(interp, 10, 3) == Approx(0).epsilon(0.00002));
+            }
+        }
+
+        SECTION("Oscillating Data") {
+            nx = 10;
+            ny = 5;
+
+            xmin = -1;
+            xmax = 8;
+
+            ymin = -1;
+            ymax = 3;
+
+            dx = (xmax - xmin) / (nx - 1);
+            dy = (ymax - ymin) / (ny - 1);
+
+            Eigen::Matrix<double, Eigen::Dynamic, 1> xx(nx * ny), yy(nx * ny),
+                zz(nx * ny);
+
+            auto f = [](double x, double y) { return sin(x) * sin(y); };
+
+            for (int i = 0; i < nx * ny; i++) {
+                // gnuplot format is essentially row-major
+                xx(i) = xmin + dx * (i / ny);
+                yy(i) = ymin + dy * (i % ny);
+                zz(i) = f(xx(i), yy(i));
+            }
+
+            interp = _2D::BicubicInterpolator<double>();
+            interp.target<_2D::BicubicInterpolator<double>>()->setData(xx, yy,
+                                                                       zz);
+
+            CHECK(interp(0, 0) == Approx(f(0, 0)).epsilon(0.00002));
+            CHECK(interp(1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+            CHECK(interp(2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+            CHECK(interp(2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+            CHECK(interp(8, 3) == Approx(f(8, 3)).epsilon(0.00002));
+
+            CHECK(interp(-2, -1) == Approx(0).epsilon(0.00002));
+            CHECK(interp(10, 3) == Approx(0).epsilon(0.00002));
+        }
     }
 
-  }
+    SECTION("Thin Plate Spline Interpolation") {
+        int nx, ny;
+        double xmin, xmax, dx;
+        double ymin, ymax, dy;
 
-  SECTION("Bicubic Interpolation")
-  {
+        SECTION("Monotomic Data") {
+            nx = 10;
+            ny = 5;
 
-    int nx, ny;
-    double xmin, xmax, dx;
-    double ymin, ymax, dy;
+            xmin = -1;
+            xmax = 8;
 
-    SECTION("Monotomic Data")
-    {
-      nx = 10;
-      ny = 5;
+            ymin = -1;
+            ymax = 3;
 
-      xmin = -1;
-      xmax = 8;
+            dx = (xmax - xmin) / (nx - 1);
+            dy = (ymax - ymin) / (ny - 1);
 
-      ymin = -1;
-      ymax = 3;
+            Eigen::Matrix<double, Eigen::Dynamic, 1> xx(nx * ny), yy(nx * ny),
+                zz(nx * ny);
 
-      dx = (xmax - xmin)/(nx - 1);
-      dy = (ymax - ymin)/(ny - 1);
+            auto f = [](double x, double y) { return x * y + 2 * x + 3 * y; };
 
-      Eigen::Matrix<double,Eigen::Dynamic,1> xx(nx*ny), yy(nx*ny), zz(nx*ny);
+            for (int i = 0; i < nx * ny; i++) {
+                // gnuplot format is essentially row-major
+                xx(i) = xmin + dx * (i / ny);
+                yy(i) = ymin + dy * (i % ny);
+                zz(i) = f(xx(i), yy(i));
+            }
 
-      auto f  = [](double x, double y){return x*y + 2*x + 3*y;};
+            interp = _2D::ThinPlateSplineInterpolator<double>();
+            interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData(
+                xx, yy, zz);
 
-      for( int i = 0; i < nx*ny; i++)
-      {
-        // gnuplot format is essentially row-major
-        xx(i) = xmin+dx*(i/ny);
-        yy(i) = ymin+dy*(i%ny);
-        zz(i) = f(xx(i),yy(i));
-      }
+            CHECK(interp(0, 0) + 1 == Approx(1 + f(0, 0)).epsilon(0.00002));
+            CHECK(interp(1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+            CHECK(interp(2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+            CHECK(interp(2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+            CHECK(interp(8, 3) == Approx(f(8, 3)).epsilon(0.00002));
 
-      interp = _2D::BicubicInterpolator<double>();
-      interp.target<_2D::BicubicInterpolator<double>>()->setData( xx, yy, zz );
+            CHECK(interp(-2, -1) == Approx(0).epsilon(0.00002));
+            CHECK(interp(10, 3) == Approx(0).epsilon(0.00002));
 
-      CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
-      CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-      CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-      CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-      CHECK( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+            SECTION("via copied std::function passed to func") {
+                REQUIRE(call(interp, 0, 0) + 1 ==
+                        Approx(1 + f(0, 0)).epsilon(0.00002));
+                REQUIRE(call(interp, 1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+                REQUIRE(call(interp, 2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+                REQUIRE(call(interp, 2, -1) ==
+                        Approx(f(2, -1)).epsilon(0.00002));
+                REQUIRE(call(interp, 8, 3) == Approx(f(8, 3)).epsilon(0.00002));
 
-      CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-      CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
+                REQUIRE(call(interp, -2, -1) == Approx(0).epsilon(0.00002));
+                REQUIRE(call(interp, 10, 3) == Approx(0).epsilon(0.00002));
+            }
+        }
 
-      SECTION("via copied std::function passed to func")
-      {
-        REQUIRE( call( interp,0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
+        SECTION("Oscillating Data") {
+            nx = 10;
+            ny = 5;
 
-        REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
-      }
+            xmin = -1;
+            xmax = 8;
 
+            ymin = -1;
+            ymax = 3;
+
+            dx = (xmax - xmin) / (nx - 1);
+            dy = (ymax - ymin) / (ny - 1);
+
+            Eigen::Matrix<double, Eigen::Dynamic, 1> xx(nx * ny), yy(nx * ny),
+                zz(nx * ny);
+
+            auto f = [](double x, double y) { return sin(x) * sin(y); };
+
+            for (int i = 0; i < nx * ny; i++) {
+                // gnuplot format is essentially row-major
+                xx(i) = xmin + dx * (i / ny);
+                yy(i) = ymin + dy * (i % ny);
+                zz(i) = f(xx(i), yy(i));
+            }
+
+            interp = _2D::ThinPlateSplineInterpolator<double>();
+            interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData(
+                xx, yy, zz);
+
+            CHECK(interp(0, 0) + 1 == Approx(1 + f(0, 0)).epsilon(0.00002));
+            CHECK(interp(1, 2) == Approx(f(1, 2)).epsilon(0.00002));
+            CHECK(interp(2, 1) == Approx(f(2, 1)).epsilon(0.00002));
+            CHECK(interp(2, -1) == Approx(f(2, -1)).epsilon(0.00002));
+            CHECK(interp(8, 3) == Approx(f(8, 3)).epsilon(0.00002));
+
+            CHECK(interp(-2, -1) == Approx(0).epsilon(0.00002));
+            CHECK(interp(10, 3) == Approx(0).epsilon(0.00002));
+        }
     }
-
-    SECTION("Oscillating Data")
-    {
-      nx = 10;
-      ny = 5;
-
-      xmin = -1;
-      xmax = 8;
-
-      ymin = -1;
-      ymax = 3;
-
-      dx = (xmax - xmin)/(nx - 1);
-      dy = (ymax - ymin)/(ny - 1);
-
-      Eigen::Matrix<double,Eigen::Dynamic,1> xx(nx*ny), yy(nx*ny), zz(nx*ny);
-
-      auto f  = [](double x, double y){return sin(x)*sin(y);};
-
-      for( int i = 0; i < nx*ny; i++)
-      {
-        // gnuplot format is essentially row-major
-        xx(i) = xmin+dx*(i/ny);
-        yy(i) = ymin+dy*(i%ny);
-        zz(i) = f(xx(i),yy(i));
-      }
-
-
-       
-      interp = _2D::BicubicInterpolator<double>();
-      interp.target<_2D::BicubicInterpolator<double>>()->setData( xx, yy, zz );
-
-      CHECK( interp(0,0)   == Approx(f(0,0)).epsilon(0.00002 )) ;
-      CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-      CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-      CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-      CHECK( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
-
-      CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-      CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
-    }
-
-
-  }
-
-
-  SECTION("Thin Plate Spline Interpolation")
-  {
-
-    int nx, ny;
-    double xmin, xmax, dx;
-    double ymin, ymax, dy;
-
-    SECTION("Monotomic Data")
-    {
-      nx = 10;
-      ny = 5;
-
-      xmin = -1;
-      xmax = 8;
-
-      ymin = -1;
-      ymax = 3;
-
-      dx = (xmax - xmin)/(nx - 1);
-      dy = (ymax - ymin)/(ny - 1);
-
-      Eigen::Matrix<double,Eigen::Dynamic,1> xx(nx*ny), yy(nx*ny), zz(nx*ny);
-
-      auto f  = [](double x, double y){return x*y + 2*x + 3*y;};
-
-      for( int i = 0; i < nx*ny; i++)
-      {
-        // gnuplot format is essentially row-major
-        xx(i) = xmin+dx*(i/ny);
-        yy(i) = ymin+dy*(i%ny);
-        zz(i) = f(xx(i),yy(i));
-      }
-
-      interp = _2D::ThinPlateSplineInterpolator<double>();
-      interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData( xx, yy, zz );
-
-      CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
-      CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-      CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-      CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-      CHECK( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
-
-      CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-      CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
-
-      SECTION("via copied std::function passed to func")
-      {
-        REQUIRE( call( interp,0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
-
-        REQUIRE( call( interp,-2,-1) == Approx(0).epsilon(0.00002 )) ;
-        REQUIRE( call( interp,10,3)  == Approx(0).epsilon(0.00002 )) ;
-      }
-
-    }
-
-    SECTION("Oscillating Data")
-    {
-      nx = 10;
-      ny = 5;
-
-      xmin = -1;
-      xmax = 8;
-
-      ymin = -1;
-      ymax = 3;
-
-      dx = (xmax - xmin)/(nx - 1);
-      dy = (ymax - ymin)/(ny - 1);
-
-      Eigen::Matrix<double,Eigen::Dynamic,1> xx(nx*ny), yy(nx*ny), zz(nx*ny);
-
-      auto f  = [](double x, double y){return sin(x)*sin(y);};
-
-      for( int i = 0; i < nx*ny; i++)
-      {
-        // gnuplot format is essentially row-major
-        xx(i) = xmin+dx*(i/ny);
-        yy(i) = ymin+dy*(i%ny);
-        zz(i) = f(xx(i),yy(i));
-      }
-
-
-       
-      interp = _2D::ThinPlateSplineInterpolator<double>();
-      interp.target<_2D::ThinPlateSplineInterpolator<double>>()->setData( xx, yy, zz );
-
-      CHECK( interp(0,0)+1 == Approx(1+f(0,0)).epsilon(0.00002 )) ;
-      CHECK( interp(1,2)   == Approx(f(1,2)).epsilon(0.00002 )) ;
-      CHECK( interp(2,1)   == Approx(f(2,1)).epsilon(0.00002 )) ;
-      CHECK( interp(2,-1)  == Approx(f(2,-1)).epsilon(0.00002 )) ;
-      CHECK( interp(8,3)   == Approx(f(8,3)).epsilon(0.00002 )) ;
-
-      CHECK( interp(-2,-1) == Approx(0).epsilon(0.00002 )) ;
-      CHECK( interp(10,3)  == Approx(0).epsilon(0.00002 )) ;
-    }
-
-
-  }
-
-
-
 }
-

@@ -7,6 +7,8 @@ include(CMakePrintHelpers)
 
 option(BUILD_TESTS "Build unit tests" ON)
 
+#set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=*,cppcoreguidelines=*)
+
 set(libInterpolate_VERSION
     "UNKNOWN"
     CACHE STRING "Library version number")

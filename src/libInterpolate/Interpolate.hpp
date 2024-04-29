@@ -4,5 +4,5 @@
 #include "./Interpolators/_2D/BicubicInterpolator.hpp"
 #include "./Interpolators/_2D/BilinearInterpolator.hpp"
 #include "./Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp"
-#include "./Interpolators/_2D/NearestInterpolator.hpp"
+#include "./Interpolators/_2D/NearestNeighborInterpolator.hpp"
 #include "./Interpolators/_2D/ThinPlateSplineInterpolator.hpp"

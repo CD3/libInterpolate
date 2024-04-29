@@ -1,7 +1,7 @@
-#ifndef Interpolators__2D_NearestInterpolator_hpp
-#define Interpolators__2D_NearestInterpolator_hpp
+#ifndef Interpolators__2D_NearestNeighborInterpolator_hpp
+#define Interpolators__2D_NearestNeighborInterpolator_hpp
 
-/** @file NearestInterpolator.hpp
+/** @file NearestNeighborInterpolator.hpp
  * @brief
  * @author Finn Lukas Busch
  * @date 10/10/23
@@ -19,9 +19,10 @@
 
 namespace _2D {
 template <class Real>
-class NearestInterpolator : public InterpolatorBase<NearestInterpolator<Real>> {
+class NearestNeighborInterpolator
+    : public InterpolatorBase<NearestNeighborInterpolator<Real>> {
    public:
-    using BASE = InterpolatorBase<NearestInterpolator<Real>>;
+    using BASE = InterpolatorBase<NearestNeighborInterpolator<Real>>;
 
    protected:
     using BASE::X;
@@ -33,33 +34,35 @@ class NearestInterpolator : public InterpolatorBase<NearestInterpolator<Real>> {
 
    public:
     template <typename I>
-    NearestInterpolator(I n, Real* x, Real* y, Real* z) {
+    NearestNeighborInterpolator(I n, Real* x, Real* y, Real* z) {
         this->setData(n, x, y, z);
     }
 
     template <typename X, typename Y, typename Z>
-    NearestInterpolator(X& x, Y& y, Z& z) {
+    NearestNeighborInterpolator(X& x, Y& y, Z& z) {
         this->setData(x, y, z);
     }
 
-    NearestInterpolator() : BASE() {}
+    NearestNeighborInterpolator() : BASE() {}
     Real operator()(Real x, Real y) const;
 
-    NearestInterpolator(const NearestInterpolator& rhs) : BASE(rhs) {}
+    NearestNeighborInterpolator(const NearestNeighborInterpolator& rhs)
+        : BASE(rhs) {}
 
     // copy-swap idiom
-    friend void swap(NearestInterpolator& lhs, NearestInterpolator& rhs) {
+    friend void swap(NearestNeighborInterpolator& lhs,
+                     NearestNeighborInterpolator& rhs) {
         swap(static_cast<BASE&>(lhs), static_cast<BASE&>(rhs));
     }
 
-    NearestInterpolator& operator=(NearestInterpolator rhs) {
+    NearestNeighborInterpolator& operator=(NearestNeighborInterpolator rhs) {
         swap(*this, rhs);
         return *this;
     }
 };
 
 template <class Real>
-Real NearestInterpolator<Real>::operator()(Real x, Real y) const {
+Real NearestNeighborInterpolator<Real>::operator()(Real x, Real y) const {
     BASE::checkData();
     if (x < (*X)(0) || x > (*X)(X->size() - 1) || y < (*Y)(0) ||
         y > (*Y)(Y->size() - 1)) {

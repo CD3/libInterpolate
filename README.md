@@ -20,6 +20,7 @@ Currently implemented methods are:
     - [Regular Grid Methods](https://en.wikipedia.org/wiki/Regular_grid)
       - bilinear (https://en.wikipedia.org/wiki/Bilinear_interpolation)
       - bicubic (https://en.wikipedia.org/wiki/Bicubic_interpolation)
+      - nearest neighbor (https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation)
     - Irregular Grid Methods
       - thin plate spline (https://en.wikipedia.org/wiki/Thin_plate_spline)
       - linear Delaunay triangles (https://en.wikipedia.org/wiki/Delaunay_triangulation)

@@ -13,6 +13,8 @@ foreach(testSrc ${unitTest_SOURCES})
   message(STATUS "  ${testSrc}")
 endforeach()
 
+set(TEST_WITH_WERROR ON CACHE BOOL "Enable -Werror for tests")
+
 set(testName ${PROJECT_NAME}_CatchTests)
 add_executable(${testName} ${unitTest_SOURCES})
 target_compile_definitions(
@@ -31,8 +33,10 @@ else()
       -pedantic
       -Wno-unknown-pragmas
       -Wno-unused-parameter
-      -Wno-gnu-zero-variadic-macro-arguments
-      -Werror)
+      -Wno-gnu-zero-variadic-macro-arguments)
+  if(TEST_WITH_WERROR)
+    target_compile_options(${testName} PRIVATE -Werror)
+  endif()
 endif()
 
 add_test(

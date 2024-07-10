@@ -1,0 +1,72 @@
+name: linux-gcc
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+        - 'doc/**'
+        - '**/*.md'
+        - .travis.yml
+        - .gitlab-ci.yml
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '**/*.md'
+      - .travis.yml
+      - .gitlab-ci.yml
+
+jobs:
+  build:
+    name: ci-ubuntu-24.04-gcc-13
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Conan packages
+        id: cache-conan
+        uses: actions/cache@v4.0.2
+        env:
+          cache-name: cache-conan-packages
+        with:
+          path: ~/.conan2
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Configure python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -r .github/requirements.txt
+
+      - name: Configure Conan profile
+        run: conan profile detect --force --name default
+
+      - name: Install Conan dependencies
+        run: conan install conanfile.txt -r conancenter --build=missing
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTS:BOOL=ON \
+            -DCMAKE_INSTALL_PREFIX=install \
+            -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: cmake --build build --target test
+
+      - name: Install
+        run: cmake --build build --target install

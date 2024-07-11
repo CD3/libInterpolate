@@ -1,7 +1,10 @@
 [requires]
-boost/1.80.0
-eigen/3.3.7
-catch2/3.3.1
+boost/1.85.0
+eigen/3.4.0
+
+[test_requires]
+catch2/3.6.0
+gsl/2.7.1
 
 [generators]
 CMakeDeps

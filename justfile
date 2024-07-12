@@ -1,6 +1,6 @@
 install-deps:
-  conan install . -s build_type=Debug
-  conan install . -s build_type=Release
+  conan install . -s build_type=Debug --build missing
+  conan install . -s build_type=Release --build missing
 
 configure: install-deps
   cmake --preset conan-default

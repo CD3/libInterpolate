@@ -33,6 +33,8 @@ point sits above the center of the square. The resulting interpolation forms a p
 
 This is basically a 2D version of the [Delaunay Interp](http://rncarpio.github.io/delaunay_linterp/) library.
 
+If you like this library, you may also like [libIntegrate](https://github.com/CD3/libIntegrate). It uses a similar design for numerical integration.
+
 
 Table of Contents
 =================

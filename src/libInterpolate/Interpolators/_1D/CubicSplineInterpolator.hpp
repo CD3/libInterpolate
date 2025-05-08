@@ -228,8 +228,8 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
     sum -= static_cast<Real>(
         (x_2 - x_1) *
         ((t - 0.5 * t2) * y_1 + 0.5 * t2 * y_2 +
-         a[bi - 1] * (0.5 * t2 - 2. * t3 / 3. + 0.25 * t4) +
-         b[bi - 1] * (t3 / 3. - 0.25 * t4)));
+         a[ai - 1] * (0.5 * t2 - 2. * t3 / 3. + 0.25 * t4) +
+         b[ai - 1] * (t3 / 3. - 0.25 * t4)));
 
     if (ai != bi)  // _a and _b are not in the in the same element, need to add
                    // area of element containing _a

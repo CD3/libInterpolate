@@ -155,7 +155,7 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
      * I = (x_2 - x_1) \int_t_a^t_b ( 1 - t )*y_1 + t*y_2 + t*( 1 - t )( a*(1 -
      * t) + b*t ) dt
      *
-     *   = (x_2 - x_1) [ ( t - t^2/2 )*y_1 + t^2/2*y_2 + a*(t^2 - 2*t^3/3 +
+     *   = (x_2 - x_1) [ ( t - t^2/2 )*y_1 + t^2/2*y_2 + a*(t^2/2 - 2*t^3/3 +
      * t^4/4) + b*(t^3/3 - t^4/4) ] |_t_a^t_b
      *
      * if we integrate over the entire element, i.e. x -> [x1,x2], then we will
@@ -166,7 +166,7 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
      *
      */
 
-    Real x_1, x_2, t;
+    Real x_1, x_2, t, t2, t3, t4;
     Real y_1, y_2;
     Real sum = 0;
     for (int i = ai; i < bi - 1; i++) {
@@ -198,13 +198,16 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
     y_1 = Y[bi - 1];
     y_2 = Y[bi];
     t = (_b - x_1) / (x_2 - x_1);
+    t2 = t*t;
+    t3 = t2*t;
+    t4 = t2*t2;
 
     // adding area between x_1 and _b
     sum += static_cast<Real>(
         (x_2 - x_1) *
-        ((t - pow(t, 2) / 2) * y_1 + pow(t, 2) / 2. * y_2 +
-         a[bi - 1] * (pow(t, 2) - 2. * pow(t, 3) / 3. + pow(t, 4) / 4.) +
-         b[bi - 1] * (pow(t, 3) / 3. - pow(t, 4) / 4.)));
+        ((t - 0.5 * t2) * y_1 + 0.5 * t2 * y_2 +
+         a[bi - 1] * (0.5 * t2 - 2. * t3 / 3. + 0.25 * t4) +
+         b[bi - 1] * (t3 / 3. - 0.25 * t4)));
 
     //
     // [_a,X(0)]
@@ -217,13 +220,16 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
     y_1 = Y[ai - 1];
     y_2 = Y[ai];
     t = (_a - x_1) / (x_2 - x_1);
+    t2 = t*t;
+    t3 = t2*t;
+    t4 = t2*t2;
 
     // subtracting area from x_1 to _a
     sum -= static_cast<Real>(
         (x_2 - x_1) *
-        ((t - pow(t, 2) / 2) * y_1 + pow(t, 2) / 2. * y_2 +
-         a[ai - 1] * (pow(t, 2) - 2. * pow(t, 3) / 3. + pow(t, 4) / 4.) +
-         b[ai - 1] * (pow(t, 3) / 3. - pow(t, 4) / 4.)));
+        ((t - 0.5 * t2) * y_1 + 0.5 * t2 * y_2 +
+         a[ai - 1] * (0.5 * t2 - 2. * t3 / 3. + 0.25 * t4) +
+         b[ai - 1] * (t3 / 3. - 0.25 * t4)));
 
     if (ai != bi)  // _a and _b are not in the in the same element, need to add
                    // area of element containing _a

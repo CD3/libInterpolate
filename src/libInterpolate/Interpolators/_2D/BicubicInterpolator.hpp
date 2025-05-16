@@ -199,11 +199,11 @@ void BicubicInterpolator<Real>::setupInterpolator() {
 
             fp = (*Z)(i, jp);
             fm = (*Z)(i, jm);
-            fy01 = (fp - fm) / dx;  // <<<<<<
+            fy01 = (fp - fm) / dy;  // <<<<<<
 
             fp = (*Z)(i + 1, jp);
             fm = (*Z)(i + 1, jm);
-            fy11 = (fp - fm) / dx;  // <<<<<<
+            fy11 = (fp - fm) / dy;  // <<<<<<
 
             // xy derivatives
 

@@ -193,9 +193,10 @@ class InterpolatorBase {
      * a .data() and .size() methods.
      */
     template <typename XT, typename YT, typename ZT>
-    auto setData(const XT& x, const YT& y, const ZT& z)
-        -> decltype(x.size(), x.data(), y.size(), y.data(), z.size(), z.data(),
-                    void()) {
+    auto setData(const XT& x, const YT& y,
+                 const ZT& z) -> decltype(x.size(), x.data(), y.size(),
+                                          y.data(), z.size(), z.data(),
+                                          void()) {
         return this->setData(x.size(), x.data(), y.size(), y.data(), z.size(),
                              z.data());
     }
@@ -335,7 +336,7 @@ void InterpolatorBase<Derived, Real>::setup2DDataViews() {
     int Nx = 0, Ny = 0;
     // Ny will be the number of elements that have the same x coordinate
     Real xlast = (*xView)(0);
-    while (Ny < N - 1 && fabs((*xView)(Ny)-xlast) < 1e-40) Ny++;
+    while (Ny < N && fabs((*xView)(Ny)-xlast) < 1e-40) Ny++;
     Nx = N / Ny;
 
     // consecutive values in the x data are separated by Ny, so this is the

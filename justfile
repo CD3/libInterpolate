@@ -31,3 +31,6 @@ format:
 
 clean:
   rm -rf build CMakeUserPresets.json applications/build applications/CMakeUserPresets.json
+
+release VERSION:
+  python scripts/make-release.py {{VERSION}}

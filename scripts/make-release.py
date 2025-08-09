@@ -38,7 +38,7 @@ def main():
         subprocess.run(['git', 'commit', '-m', 'chore: version bump'], check=True)
         print("Committed.")
 
-        tag_name = f"v{args.version}"
+        tag_name = f"{args.version}"
         print(f"Tagging commit with {tag_name}...")
         subprocess.run(['git', 'tag', tag_name], check=True)
         print("Tagged.")

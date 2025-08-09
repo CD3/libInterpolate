@@ -1,0 +1,3 @@
+#pragma once
+
+#define libInterpolate_VERSION "@libInterpolate_FULL_VERSION@"

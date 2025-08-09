@@ -1,28 +1,45 @@
 cmake_minimum_required(VERSION 3.16)
-project(libInterpolate)
+
+option(BUILD_TESTS "Build unit tests" ON)
+
+
+include("version.cmake")
+if(NOT DEFINED libInterpolate_FULL_VERSION)
+  message(STATUS "Version not set, attempting to detected with git")
+  execute_process(
+    COMMAND git describe --tags --always --dirty
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_DESCRIBE_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE GIT_DESCRIBE_ERROR
+    ERROR_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE GIT_DESCRIBE_RESULT
+  )
+  if("${GIT_DESCRIBE_RESULT}" STREQUAL "0")
+    message(STATUS "Version detected with git")
+    set(libInterpolate_FULL_VERSION "${GIT_DESCRIBE_VERSION}" CACHE STRING "Full build version number")
+  else()
+    message(WARNING "Could NOT detect version number with git")
+    message(WARNING "STDERR: ${GIT_DESCRIBE_RESULT} ${GIT_DESCRIBE_ERROR}")
+    set(libInterpolate_FULL_VERSION "0.0.0-UNKNOWN" CACHE STRING "WARNING!! Full build version number could not be determined.")
+  endif()
+endif()
+
+string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*" libInterpolate_PROJECT_VERSION_NUMERIC "${libInterpolate_FULL_VERSION}")
+
+message(STATUS "FULL VERSION: ${libInterpolate_FULL_VERSION}")  
+message(STATUS "NUMERIC VERSION NUMBER: ${libInterpolate_PROJECT_VERSION_NUMERIC}")  
+# NOTE: this will create a variables named libInterpolate_VERSION
+project(libInterpolate VERSION ${libInterpolate_PROJECT_VERSION_NUMERIC})
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 include(CMakePrintHelpers)
 
-option(BUILD_TESTS "Build unit tests" ON)
-
-set(libInterpolate_VERSION
-    "UNKNOWN"
-    CACHE STRING "Library version number")
-set(libInterpolate_VERSION $CACHE{libInterpolate_VERSION})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
                       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-if("${libInterpolate_VERSION}" STREQUAL "UNKNOWN")
-  message(STATUS "Detecting version number using git...")
-  include(macro-git_version)
-  git_version(libInterpolate)
-  message(STATUS "Version: ${libInterpolate_VERSION}")
-  message(STATUS "Version (Full): ${libInterpolate_VERSION_FULL}")
-endif()
 
 find_package(Boost REQUIRED)
 find_package(Eigen3 3.3.7 REQUIRED) # v3.3.7 adds support for cmake targets
@@ -38,6 +55,11 @@ target_include_directories(
 target_compile_definitions(Interpolate
                            INTERFACE $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>)
 target_compile_features(Interpolate INTERFACE cxx_std_17)
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/version.h.in"
+  "${CMAKE_BINARY_DIR}/include/libInterpolate/version.h"
+)
 target_sources(
   Interpolate
   INTERFACE

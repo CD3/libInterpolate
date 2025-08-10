@@ -3,3 +3,4 @@
 int
 build*
 CMakeUserPresets.json
+.cache

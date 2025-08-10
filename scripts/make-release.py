@@ -55,7 +55,7 @@ f'''# this file is used to embed a build version number into th elibrary source.
 
     try:
         subprocess.run(['git', 'add', 'version.cmake'], check=True)
-        subprocess.run(['git', 'commit', '-m', 'chore: removing release version'], check=True)
+        subprocess.run(['git', 'commit', '-m', 'chore: removing release version from CMake config'], check=True)
         print("Committed.")
 
     except subprocess.CalledProcessError as e:

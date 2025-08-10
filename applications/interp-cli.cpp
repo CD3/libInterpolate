@@ -1,3 +1,5 @@
+#include <libInterpolate/version.h>
+
 #include <algorithm>
 #include <boost/program_options.hpp>
 #include <boost/range/adaptor/strided.hpp>
@@ -14,6 +16,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 void print_usage(char prog_name[]) {
+    cout << "version " << libInterpolate_FULL_VERSION << "\n\n";
     cout << "usage: " << prog_name
          << " [OPTIONS] interpolation-data-file x-values-file output-file"
          << "\n";

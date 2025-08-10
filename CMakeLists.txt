@@ -50,7 +50,7 @@ target_include_directories(
   Interpolate
   INTERFACE
     $<BUILD_INTERFACE:${libInterpolate_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${libInterpolate_BINARY_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 target_compile_definitions(Interpolate
                            INTERFACE $<$<BOOL:${MSVC}>:_USE_MATH_DEFINES>)
@@ -58,7 +58,7 @@ target_compile_features(Interpolate INTERFACE cxx_std_17)
 
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/version.h.in"
-  "${CMAKE_BINARY_DIR}/include/libInterpolate/version.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/include/libInterpolate/version.h"
 )
 target_sources(
   Interpolate

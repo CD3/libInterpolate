@@ -128,6 +128,8 @@ Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
     // no extrapolation
     _a = std::max(_a, X[0]);
     _b = std::min(_b, X[X.size() - 1]);
+    // the range is entirely outside the domain
+    if (_a > _b) return 0;
 
     int ai = this->get_index_to_right_of(_a);
     int bi = this->get_index_to_right_of(_b);

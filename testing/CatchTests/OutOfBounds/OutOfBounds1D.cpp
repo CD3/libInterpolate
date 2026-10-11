@@ -155,22 +155,18 @@ TEMPLATE_TEST_CASE("KNOWN BUG: CubicSpline derivative extrapolates below x[0]",
               oob::default_value<TestType>());
 }
 
-TEMPLATE_TEST_CASE(
-    "KNOWN BUG: CubicSpline integral entirely below x[0] is nonzero",
-    "[out-of-bounds][1D][spline][!shouldfail]", float, double) {
+// integral() used to read past the end of the coefficient arrays when both
+// limits were above x[N-1], and returned a nonzero value when both were below
+// x[0].
+TEMPLATE_TEST_CASE("CubicSpline integral entirely outside the domain is 0",
+                   "[out-of-bounds][1D][spline]", float, double) {
     std::vector<TestType> x{1, 2, 3, 4}, y{1, 4, 9, 16};
     _1D::CubicSplineInterpolator<TestType> interp(x, y);
     CHECK_OOB(interp.integral(-5, -2), oob::default_value<TestType>());
     CHECK_OOB(interp.integral(TestType(-2), TestType(0.5)),
               oob::default_value<TestType>());
-}
-
-// Hidden ([.]) because it reads past the end of the coefficient arrays: an
-// Eigen assertion in Debug builds, a heap overflow in Release. Run it on
-// purpose with `"[known-crash]"`.
-TEST_CASE("KNOWN CRASH: CubicSpline integral entirely above x[N-1]",
-          "[.][known-crash][out-of-bounds][1D][spline]") {
-    std::vector<double> x{1, 2, 3, 4}, y{1, 4, 9, 16};
-    _1D::CubicSplineInterpolator<double> interp(x, y);
-    CHECK_OOB(interp.integral(5, 9), 0.0);
+    CHECK_OOB(interp.integral(5, 9), oob::default_value<TestType>());
+    CHECK_OOB(interp.integral(9, 5), oob::default_value<TestType>());
+    CHECK_OOB(interp.integral(oob::next_above(TestType(4)), 9),
+              oob::default_value<TestType>());
 }

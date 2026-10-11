@@ -30,6 +30,7 @@ class LinearDelaunayTriangleInterpolator
     using rtree_value_t = typename BASE::rtree_value_t;
 
     Real operator()(Real x, Real y) const {
+        this->checkData();
         point_t p{x, y};
         // search optimization: find all boxes that envelope a triangle and
         // cover the point first
@@ -47,8 +48,8 @@ class LinearDelaunayTriangleInterpolator
                         if (j > 2) return;
                         points[j][0] = pp[0];
                         points[j][1] = pp[1];
-                        points[j][2] =
-                            this->getZData()[this->m_triangle_datapoints[i][j]];
+                        points[j][2] = (*this->zView)(
+                            this->m_triangle_datapoints[i][j]);
                         j++;
                     });
 

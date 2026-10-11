@@ -52,11 +52,15 @@ class DelaunayTriangulationInterpolatorBase
     void setupInterpolator() {
         clearTriangleBuffers();  // Clear triangle buffers before initialization
 
+        // read through the views, not xData/yData, so that data set with
+        // setUnsafeDataReference() works too.
+        const auto& X = *this->xView;
+        const auto& Y = *this->yView;
         std::vector<Real> coords;
-        coords.reserve(2 * this->xData.size());
-        for (size_t i = 0; i < this->xData.size(); ++i) {
-            coords.push_back(this->xData[i]);
-            coords.push_back(this->yData[i]);
+        coords.reserve(2 * X.size());
+        for (Eigen::Index i = 0; i < X.size(); ++i) {
+            coords.push_back(X(i));
+            coords.push_back(Y(i));
         }
 
         delaunator::Delaunator<Real> triangulation(coords);

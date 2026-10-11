@@ -141,3 +141,34 @@ TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator Benchmarks",
         }
     }
 }
+
+TEMPLATE_TEST_CASE("2D LinearDelaunayTriangleInterpolator data setup",
+                   "[delaunay]", double, float) {
+    // z = x + 2y + 10 on a square with a center point, so the data is never 0
+    // and a planar interpolator reproduces it exactly.
+    std::vector<TestType> x{-1, -1, 1, 1, 0}, y{-1, 1, -1, 1, 0}, z(5);
+    for (size_t i = 0; i < z.size(); ++i) z[i] = x[i] + 2 * y[i] + 10;
+
+    SECTION("no data throws") {
+        _2D::LinearDelaunayTriangleInterpolator<TestType> interp;
+        CHECK_THROWS_AS(interp(0, 0), std::logic_error);
+    }
+
+    // setUnsafeDataReference used to segfault because the triangulation read
+    // the interpolator's own (empty) copy of the data.
+    SECTION("setUnsafeDataReference matches setData") {
+        _2D::LinearDelaunayTriangleInterpolator<TestType> owned, ref;
+        owned.setData(x, y, z);
+        ref.setUnsafeDataReference(x.size(), x.data(), y.data(), z.data());
+
+        for (TestType xx : {-1., -0.5, 0., 0.25, 1.}) {
+            for (TestType yy : {-1., -0.75, 0., 0.5, 1.}) {
+                CHECK(ref(xx, yy) == Approx(xx + 2 * yy + 10));
+                CHECK(ref(xx, yy) == owned(xx, yy));
+            }
+        }
+        // outside the convex hull
+        CHECK(ref(2, 0) == 0);
+        CHECK(ref(0, -2) == 0);
+    }
+}

@@ -1,7 +1,9 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
+#include <cmath>
 #include <libInterpolate/Interpolators/_2D/InterpolatorBase.hpp>
+#include <limits>
 using namespace Catch;
 namespace _2D {
 
@@ -326,5 +328,92 @@ TEST_CASE("2D InterpolatorBase Setup Tests", "[plumbing]") {
             CHECK(Z[10] == 20);
             CHECK(Z[11] == 21);
         }
+    }
+}
+
+TEST_CASE("2D InterpolatorBase closest index helpers", "[plumbing]") {
+    _2D::TestInterp interp;
+
+    // unevenly spaced grid so that "closer to the lower knot", "closer to the
+    // upper knot" and "exactly halfway" are different cases.
+    // x = {0, 1, 3}, y = {2, 3, 5, 10}
+    std::vector<double> x, y, z;
+    for (double xx : {0., 1., 3.}) {
+        for (double yy : {2., 3., 5., 10.}) {
+            x.push_back(xx);
+            y.push_back(yy);
+            z.push_back(xx + yy);
+        }
+    }
+    interp.setData(x, y, z);
+
+    const double inf = std::numeric_limits<double>::infinity();
+    auto below = [&](double v) { return std::nextafter(v, -inf); };
+    auto above = [&](double v) { return std::nextafter(v, inf); };
+
+    SECTION("x") {
+        // knots
+        CHECK(interp.get_x_index_closest_to(0) == 0);
+        CHECK(interp.get_x_index_closest_to(1) == 1);
+        CHECK(interp.get_x_index_closest_to(3) == 2);
+        // between knots
+        CHECK(interp.get_x_index_closest_to(0.25) == 0);
+        CHECK(interp.get_x_index_closest_to(0.75) == 1);
+        CHECK(interp.get_x_index_closest_to(1.5) == 1);
+        CHECK(interp.get_x_index_closest_to(2.5) == 2);
+        // ties go to the upper knot
+        CHECK(interp.get_x_index_closest_to(0.5) == 1);
+        CHECK(interp.get_x_index_closest_to(2) == 2);
+        // just either side of a knot
+        CHECK(interp.get_x_index_closest_to(above(0)) == 0);
+        CHECK(interp.get_x_index_closest_to(below(1)) == 1);
+        CHECK(interp.get_x_index_closest_to(above(1)) == 1);
+        CHECK(interp.get_x_index_closest_to(below(3)) == 2);
+        // outside the data clamps to the first or last index
+        CHECK(interp.get_x_index_closest_to(below(0)) == 0);
+        CHECK(interp.get_x_index_closest_to(-100) == 0);
+        CHECK(interp.get_x_index_closest_to(-inf) == 0);
+        CHECK(interp.get_x_index_closest_to(above(3)) == 2);
+        CHECK(interp.get_x_index_closest_to(100) == 2);
+        CHECK(interp.get_x_index_closest_to(inf) == 2);
+        // NaN must give a valid index. Which one is not part of the contract.
+        int i = interp.get_x_index_closest_to(std::nan(""));
+        CHECK(i >= 0);
+        CHECK(i <= 2);
+    }
+
+    SECTION("y") {
+        // knots
+        CHECK(interp.get_y_index_closest_to(2) == 0);
+        CHECK(interp.get_y_index_closest_to(3) == 1);
+        CHECK(interp.get_y_index_closest_to(5) == 2);
+        CHECK(interp.get_y_index_closest_to(10) == 3);
+        // between knots
+        CHECK(interp.get_y_index_closest_to(2.25) == 0);
+        CHECK(interp.get_y_index_closest_to(2.75) == 1);
+        CHECK(interp.get_y_index_closest_to(3.5) == 1);
+        CHECK(interp.get_y_index_closest_to(4.5) == 2);
+        CHECK(interp.get_y_index_closest_to(7) == 2);
+        CHECK(interp.get_y_index_closest_to(8) == 3);
+        // ties go to the upper knot
+        CHECK(interp.get_y_index_closest_to(2.5) == 1);
+        CHECK(interp.get_y_index_closest_to(4) == 2);
+        CHECK(interp.get_y_index_closest_to(7.5) == 3);
+        // just either side of a knot
+        CHECK(interp.get_y_index_closest_to(above(2)) == 0);
+        CHECK(interp.get_y_index_closest_to(below(3)) == 1);
+        CHECK(interp.get_y_index_closest_to(above(3)) == 1);
+        CHECK(interp.get_y_index_closest_to(below(10)) == 3);
+        // outside the data clamps to the first or last index
+        CHECK(interp.get_y_index_closest_to(below(2)) == 0);
+        CHECK(interp.get_y_index_closest_to(-100) == 0);
+        CHECK(interp.get_y_index_closest_to(-inf) == 0);
+        CHECK(interp.get_y_index_closest_to(above(10)) == 3);
+        CHECK(interp.get_y_index_closest_to(100) == 3);
+        CHECK(interp.get_y_index_closest_to(inf) == 3);
+        // NaN must give a valid index. Which one is not part of the contract.
+        int j = interp.get_y_index_closest_to(std::nan(""));
+        CHECK(j >= 0);
+        CHECK(j <= 3);
     }
 }

@@ -144,15 +144,24 @@ TEMPLATE_TEST_CASE("CubicSpline derivative/integral outside the domain",
     }
 }
 
-// Known bugs. [!shouldfail] passes while the bug is present and fails once it
-// is fixed, which flags that the tag should be removed.
-TEMPLATE_TEST_CASE("KNOWN BUG: CubicSpline derivative extrapolates below x[0]",
-                   "[out-of-bounds][1D][spline][!shouldfail]", float, double) {
+// derivative() used to extrapolate below x[0] (and return NaN at -inf) while
+// returning 0 above x[N-1].
+TEMPLATE_TEST_CASE("CubicSpline derivative below the lower bound is 0",
+                   "[out-of-bounds][1D][spline]", float, double) {
     std::vector<TestType> x{1, 2, 3, 4}, y{1, 4, 9, 16};
     _1D::CubicSplineInterpolator<TestType> interp(x, y);
     CHECK_OOB(interp.derivative(TestType(0)), oob::default_value<TestType>());
     CHECK_OOB(interp.derivative(oob::next_below(TestType(1))),
               oob::default_value<TestType>());
+    CHECK_OOB(interp.derivative(-std::numeric_limits<TestType>::infinity()),
+              oob::default_value<TestType>());
+}
+
+TEST_CASE("CubicSpline derivative/integral without data throw",
+          "[1D][spline]") {
+    _1D::CubicSplineInterpolator<double> interp;
+    CHECK_THROWS_AS(interp.derivative(1), std::logic_error);
+    CHECK_THROWS_AS(interp.integral(1, 2), std::logic_error);
 }
 
 // integral() used to read past the end of the coefficient arrays when both

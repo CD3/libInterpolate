@@ -93,13 +93,15 @@ Real CubicSplineInterpolator<Real>::operator()(Real x) const {
 
 template <typename Real>
 Real CubicSplineInterpolator<Real>::derivative(Real x) const {
+    BASE::checkData();
+
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
-    int i = this->get_index_to_right_of(x);
-
     // don't extrapolate at all
-    if (i <= 0 || i >= X.size()) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) return 0;
+
+    int i = this->get_index_to_right_of(x);
 
     // this should be the same t as in the regular interpolation case
     Real t = (x - X(i - 1)) / (X(i) - X(i - 1));
@@ -114,7 +116,7 @@ Real CubicSplineInterpolator<Real>::derivative(Real x) const {
 
 template <class Real>
 Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
-    if (this->xView->size() < 1) return 0;
+    BASE::checkData();
 
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);

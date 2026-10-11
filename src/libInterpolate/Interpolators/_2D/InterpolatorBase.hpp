@@ -245,30 +245,40 @@ class InterpolatorBase {
         auto xrng = std::make_pair(X->data(),
                                    X->data() + X->size() * X->innerStride()) |
                     boost::adaptors::strided(X->innerStride());
-        auto iter_lower = boost::lower_bound(xrng, x) - 1;
-        auto iter_upper = iter_lower + 1;
-        Real lower = *(iter_lower);
-        Real upper = *(iter_upper);
-        if (abs(x - lower) < abs(x - upper)) {
-            return iter_lower - boost::begin(xrng);
-        }
-        return iter_upper - boost::begin(xrng);
+        return index_closest_to(xrng, x);
     }
     /**
      * Given an y value, returns the index i of the stored y data Y
      * that is closest to x
      */
     int get_y_index_closest_to(Real y) const {
-        // NOTE: X data is strided.
+        // NOTE: Y data is NOT strided
         auto yrng = std::make_pair(Y->data(), Y->data() + Y->size());
-        auto iter_lower = boost::lower_bound(yrng, y) - 1;
-        auto iter_upper = iter_lower + 1;
-        Real lower = *(iter_lower);
-        Real upper = *(iter_upper);
-        if (abs(y - lower) < abs(y - upper)) {
-            return iter_lower - boost::begin(yrng);
+        return index_closest_to(yrng, y);
+    }
+
+   private:
+    /**
+     * Returns the index of the element in the sorted range rng that is
+     * closest to v. Values below or above the range give the first or last
+     * index. Ties go to the upper element.
+     */
+    template <typename Range>
+    static int index_closest_to(const Range& rng, Real v) {
+        auto first = boost::begin(rng);
+        auto last = boost::end(rng);
+        auto iter_upper = boost::lower_bound(rng, v);
+        if (iter_upper == first) {
+            return 0;
         }
-        return iter_upper - boost::begin(yrng);
+        if (iter_upper == last) {
+            return static_cast<int>(last - first) - 1;
+        }
+        auto iter_lower = iter_upper - 1;
+        if (v - *iter_lower < *iter_upper - v) {
+            return iter_lower - first;
+        }
+        return iter_upper - first;
     }
 
    protected:

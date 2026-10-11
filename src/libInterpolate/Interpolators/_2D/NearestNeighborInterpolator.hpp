@@ -70,9 +70,6 @@ Real NearestNeighborInterpolator<Real>::operator()(Real x, Real y) const {
     }
     int i = this->get_x_index_closest_to(x);
     int j = this->get_y_index_closest_to(y);
-
-    if (i < 0) i = 0;
-    if (j < 0) j = 0;
     return Z->operator()(i, j);
 }
 }  // namespace _2D

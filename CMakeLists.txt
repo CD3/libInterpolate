@@ -79,6 +79,7 @@ target_sources(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Utils/Indexing.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Utils/ReadFunction.hpp>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Utils/Concepts.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/libInterpolate/Utils/OutOfBounds.hpp>
 )
 
 target_link_libraries(Interpolate INTERFACE Boost::boost Eigen3::Eigen)

@@ -41,6 +41,8 @@ class MonotonicInterpolator
         this->setData(x, y);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     MonotonicInterpolator() : BASE() {}
     MonotonicInterpolator(const MonotonicInterpolator& rhs)
         : BASE(rhs), a(rhs.a), b(rhs.b), yplow(rhs.yplow), yphigh(rhs.yphigh) {}
@@ -151,8 +153,14 @@ Real MonotonicInterpolator<Real>::operator()(Real x) const {
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
-    // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) {
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
+        // Continue in a straight line with the slope at the end point.
+        // Extending the end cubic could break monotonicity.
+        int n = X.size() - 1;
+        if (x < X(0)) return Y(0) + yplow[0] * (x - X(0));
+        return Y(n) + yphigh[n - 1] * (x - X(n));
+    }
 
     // the index that is just to the left of x will correspond to the "interval
     // index"

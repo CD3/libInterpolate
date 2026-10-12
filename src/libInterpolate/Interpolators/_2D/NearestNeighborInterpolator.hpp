@@ -43,6 +43,8 @@ class NearestNeighborInterpolator
         this->setData(x, y, z);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     NearestNeighborInterpolator() : BASE() {}
     Real operator()(Real x, Real y) const;
 
@@ -66,7 +68,8 @@ Real NearestNeighborInterpolator<Real>::operator()(Real x, Real y) const {
     BASE::checkData();
     if (x < (*X)(0) || x > (*X)(X->size() - 1) || y < (*Y)(0) ||
         y > (*Y)(Y->size() - 1)) {
-        return 0;
+        // extrapolation returns the nearest edge value
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
     }
     int i = this->get_x_index_closest_to(x);
     int j = this->get_y_index_closest_to(y);

@@ -67,6 +67,8 @@ class ThinPlateSplineInterpolator
         this->setData(x, y, z);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     ThinPlateSplineInterpolator() : BASE() {}
 
     ThinPlateSplineInterpolator(const ThinPlateSplineInterpolator& rhs)
@@ -138,10 +140,10 @@ template <class Real>
 Real ThinPlateSplineInterpolator<Real>::operator()(Real x, Real y) const {
     BASE::checkData();
 
-    // no extrapolation...
+    // the spline is defined everywhere, so extrapolation needs no special case
     if (x < this->xView->minCoeff() || x > this->xView->maxCoeff() ||
         y < this->yView->minCoeff() || y > this->yView->maxCoeff()) {
-        return 0;
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
     }
 
     MatrixType Gx(1, this->xView->rows());

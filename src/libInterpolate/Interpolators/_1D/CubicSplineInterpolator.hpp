@@ -36,6 +36,8 @@ class CubicSplineInterpolator
         this->setData(x, y);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     CubicSplineInterpolator() : BASE() {}
 
     // copy constructor
@@ -76,8 +78,15 @@ Real CubicSplineInterpolator<Real>::operator()(Real x) const {
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
-    // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) {
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
+        // Continue in a straight line with the slope at the end point.
+        // Extending the end cubic blows up quickly. This is a natural spline
+        // (zero curvature at the ends), so the line joins it smoothly.
+        int n = X.size() - 1;
+        if (x < X(0)) return Y(0) + this->derivative(X(0)) * (x - X(0));
+        return Y(n) + this->derivative(X(n)) * (x - X(n));
+    }
 
     int i = this->get_index_to_right_of(x);
 

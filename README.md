@@ -267,13 +267,42 @@ The Thin Plate Spline and Linear Delaunay interpolators work with scattered poin
 
 #### Out-of-Bounds and NaN Queries
 
-The interpolators do not extrapolate. A query outside the data returns 0. Points exactly on the boundary are inside.
-What counts as "outside" depends on the method:
+By default, the interpolators do not extrapolate. A query outside the data returns 0. Points exactly on the boundary are
+inside. What counts as "outside" depends on the method:
 
 - 1D interpolators: below the first x value or above the last.
 - Bilinear, Bicubic, and Nearest Neighbor: outside the grid.
 - Thin Plate Spline: outside the bounding box of the data points.
 - Linear Delaunay: outside the convex hull of the data points (i.e. not in any triangle).
+
+You can change the value returned outside the data, or turn on extrapolation:
+
+```C++
+_1D::CubicSplineInterpolator<double> interp(x, y);
+
+interp.setOutOfBoundsValue(-1);  // return -1 outside the data
+interp.setOutOfBoundsNaN();      // return quiet NaN outside the data
+interp.enableExtrapolation();    // extrapolate outside the data
+interp.setOutOfBoundsValue(0);   // back to the default
+```
+
+The last call wins: `setOutOfBoundsValue()` and `setOutOfBoundsNaN()` turn extrapolation off. `setOutOfBoundsNaN()` does not
+compile for types without a quiet NaN (e.g. `int`); use `setOutOfBoundsValue()` instead. Copies of an interpolator,
+including the copy made by `AnyInterpolator`, keep its settings. `AnyInterpolator` does not provide these methods, so
+configure the interpolator before wrapping it.
+
+How each method extrapolates:
+
+- Linear: continues the first or last segment.
+- Cubic Spline and Monotonic: continue in a straight line with the slope at the first or last point. (Extending the end
+  cubic grows quickly, and would break the monotonic interpolator's monotonicity.)
+- Bilinear and Bicubic: continue the edge patch. Bicubic patches are cubic, so the result is only reliable close to the grid.
+- Nearest Neighbor: returns the value at the nearest point on the edge of the grid.
+- Thin Plate Spline: the spline is defined everywhere, so it is simply evaluated. It is only reliable close to the data.
+- Linear Delaunay: cannot extrapolate. Calling `enableExtrapolation()` on it is a compile error.
+
+`derivative()` and `integral()` (Cubic Spline) are not affected by these settings. `derivative()` returns 0 outside the
+data and `integral()` only integrates over the part of the range inside the data.
 
 The result of a query with a NaN coordinate is **unspecified** and may differ between interpolators (it may be NaN,
 0, or a data value). Check for NaN before calling the interpolator if it matters.

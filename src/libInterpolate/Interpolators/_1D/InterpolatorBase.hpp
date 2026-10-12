@@ -14,6 +14,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "../../Utils/OutOfBounds.hpp"
+
 namespace _1D {
 
 /** @class
@@ -33,7 +35,11 @@ struct RealTypeOf<T<R>> {
 };
 
 template <class Derived, typename Real = typename RealTypeOf<Derived>::type>
-class InterpolatorBase {
+class InterpolatorBase
+    : public libInterpolate::Utils::OutOfBoundsSettings<Derived, Real> {
+    using OutOfBoundsSettings =
+        libInterpolate::Utils::OutOfBoundsSettings<Derived, Real>;
+
    public:
     using VectorType = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
     using MapType = Eigen::Map<const VectorType>;
@@ -70,7 +76,8 @@ class InterpolatorBase {
     // we only want to initialize x and y views if the object
     // we are copying from is initialized.
     InterpolatorBase(const InterpolatorBase& rhs)
-        : xData(rhs.xData),
+        : OutOfBoundsSettings(rhs),
+          xData(rhs.xData),
           yData(rhs.yData),
           xView(copyView(rhs.xView, rhs.xData, xData)),
           yView(copyView(rhs.yView, rhs.yData, yData)) {}
@@ -81,6 +88,8 @@ class InterpolatorBase {
         std::swap(lhs.yData, rhs.yData);
         std::swap(lhs.xView, rhs.xView);
         std::swap(lhs.yView, rhs.yView);
+        std::swap(static_cast<OutOfBoundsSettings&>(lhs),
+                  static_cast<OutOfBoundsSettings&>(rhs));
     }
 
     InterpolatorBase& operator=(InterpolatorBase rhs) {

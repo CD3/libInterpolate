@@ -62,6 +62,8 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>> {
         this->setData(x, y, z);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     BicubicInterpolator() : BASE() {}
 
     BicubicInterpolator(const BicubicInterpolator& rhs) : BASE(rhs), a(rhs.a) {}
@@ -263,17 +265,19 @@ template <class Real>
 Real BicubicInterpolator<Real>::operator()(Real x, Real y) const {
     BASE::checkData();
 
-    // no extrapolation...
     if (x < this->xView->minCoeff() || x > this->xView->maxCoeff() ||
         y < this->yView->minCoeff() || y > this->yView->maxCoeff()) {
-        return 0;
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
     }
 
     int i = this->get_x_index_to_left_of(x);
     int j = this->get_y_index_below(y);
 
+    // extrapolation uses the edge patch
     if (i < 0) i = 0;
     if (j < 0) j = 0;
+    if (i > X->size() - 2) i = X->size() - 2;
+    if (j > Y->size() - 2) j = Y->size() - 2;
 
     Real xL = (*X)(i + 1) - (*X)(i);
     Real yL = (*Y)(j + 1) - (*Y)(j);

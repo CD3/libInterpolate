@@ -62,6 +62,8 @@ class BilinearInterpolator
         this->setData(x, y, z);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     BilinearInterpolator() : BASE() {}
     BilinearInterpolator(const BilinearInterpolator& rhs)
         : BASE(rhs), Q(rhs.Q) {}
@@ -105,17 +107,19 @@ template <class Real>
 Real BilinearInterpolator<Real>::operator()(Real x, Real y) const {
     BASE::checkData();
 
-    // no extrapolation...
     if (x < (*X)(0) || x > (*X)(X->size() - 1) || y < (*Y)(0) ||
         y > (*Y)(Y->size() - 1)) {
-        return 0;
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
     }
 
     int i = this->get_x_index_to_left_of(x);
     int j = this->get_y_index_below(y);
 
+    // extrapolation uses the edge patch
     if (i < 0) i = 0;
     if (j < 0) j = 0;
+    if (i > X->size() - 2) i = X->size() - 2;
+    if (j > Y->size() - 2) j = Y->size() - 2;
 
     // now, create the coordinate vectors (see Wikipedia
     // https://en.wikipedia.org/wiki/Bilinear_interpolation)

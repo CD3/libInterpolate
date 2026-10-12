@@ -28,6 +28,8 @@ class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>> {
         this->setData(x, y);
     }
 
+    static constexpr bool supports_extrapolation = true;
+
     LinearInterpolator() : BASE() {}
 
     LinearInterpolator(const LinearInterpolator& rhs) = default;
@@ -43,10 +45,13 @@ Real LinearInterpolator<Real>::operator()(Real x) const {
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
-    // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) {
+        if (!this->extrapolationEnabled()) return this->getOutOfBoundsValue();
+    }
 
     int i = this->get_index_to_left_of(x);
+    // extrapolation uses the last segment above the data
+    if (i > X.size() - 2) i = X.size() - 2;
 
     Real b = Y(i);
     Real m = Y(i + 1) - Y(i);

@@ -76,8 +76,8 @@ class LinearDelaunayTriangleInterpolator
             }
         }
 
-        // do not extrapolate
-        return 0;
+        // outside the convex hull. Extrapolation is not supported.
+        return this->getOutOfBoundsValue();
     }
 
    protected:

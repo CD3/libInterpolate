@@ -15,6 +15,8 @@
 #include <memory>
 #include <vector>
 
+#include "../../Utils/OutOfBounds.hpp"
+
 namespace _2D {
 template <typename T>
 struct RealTypeOf {
@@ -39,7 +41,11 @@ struct RealTypeOf<T<B, R>> {
  * methods.
  */
 template <class Derived, typename Real = typename RealTypeOf<Derived>::type>
-class InterpolatorBase {
+class InterpolatorBase
+    : public libInterpolate::Utils::OutOfBoundsSettings<Derived, Real> {
+    using OutOfBoundsSettings =
+        libInterpolate::Utils::OutOfBoundsSettings<Derived, Real>;
+
    public:
     using VectorType = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
     using MapType = Eigen::Map<const VectorType>;
@@ -84,7 +90,8 @@ class InterpolatorBase {
     }
 
     InterpolatorBase(const InterpolatorBase& rhs)
-        : xData(rhs.xData),
+        : OutOfBoundsSettings(rhs),
+          xData(rhs.xData),
           yData(rhs.yData),
           zData(rhs.zData),
           xView(copyView(rhs.xView, rhs.xData, xData)),
@@ -104,6 +111,8 @@ class InterpolatorBase {
         std::swap(lhs.X, rhs.X);
         std::swap(lhs.Y, rhs.Y);
         std::swap(lhs.Z, rhs.Z);
+        std::swap(static_cast<OutOfBoundsSettings&>(lhs),
+                  static_cast<OutOfBoundsSettings&>(rhs));
     }
 
     InterpolatorBase& operator=(InterpolatorBase rhs) {

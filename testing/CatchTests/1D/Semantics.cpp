@@ -1,6 +1,8 @@
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
+#include <libInterpolate/AnyInterpolator.hpp>
 #include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
 #include <libInterpolate/Interpolators/_1D/LinearInterpolator.hpp>
 #include <libInterpolate/Interpolators/_1D/MonotonicInterpolator.hpp>
@@ -142,4 +144,36 @@ void testCopy1D(std::string testName) {
 TEST_CASE("Copy Constructor and Copy Assignment", "[semantics]") {
     testCopy1D<_1D::LinearInterpolator<double>>("1D Linear");
     testCopy1D<_1D::CubicSplineInterpolator<double>>("1D Cubic Spline");
+}
+
+// Copies of an interpolator set with setUnsafeDataReference() used to end up
+// with zero-size data and throw. They now share the reference.
+TEMPLATE_TEST_CASE("1D - Copying an interpolator with an unsafe data reference",
+                   "[semantics]", _1D::LinearInterpolator<double>,
+                   _1D::CubicSplineInterpolator<double>,
+                   _1D::MonotonicInterpolator<double>) {
+    std::vector<double> x{1, 2, 3, 4}, y{3, 5, 7, 9};  // y = 2x + 1
+    TestType interp;
+    interp.setUnsafeDataReference(x.size(), x.data(), y.data());
+    REQUIRE(interp(2.5) == Approx(6));
+
+    SECTION("Copy constructor") {
+        TestType copy(interp);
+        CHECK(copy(2.5) == Approx(6));
+        CHECK(copy(3.5) == Approx(8));
+        // the copy shares the reference rather than copying the data
+        CHECK(copy.getXData().empty());
+    }
+    SECTION("Copy assignment") {
+        TestType copy;
+        copy = interp;
+        CHECK(copy(2.5) == Approx(6));
+        CHECK(copy(3.5) == Approx(8));
+        CHECK(copy.getXData().empty());
+    }
+    SECTION("AnyInterpolator") {
+        _1D::AnyInterpolator<double> any(interp);
+        CHECK(any(2.5) == Approx(6));
+        CHECK(any(3.5) == Approx(8));
+    }
 }

@@ -71,13 +71,25 @@ class InterpolatorBase {
 
     InterpolatorBase() = default;
 
+    // Make a view for a copy. If rhs's view points at rhs's own data, point at
+    // our copy of it. Otherwise rhs was set with setUnsafeDataReference(), so
+    // share the reference.
+    static MapType* copyView(const std::unique_ptr<MapType>& rhsView,
+                             const std::vector<Real>& rhsData,
+                             const std::vector<Real>& data) {
+        if (!rhsView) return nullptr;
+        if (rhsView->data() == rhsData.data())
+            return new MapType(data.data(), data.size());
+        return new MapType(rhsView->data(), rhsView->size());
+    }
+
     InterpolatorBase(const InterpolatorBase& rhs)
         : xData(rhs.xData),
           yData(rhs.yData),
           zData(rhs.zData),
-          xView(rhs.xView ? new MapType(xData.data(), xData.size()) : nullptr),
-          yView(rhs.xView ? new MapType(yData.data(), yData.size()) : nullptr),
-          zView(rhs.zView ? new MapType(zData.data(), zData.size()) : nullptr) {
+          xView(copyView(rhs.xView, rhs.xData, xData)),
+          yView(copyView(rhs.yView, rhs.yData, yData)),
+          zView(copyView(rhs.zView, rhs.zData, zData)) {
         this->setup2DDataViews();
     }
 

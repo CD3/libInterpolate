@@ -1,8 +1,12 @@
 #include <catch2/catch_approx.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
+#include <libInterpolate/AnyInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BicubicInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/BilinearInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/LinearDelaunayTriangleInterpolator.hpp>
+#include <libInterpolate/Interpolators/_2D/NearestNeighborInterpolator.hpp>
 #include <libInterpolate/Interpolators/_2D/ThinPlateSplineInterpolator.hpp>
 using namespace Catch;
 namespace {
@@ -172,4 +176,47 @@ TEST_CASE("2D - Copy Constructor and Copy Assignment", "[semantics]") {
     testCopy1D<_2D::BilinearInterpolator<double>>("Bilinear");
     testCopy1D<_2D::BicubicInterpolator<double>>("Bicubic");
     testCopy1D<_2D::ThinPlateSplineInterpolator<double>>("Thin Plate Spline");
+}
+
+// Copies of an interpolator set with setUnsafeDataReference() used to abort in
+// the copy constructor. They now share the reference.
+TEMPLATE_TEST_CASE("2D - Copying an interpolator with an unsafe data reference",
+                   "[semantics]", _2D::BilinearInterpolator<double>,
+                   _2D::BicubicInterpolator<double>,
+                   _2D::NearestNeighborInterpolator<double>,
+                   _2D::ThinPlateSplineInterpolator<double>,
+                   _2D::LinearDelaunayTriangleInterpolator<double>) {
+    // z = x + 2y + 100 on a 3x4 grid. Only the data points are checked so
+    // that every method, including nearest neighbor, gives the exact value.
+    std::vector<double> x, y, z;
+    for (double xx : {1., 2., 3.}) {
+        for (double yy : {10., 20., 30., 40.}) {
+            x.push_back(xx);
+            y.push_back(yy);
+            z.push_back(xx + 2 * yy + 100);
+        }
+    }
+    TestType interp;
+    interp.setUnsafeDataReference(x.size(), x.data(), y.data(), z.data());
+    REQUIRE(interp(2, 20) == Approx(142));
+
+    SECTION("Copy constructor") {
+        TestType copy(interp);
+        CHECK(copy(2, 20) == Approx(142));
+        CHECK(copy(3, 40) == Approx(183));
+        // the copy shares the reference rather than copying the data
+        CHECK(copy.getXData().empty());
+    }
+    SECTION("Copy assignment") {
+        TestType copy;
+        copy = interp;
+        CHECK(copy(2, 20) == Approx(142));
+        CHECK(copy(3, 40) == Approx(183));
+        CHECK(copy.getXData().empty());
+    }
+    SECTION("AnyInterpolator") {
+        _2D::AnyInterpolator<double> any(interp);
+        CHECK(any(2, 20) == Approx(142));
+        CHECK(any(3, 40) == Approx(183));
+    }
 }

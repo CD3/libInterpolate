@@ -33,18 +33,18 @@ class LinearInterpolator : public InterpolatorBase<LinearInterpolator<Real>> {
     LinearInterpolator(const LinearInterpolator& rhs) = default;
     LinearInterpolator& operator=(const LinearInterpolator& rhs) = default;
 
-    Real operator()(Real x) const;
+    Real operator()(Real x, Real invalid = 0) const;
 };
 
 template <class Real>
-Real LinearInterpolator<Real>::operator()(Real x) const {
+Real LinearInterpolator<Real>::operator()(Real x, Real invalid) const {
     BASE::checkData();
 
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
     // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) return invalid;
 
     int i = this->get_index_to_left_of(x);
 

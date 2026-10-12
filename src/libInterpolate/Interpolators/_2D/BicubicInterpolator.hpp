@@ -78,7 +78,7 @@ class BicubicInterpolator : public InterpolatorBase<BicubicInterpolator<Real>> {
     }
 
     // methods required by the interface
-    Real operator()(Real x, Real y) const;
+    Real operator()(Real x, Real y, Real invalid = 0) const;
 
    protected:
     void setupInterpolator();
@@ -260,13 +260,13 @@ void BicubicInterpolator<Real>::setupInterpolator() {
 }
 
 template <class Real>
-Real BicubicInterpolator<Real>::operator()(Real x, Real y) const {
+Real BicubicInterpolator<Real>::operator()(Real x, Real y, Real invalid) const {
     BASE::checkData();
 
     // no extrapolation...
     if (x < this->xView->minCoeff() || x > this->xView->maxCoeff() ||
         y < this->yView->minCoeff() || y > this->yView->maxCoeff()) {
-        return 0;
+        return invalid;
     }
 
     int i = this->get_x_index_to_left_of(x);

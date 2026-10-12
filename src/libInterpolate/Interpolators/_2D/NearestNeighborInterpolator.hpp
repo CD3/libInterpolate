@@ -44,7 +44,7 @@ class NearestNeighborInterpolator
     }
 
     NearestNeighborInterpolator() : BASE() {}
-    Real operator()(Real x, Real y) const;
+    Real operator()(Real x, Real y, Real invalid = 0) const;
 
     NearestNeighborInterpolator(const NearestNeighborInterpolator& rhs)
         : BASE(rhs) {}
@@ -62,11 +62,11 @@ class NearestNeighborInterpolator
 };
 
 template <class Real>
-Real NearestNeighborInterpolator<Real>::operator()(Real x, Real y) const {
+Real NearestNeighborInterpolator<Real>::operator()(Real x, Real y, Real invalid) const {
     BASE::checkData();
     if (x < (*X)(0) || x > (*X)(X->size() - 1) || y < (*Y)(0) ||
         y > (*Y)(Y->size() - 1)) {
-        return 0;
+        return invalid;
     }
     int i = this->get_x_index_closest_to(x);
     int j = this->get_y_index_closest_to(y);

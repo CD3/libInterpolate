@@ -55,10 +55,10 @@ class CubicSplineInterpolator
         return *this;
     }
 
-    Real operator()(Real x) const;
+    Real operator()(Real x, Real invalid = 0) const;
 
-    Real derivative(Real x) const;
-    Real integral(Real a, Real b) const;
+    Real derivative(Real x, Real invalid = 0) const;
+    Real integral(Real a, Real b, Real invalid = 0) const;
 
    protected:
     // this function will be called by the base class
@@ -70,14 +70,14 @@ class CubicSplineInterpolator
 };
 
 template <class Real>
-Real CubicSplineInterpolator<Real>::operator()(Real x) const {
+Real CubicSplineInterpolator<Real>::operator()(Real x, Real invalid) const {
     BASE::checkData();
 
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
     // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) return invalid;
 
     int i = this->get_index_to_right_of(x);
 
@@ -92,14 +92,14 @@ Real CubicSplineInterpolator<Real>::operator()(Real x) const {
 }
 
 template <typename Real>
-Real CubicSplineInterpolator<Real>::derivative(Real x) const {
+Real CubicSplineInterpolator<Real>::derivative(Real x, Real invalid) const {
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
     int i = this->get_index_to_right_of(x);
 
     // don't extrapolate at all
-    if (i <= 0 || i >= X.size()) return 0;
+    if (i <= 0 || i >= X.size()) return invalid;
 
     // this should be the same t as in the regular interpolation case
     Real t = (x - X(i - 1)) / (X(i) - X(i - 1));
@@ -113,8 +113,8 @@ Real CubicSplineInterpolator<Real>::derivative(Real x) const {
 }
 
 template <class Real>
-Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b) const {
-    if (this->xView->size() < 1) return 0;
+Real CubicSplineInterpolator<Real>::integral(Real _a, Real _b, Real invalid) const {
+    if (this->xView->size() < 1) return invalid;
 
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);

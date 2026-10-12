@@ -29,7 +29,7 @@ class MonotonicInterpolator
     VectorType a, b, yplow, yphigh;
 
    public:
-    Real operator()(Real x) const;
+    Real operator()(Real x, Real invalid = 0) const;
 
     template <typename I>
     MonotonicInterpolator(I n, Real* x, Real* y) {
@@ -145,14 +145,14 @@ void MonotonicInterpolator<Real>::setupInterpolator() {
 }
 
 template <class Real>
-Real MonotonicInterpolator<Real>::operator()(Real x) const {
+Real MonotonicInterpolator<Real>::operator()(Real x, Real invalid) const {
     BASE::checkData();
 
     const MapType& X = *(this->xView);
     const MapType& Y = *(this->yView);
 
     // don't extrapolate at all
-    if (x < X(0) || x > X(X.size() - 1)) return 0;
+    if (x < X(0) || x > X(X.size() - 1)) return invalid;
 
     // the index that is just to the left of x will correspond to the "interval
     // index"

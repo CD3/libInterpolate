@@ -77,7 +77,7 @@ class BilinearInterpolator
         return *this;
     }
 
-    Real operator()(Real x, Real y) const;
+    Real operator()(Real x, Real y, Real invalid = 0) const;
 
    private:
     void setupInterpolator();
@@ -102,13 +102,13 @@ void BilinearInterpolator<Real>::setupInterpolator() {
 }
 
 template <class Real>
-Real BilinearInterpolator<Real>::operator()(Real x, Real y) const {
+Real BilinearInterpolator<Real>::operator()(Real x, Real y, Real invalid) const {
     BASE::checkData();
 
     // no extrapolation...
     if (x < (*X)(0) || x > (*X)(X->size() - 1) || y < (*Y)(0) ||
         y > (*Y)(Y->size() - 1)) {
-        return 0;
+        return invalid;
     }
 
     int i = this->get_x_index_to_left_of(x);

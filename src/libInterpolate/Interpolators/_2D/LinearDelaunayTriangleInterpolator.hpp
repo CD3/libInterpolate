@@ -29,7 +29,7 @@ class LinearDelaunayTriangleInterpolator
 
     using rtree_value_t = typename BASE::rtree_value_t;
 
-    Real operator()(Real x, Real y) const {
+    Real operator()(Real x, Real y, Real invalid = 0) const {
         point_t p{x, y};
         // search optimization: find all boxes that envelope a triangle and
         // cover the point first
@@ -76,7 +76,7 @@ class LinearDelaunayTriangleInterpolator
         }
 
         // do not extrapolate
-        return 0;
+        return invalid;
     }
 
    protected:

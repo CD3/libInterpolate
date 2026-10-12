@@ -85,7 +85,7 @@ class ThinPlateSplineInterpolator
         return *this;
     }
 
-    Real operator()(Real x, Real y) const;
+    Real operator()(Real x, Real y, Real invalid = 0) const;
 
    protected:
     Real G(Real x, Real y, Real xi, Real yi) const;
@@ -135,13 +135,13 @@ Real ThinPlateSplineInterpolator<Real>::G(Real x1, Real y1, Real x2,
 }
 
 template <class Real>
-Real ThinPlateSplineInterpolator<Real>::operator()(Real x, Real y) const {
+Real ThinPlateSplineInterpolator<Real>::operator()(Real x, Real y, Real invalid) const {
     BASE::checkData();
 
     // no extrapolation...
     if (x < this->xView->minCoeff() || x > this->xView->maxCoeff() ||
         y < this->yView->minCoeff() || y > this->yView->maxCoeff()) {
-        return 0;
+        return invalid;
     }
 
     MatrixType Gx(1, this->xView->rows());

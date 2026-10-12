@@ -265,6 +265,19 @@ and may read out of bounds, so sort your data before calling `setData`.
 
 The Thin Plate Spline and Linear Delaunay interpolators work with scattered points and do not require any ordering.
 
+#### Out-of-Bounds and NaN Queries
+
+The interpolators do not extrapolate. A query outside the data returns 0. Points exactly on the boundary are inside.
+What counts as "outside" depends on the method:
+
+- 1D interpolators: below the first x value or above the last.
+- Bilinear, Bicubic, and Nearest Neighbor: outside the grid.
+- Thin Plate Spline: outside the bounding box of the data points.
+- Linear Delaunay: outside the convex hull of the data points (i.e. not in any triangle).
+
+The result of a query with a NaN coordinate is **unspecified** and may differ between interpolators (it may be NaN,
+0, or a data value). Check for NaN before calling the interpolator if it matters.
+
 ## Interpolation Methods
 
 Each interpolation method is implemented as a class that is templated on the data type. All one-dimensional

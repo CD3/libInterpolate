@@ -85,9 +85,10 @@ TEMPLATE_PRODUCT_TEST_CASE("1D out-of-bounds queries return 0 by default",
         CHECK_OOB(assigned(hi + 1), oob);
     }
     SECTION("NaN query propagates NaN (current behavior, not a bounds check)") {
-        // NaN fails both `x < lo` and `x > hi`, so it reaches the interpolation
-        // formula. If a sentinel mode treats NaN as out of bounds, change this
-        // on purpose.
+        // NaN results are unspecified (see README). This pins the current
+        // behavior so a change is noticed: NaN fails both `x < lo` and
+        // `x > hi`, so it reaches the interpolation formula, which propagates
+        // it. Update this if the behavior changes on purpose.
         CHECK_THAT(interp(L::quiet_NaN()), Matchers::IsNaN());
     }
 }

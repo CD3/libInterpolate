@@ -115,8 +115,9 @@ TEMPLATE_PRODUCT_TEST_CASE("2D out-of-bounds queries return 0 by default",
     }
 }
 
-// NaN does not behave the same across methods. Each case pins one method's
-// current result. Unify NaN handling on purpose (see the report).
+// NaN results are unspecified (see README) and differ between methods. These
+// pin each method's current result so a change is noticed. Update them if the
+// behavior changes on purpose. NearestNeighbor is not pinned (see below).
 TEMPLATE_PRODUCT_TEST_CASE("2D NaN query propagates NaN",
                            "[out-of-bounds][2D][nan]",
                            (_2D::BilinearInterpolator, _2D::BicubicInterpolator,

@@ -7,49 +7,38 @@ on:
     paths-ignore:
         - 'doc/**'
         - '**/*.md'
-        - .travis.yml
-        - .gitlab-ci.yml
   workflow_dispatch:
   pull_request:
     paths-ignore:
       - 'doc/**'
       - '**/*.md'
-      - .travis.yml
-      - .gitlab-ci.yml
 
 jobs:
   build:
-    name: ci-windows-msvc-17
+    name: ci-windows-msvc
     runs-on: windows-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure Visual Studio Environment
-        uses: ilammy/msvc-dev-cmd@v1.13.0
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
+        uses: actions/checkout@v7
+        with:
+          # the version number is detected from git tags
+          fetch-depth: 0
 
       - name: Cache Conan packages
-        id: cache-conan
-        uses: actions/cache@v4.0.2
-        env:
-          cache-name: cache-conan-packages
+        uses: actions/cache@v6
         with:
-          path: ~/.conan2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
+          path: ~/.conan2/p
+          key: ${{ runner.os }}-conan-${{ hashFiles('conanfile.txt') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-conan-
 
       - name: Configure python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: '3.12'
           cache: 'pip'
+          cache-dependency-path: .github/requirements.txt
 
       - name: Install Python dependencies
         run: python -m pip install -r .github/requirements.txt
@@ -58,18 +47,18 @@ jobs:
         run: conan profile detect --force --name default
 
       - name: Install Conan dependencies
-        run: |
-          conan install conanfile.txt -r conancenter -s compiler.cppstd=17 -c tools.cmake.cmaketoolchain:generator=Ninja --build=missing
+        run: conan install conanfile.txt -r conancenter -s compiler.cppstd=17 --build=missing
 
+      # Conan uses the Visual Studio generator (multi-config), so the configure
+      # preset is conan-default and the build/test presets are conan-release.
       - name: Configure CMake
-        run: |
-          cmake -S . --preset conan-release -G Ninja -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_INSTALL_PREFIX=install -DBUILD_TESTS:BOOL=ON
+        run: cmake --preset conan-default -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
         run: cmake --build --preset conan-release
 
       - name: Test
-        run: cmake --build --preset conan-release --target test --output-on-failure
+        run: ctest --preset conan-release --output-on-failure
 
       - name: Install
         run: cmake --build --preset conan-release --target install

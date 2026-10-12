@@ -7,15 +7,11 @@ on:
     paths-ignore:
         - 'doc/**'
         - '**/*.md'
-        - .travis.yml
-        - .gitlab-ci.yml
   workflow_dispatch:
   pull_request:
     paths-ignore:
       - 'doc/**'
       - '**/*.md'
-      - .travis.yml
-      - .gitlab-ci.yml
 
 jobs:
   build:
@@ -24,26 +20,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          # the version number is detected from git tags
+          fetch-depth: 0
 
       - name: Cache Conan packages
-        id: cache-conan
-        uses: actions/cache@v4.0.2
-        env:
-          cache-name: cache-conan-packages
+        uses: actions/cache@v6
         with:
-          path: ~/.conan2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('conanfile.txt') }}
+          path: ~/.conan2/p
+          key: ${{ runner.os }}-conan-${{ hashFiles('conanfile.txt') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-conan-
 
       - name: Configure python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: '3.12'
           cache: 'pip'
+          cache-dependency-path: .github/requirements.txt
 
       - name: Install Python dependencies
         run: pip install -r .github/requirements.txt
@@ -52,21 +47,16 @@ jobs:
         run: conan profile detect --force --name default
 
       - name: Install Conan dependencies
-        run: conan install conanfile.txt -r conancenter --build=missing
+        run: conan install conanfile.txt -r conancenter -s compiler.cppstd=17 --build=missing
 
       - name: Configure CMake
-        run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_TESTS:BOOL=ON \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake
+        run: cmake --preset conan-release -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build --preset conan-release
 
       - name: Test
-        run: cmake --build build --target test
+        run: ctest --preset conan-release --output-on-failure
 
       - name: Install
-        run: cmake --build build --target install
+        run: cmake --build --preset conan-release --target install

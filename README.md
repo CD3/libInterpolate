@@ -248,6 +248,23 @@ it makes the two-dimensional interpolator interface uniform (the thin plate inte
 and it is also compatible with the standard gnuplot surface plot data format. So if you read three columns from a file that can be plotted
 with gnuplot's `splot` command, these three columns can be passed into the interpolator directly.
 
+#### Data Ordering
+
+The 1D interpolators and the 2D regular grid interpolators (Bilinear, Bicubic, and Nearest Neighbor) require the
+coordinates to be **strictly increasing**. For 1D data, the x values must be sorted in ascending order with no duplicates.
+For 2D grid data, the x values must be the outer (slowly varying) coordinate and the y values the inner (quickly varying)
+coordinate, and both must be ascending. For example, a 2x3 grid is given as
+
+```
+x: 1 1 1 2 2 2
+y: 5 6 7 5 6 7
+```
+
+The data is not checked. Descending, unsorted, or duplicate coordinates will give incorrect results (often 0 everywhere)
+and may read out of bounds, so sort your data before calling `setData`.
+
+The Thin Plate Spline and Linear Delaunay interpolators work with scattered points and do not require any ordering.
+
 ## Interpolation Methods
 
 Each interpolation method is implemented as a class that is templated on the data type. All one-dimensional

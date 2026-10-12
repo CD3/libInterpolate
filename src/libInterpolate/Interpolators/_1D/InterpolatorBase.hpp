@@ -106,6 +106,9 @@ class InterpolatorBase {
      * Modifying the data after setting the interpolator references is undefined
      * behavior as some interpolators do some setup work that will be negated
      * when the data has changed.
+     *
+     * The x values must be strictly increasing. This is not checked, and
+     * descending, unsorted, or duplicate values give incorrect results.
      */
     template <typename I>
     void setUnsafeDataReference(I n, const Real* x, const Real* y) {
@@ -128,6 +131,7 @@ class InterpolatorBase {
      * Set the data that will be interpolated from raw data pointers.
      *
      * The data pointed at by x and y will be *copied* into the interpolator.
+     * The x values must be strictly increasing (see setUnsafeDataReference).
      */
     template <typename I, typename X, typename Y>
     void setData(I n, const X* x, const Y* y) {

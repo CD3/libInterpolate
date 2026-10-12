@@ -130,6 +130,13 @@ class InterpolatorBase {
      * Modifying the data after setting the interpolator references is undefined
      * behavior as some interpolators do some setup work that will be negated
      * when the data has changed.
+     *
+     * For the regular grid interpolators (Bilinear, Bicubic, NearestNeighbor),
+     * x must be the outer coordinate and y the inner coordinate, and both must
+     * be strictly increasing. This is not checked, and other orderings give
+     * incorrect results and may read out of bounds. Scattered data
+     * interpolators (ThinPlateSpline, LinearDelaunay) do not require any
+     * ordering.
      */
     template <typename I>
     void setUnsafeDataReference(I n, const Real* x, const Real* y,
@@ -187,7 +194,7 @@ class InterpolatorBase {
      * Reads data from x, y, and z arrays. Arrays should all be the same length
      * with each element corresponding to a data point. Basically, x[i], y[i],
      * and z[i] should correspond to the first, second, and third columns of a
-     * gnuplot file.
+     * gnuplot file. See setUnsafeDataReference for ordering requirements.
      */
     template <typename I, typename X, typename Y, typename Z>
     void setData(I n, const X* x, const Y* y, const Z* z) {

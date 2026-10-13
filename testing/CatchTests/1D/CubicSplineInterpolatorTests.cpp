@@ -1,7 +1,9 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
+#include <cmath>
 #include <libInterpolate/Interpolators/_1D/CubicSplineInterpolator.hpp>
+#include <limits>
 using namespace Catch;
 
 TEST_CASE("CubicSplineInterpolator Tests", "[spline]") {
@@ -120,4 +122,46 @@ TEST_CASE("CubicSplineInterpolator Edge Case Tests") {
     CHECK(interp(2.0) == Approx(8.0));
     CHECK(interp(3.0) == Approx(16.0));
     CHECK(interp(4.0) == Approx(64.0));
+}
+
+TEST_CASE("Extrapolation settings") {
+    _1D::CubicSplineInterpolator<double> interp;
+
+    int N = 100;
+    double xmin = 0, xmax = 2 * M_PI;
+    double dx = (xmax - xmin) / (N - 1);
+
+    _1D::CubicSplineInterpolator<double>::VectorType xx(N), yy(N);
+
+    CHECK_THROWS_AS(interp(1), std::logic_error);
+
+    for (int i = 0; i < N; i++) {
+        xx(i) = dx * i;
+        yy(i) = sin(xx(i));
+    }
+    interp.setData(xx, yy);
+
+    CHECK(interp(-1) == 0);
+    CHECK(interp(8) == 0);
+    CHECK(!std::isnan(interp(-1)));
+    CHECK(!std::isnan(interp(-4)));
+
+    interp.setOutOfBoundsValue(1);
+
+    CHECK(interp(-1) == 1);
+    CHECK(interp(8) == 1);
+    CHECK(!std::isnan(interp(-1)));
+    CHECK(!std::isnan(interp(-4)));
+
+    interp.setOutOfBoundsNaN();
+
+    CHECK(interp(-1) != std::numeric_limits<double>::quiet_NaN());
+    CHECK(interp(8) != std::numeric_limits<double>::quiet_NaN());
+    CHECK(std::isnan(interp(-1)));
+    CHECK(std::isnan(interp(-4)));
+
+    interp.enableExtrapolation();
+
+    CHECK(interp(-1) == Approx(-1));
+    CHECK(interp(8) == Approx(8 - 2 * M_PI));
 }
